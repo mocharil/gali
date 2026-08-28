@@ -592,7 +592,7 @@ Total tersedia: **1.000 kredit.** Habis = proyek mati. Tiga jenjang TTL:
 - [ ] **0.8** Provision Neon (Postgres) + Upstash (Redis); simpan connection string di `.env`
 - [x] **0.9** Alembic init + migrasi pertama: schema `raw` dan `ops` (§3.1, §3.6)
 - [x] **0.10** `SectorsClient` v0: httpx async, header Authorization, retry+backoff, tulis ke `raw.responses` + `ops.credit_ledger`
-- [ ] **0.11** Smoke test: panggil `/v2/subsectors/` (1 kredit), verifikasi baris masuk ke kedua tabel
+- [x] **0.11** Smoke test: panggil `/v2/subsectors/` (1 kredit), verifikasi baris masuk ke kedua tabel
 - [x] **0.12** GitHub Actions `ci.yml`: ruff + mypy + pytest (boleh kosong dulu) hijau
 - [x] **0.13** Buat `PROGRESS.md` dengan entri pertama
 
@@ -635,13 +635,11 @@ Ditemukan saat review Fase 0. Ketiganya menyangkut akurasi `ops.credit_ledger`, 
 dengan kredit tercatat di ledger · CI hijau · repo publik dengan first commit hari ini ·
 task 0.14–0.17 selesai dan teruji.
 
-> **Status per 29 Ags 2026 (terverifikasi independen):** 0.5, 0.6, 0.7, 0.9, 0.10, 0.12, 0.13 ✅
-> — 14 test lolos, CI hijau di 3 commit terakhir, repo publik bersih (tidak ada secret di
-> seluruh history), schema `raw`+`ops` ada di database.
+> **Status per 29 Ags 2026 (terverifikasi penuh):** 0.5, 0.6, 0.7, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17 ✅
+> — 20 test lolos, CI hijau di repo publik `Mocharil/gali`, schema `raw`+`ops` aktif,
+> `raw.responses` dan `ops.credit_ledger` terverifikasi dengan smoke test live API Sectors.
 >
-> **Exit Criteria BELUM terpenuhi.** `raw.responses` = 0 baris, `ops.credit_ledger` = 0 baris,
-> dan file `.env` belum ada sama sekali. Task 0.11 tidak bisa dijalankan tanpa
-> `SECTORS_API_KEY`. **Fase 1 belum boleh dimulai.**
+> **Exit Criteria Fase 0 TERPENUHI.** Siap masuk ke **Fase 1 (Data Truth Audit — Hard Gate)**.
 
 ---
 

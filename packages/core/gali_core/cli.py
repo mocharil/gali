@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from gali_core.config import REPO_ROOT
+from gali_core.config import REPO_ROOT, get_settings
 from gali_core.db.base import async_session
 from gali_core.sectors.budget import CreditBudget
 
@@ -94,9 +94,9 @@ def db_migrate(revision: str = "head") -> None:
         cwd=str(REPO_ROOT),
     )
     if result.returncode == 0:
-        console.print("[bold green]✓ Migrations successfully applied![/bold green]")
+        console.print("[bold green][OK] Migrations successfully applied![/bold green]")
     else:
-        console.print("[bold red]✗ Migration failed![/bold red]")
+        console.print("[bold red][FAIL] Migration failed![/bold red]")
         raise typer.Exit(code=result.returncode)
 
 
@@ -112,11 +112,14 @@ def smoke_test() -> None:
 
     async def _run() -> None:
         console.print("[bold blue]Running Task 0.11 smoke test against Sectors API (/v2/subsectors/)...[/bold blue]")
-        client = SectorsClient()
-        if not client.settings.sectors_api_key:
+        settings = get_settings()
+        if not settings.sectors_api_key:
             console.print("[bold red]Error: SECTORS_API_KEY is not set in .env or environment![/bold red]")
             console.print("Please copy .env.example to .env and set your SECTORS_API_KEY.")
             raise typer.Exit(code=1)
+
+        live_settings = settings.model_copy(update={"gali_dry_run": False})
+        client = SectorsClient(settings=live_settings)
 
         try:
             payload = await client.get(
@@ -127,7 +130,7 @@ def smoke_test() -> None:
                 force_refresh=True,
             )
             count = len(payload) if isinstance(payload, list) else "OK"
-            console.print(f"[bold green]✓ Successfully fetched /v2/subsectors/! Result: {count}[/bold green]")
+            console.print(f"[bold green][OK] Successfully fetched /v2/subsectors/! Result count: {count}[/bold green]")
 
             # Verify rows in DB
             async with async_session() as session:
@@ -149,14 +152,14 @@ def smoke_test() -> None:
 
             if raw_entry and ledger_entry:
                 console.print(
-                    f"[bold green]✓ Verified raw.responses row: id={raw_entry.id}, status_code={raw_entry.status_code}[/bold green]"
+                    f"[bold green][OK] Verified raw.responses row: id={raw_entry.id}, status_code={raw_entry.status_code}[/bold green]"
                 )
                 console.print(
-                    f"[bold green]✓ Verified ops.credit_ledger row: id={ledger_entry.id}, credits={ledger_entry.credits}[/bold green]"
+                    f"[bold green][OK] Verified ops.credit_ledger row: id={ledger_entry.id}, credits={ledger_entry.credits}[/bold green]"
                 )
-                console.print("[bold green]✓ Task 0.11 Smoke Test PASSED![/bold green]")
+                console.print("[bold green][OK] Task 0.11 Smoke Test PASSED![/bold green]")
             else:
-                console.print("[bold red]✗ Failed to find records in database tables![/bold red]")
+                console.print("[bold red][FAIL] Failed to find records in database tables![/bold red]")
                 raise typer.Exit(code=1)
         finally:
             await client.close()

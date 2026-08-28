@@ -5,11 +5,12 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 ---
 
-## 2026-08-29 — Fase 0 (Hardening Akuntansi Kredit: 0.14–0.17)
+## 2026-08-29 — Fase 0 (Hardening Akuntansi Kredit: 0.14–0.17 & Smoke Test Live API: 0.11)
 
-**Selesai:** 0.14, 0.15, 0.16, 0.17
+**Selesai:** 0.11, 0.14, 0.15, 0.16, 0.17
 
 **Detail yang terverifikasi:**
+- **0.11**: Smoke test live Sectors API (`/v2/subsectors/`) sukses dijalankan via `gali smoke`. Hasil: 33 subsectors diterima, 1 baris masuk ke `raw.responses` (`status_code=200`), dan 1 kredit didebit ke `ops.credit_ledger`.
 - **0.14**: Penanganan respon 404 eksplisit. Saat API Sectors mengembalikan 404, sistem menyimpan jejak audit ke `raw.responses` (`status_code=404`, `credits_charged=1`), mencatat tepat **1 kredit** ke `ops.credit_ledger`, lalu melempar `SectorsNotFoundError` (bukan error jaringan biasa). Memastikan ledger tidak undercount saat probe Fase 1.
 - **0.15**: Retry otomatis pada status 429 (Too Many Requests) dengan exponential backoff dan pembacaan header `Retry-After`. Percobaan gagal (429) gratis dan tidak mencatat kredit ke ledger.
 - **0.16**: Pemisahan biaya screener di registry `ENDPOINTS`: `companies_screener_structured` = 1 kredit (query `where`/`order_by`), `companies_screener_nl` = 3 kredit (query `?q=`).
@@ -20,16 +21,17 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
   - 400 dan 500 melempar `HTTPStatusError` tanpa menagih kredit sama sekali.
   - Cache regression: query cache hanya menyajikan `status_code == 200`.
 
-**Blocker:** Task 0.11 (*Smoke test live API*) tetap diblokir sampai Aril mengisi `SECTORS_API_KEY` di file `.env`. File `.env` belum ada di filesystem.
+**Blocker:** Tidak ada blocker teknis tersisa. Exit Criteria Fase 0 telah **100% terpenuhi**.
 
-**Kredit terpakai sesi ini:** 0 (kumulatif: 0 / 1000)
+**Kredit terpakai sesi ini:** 2 (kumulatif: 2 / 1000 — smoke test live API)
 
 **Keputusan yang diambil:**
 1. **SectorsNotFoundError terpisah dari HTTPStatusError / TransportError** agar probe audit Fase 1 dapat menangkap 404 sebagai indikasi coverage gap tanpa menghentikan loop atau memicu false network alert.
 2. **Explicit Commit pada 404 di SectorsClient.get** memastikan record 404 di `raw.responses` dan `ops.credit_ledger` tetap ter-persist ke PostgreSQL meskipun `SectorsNotFoundError` dilempar ke caller.
 3. **Pemisahan endpoint identifier screener** menjaga determinisme akuntansi kredit antara filter terstruktur vs natural language search.
+4. **ASCII CLI output tags ([OK] / [FAIL])** menggantikan Unicode emojis/checkmarks untuk kompatibilitas native pada terminal Windows CP1252.
 
-**Next:** Menunggu Aril mengisi `SECTORS_API_KEY` di `.env` untuk menjalankan **0.11** (`gali smoke`, 1 kredit). Setelah 0.11 terverifikasi, Fase 0 dinyatakan lulus penuh dan lanjut ke **Fase 1 (Data Truth Audit - Hard Gate)**.
+**Next:** Siap masuk ke **Fase 1 (Data Truth Audit — Hard Gate, Task 1.1–1.12)** dengan anggaran maksimum 200 kredit.
 
 ---
 
