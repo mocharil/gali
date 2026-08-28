@@ -100,5 +100,69 @@ def db_migrate(revision: str = "head") -> None:
         raise typer.Exit(code=result.returncode)
 
 
+@app.command("smoke")
+def smoke_test() -> None:
+    """Run Task 0.11 smoke test: call /v2/subsectors/ and verify DB persistence."""
+    import asyncio
+
+    from sqlalchemy import desc, select
+
+    from gali_core.db.models import CreditLedger, RawResponse
+    from gali_core.sectors.client import SectorsClient
+
+    async def _run() -> None:
+        console.print("[bold blue]Running Task 0.11 smoke test against Sectors API (/v2/subsectors/)...[/bold blue]")
+        client = SectorsClient()
+        if not client.settings.sectors_api_key:
+            console.print("[bold red]Error: SECTORS_API_KEY is not set in .env or environment![/bold red]")
+            console.print("Please copy .env.example to .env and set your SECTORS_API_KEY.")
+            raise typer.Exit(code=1)
+
+        try:
+            payload = await client.get(
+                endpoint="/v2/subsectors/",
+                tier="cold",
+                credit_cost=1,
+                run_id="smoke_test_011",
+                force_refresh=True,
+            )
+            count = len(payload) if isinstance(payload, list) else "OK"
+            console.print(f"[bold green]✓ Successfully fetched /v2/subsectors/! Result: {count}[/bold green]")
+
+            # Verify rows in DB
+            async with async_session() as session:
+                raw_res = await session.execute(
+                    select(RawResponse)
+                    .where(RawResponse.endpoint == "/v2/subsectors/")
+                    .order_by(desc(RawResponse.fetched_at))
+                    .limit(1)
+                )
+                raw_entry = raw_res.scalar_one_or_none()
+
+                ledger_res = await session.execute(
+                    select(CreditLedger)
+                    .where(CreditLedger.endpoint == "/v2/subsectors/")
+                    .order_by(desc(CreditLedger.occurred_at))
+                    .limit(1)
+                )
+                ledger_entry = ledger_res.scalar_one_or_none()
+
+            if raw_entry and ledger_entry:
+                console.print(
+                    f"[bold green]✓ Verified raw.responses row: id={raw_entry.id}, status_code={raw_entry.status_code}[/bold green]"
+                )
+                console.print(
+                    f"[bold green]✓ Verified ops.credit_ledger row: id={ledger_entry.id}, credits={ledger_entry.credits}[/bold green]"
+                )
+                console.print("[bold green]✓ Task 0.11 Smoke Test PASSED![/bold green]")
+            else:
+                console.print("[bold red]✗ Failed to find records in database tables![/bold red]")
+                raise typer.Exit(code=1)
+        finally:
+            await client.close()
+
+    asyncio.run(_run())
+
+
 if __name__ == "__main__":
     app()
