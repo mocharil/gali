@@ -9,16 +9,18 @@ from gali_core.sectors.budget import BudgetExceededError, CreditBudget
 
 @pytest.mark.asyncio
 async def test_budget_hard_cap_enforcement() -> None:
-    budget = CreditBudget(hard_cap=10)
-
     async with async_session() as session:
         async with session.begin():
+            budget = CreditBudget(hard_cap=950)
+            current_spent = await budget.get_total_spent_async(session)
+            dynamic_budget = CreditBudget(hard_cap=current_spent + 10)
+
             # Check within budget
-            await budget.check_budget_async(5, session)
+            await dynamic_budget.check_budget_async(5, session)
 
             # Check exceeding budget
             with pytest.raises(BudgetExceededError):
-                await budget.check_budget_async(15, session)
+                await dynamic_budget.check_budget_async(15, session)
 
 
 @pytest.mark.asyncio

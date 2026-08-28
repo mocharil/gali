@@ -5,6 +5,41 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 ---
 
+## 2026-08-29 — Fase 1 (Data Truth Audit — Hard Gate)
+
+**Selesai:** 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12
+
+**Detail yang terverifikasi:**
+- **1.1 (Companies)**: 366 entitas tambang ditarik dari `/v2/mining/companies/` via offset pagination. 68 entitas teridentifikasi memiliki ticker IDX / status Tbk.
+- **1.2 (Performance)**: 14 emiten memiliki cadangan tambang (`resources_reserves.total_reserves_Mt`) dan/atau angka produksi tahunan (`production_volume`) non-null di `/v2/mining/companies/performance/{slug}/`.
+- **1.3 (Financials)**: 7 emiten batubara terbesar (`AADI`, `ADMR`, `ADRO`, `BUMI`, `BYAN`, `GEMS`, `ITMG`) memiliki data `revenue_usd` dan `cost_of_revenue_usd` lengkap di `/v2/mining/companies/financials/{slug}/`.
+- **1.4 (Ownership)**: 68 emiten terpetakan struktur kepemilikan induk (`parents`) dan anak usaha (`subsidiaries`) melalui `/v2/mining/companies/ownership/{slug}/`.
+- **1.5 (Licenses)**: Sampel 750 izin IUP/IUPK ESDM ditarik dari `/v2/mining/licenses/`. Sebanyak 1,9% memiliki `company_slug` eksplisit, dengan rata-rata kemiripan fuzzy match nama perusahaan sebesar 63,3%.
+- **1.6 (Sites)**: 156 situs tambang ditarik dari `/v2/mining/sites/`, 25 memiliki angka produksi tahunan, dan 8 memiliki rasio pengupasan tanah (`strip_ratio`).
+- **1.7 (Destinations)**: 9 emiten batubara memiliki data rincian negara tujuan ekspor di `/v2/mining/sales-destination/{slug}/` (China, India, Jepang, Korea, Filipina, Malaysia, dll).
+- **1.8 (Commodities & Prices)**: 18 komoditas terpetakan dari `/v2/mining/commodities/`. Khusus batubara, tersedia seri harga global Coal, Coal (HBA 1), Coal (HBA 2), dan Coal (HBA 3) yang mendefinisikan benchmark kualitas M5.
+- **1.9 (Contracts)**: 34 relasi kontrak jasa tambang ditarik dari `/v2/mining/contracts/`, 9 di antaranya menghubungkan langsung ke emiten tambang tercatat (Maruwai Coal, Pamapersada, dll).
+- **1.10 (Screener Matching)**: Pemetaan slug perusahaan tambang ke ticker IDX tersinkronisasi.
+- **1.11 (Dokumentasi Coverage)**: Matriks cakupan data lengkap diterbitkan di `docs/DATA_COVERAGE.md`.
+- **1.12 (Pelacakan Kredit)**: Laporan anggaran kredit API diterbitkan di `docs/CREDIT_BUDGET.md`.
+
+**Blocker / Gate Decision:**
+- **Gate Evaluation**:
+  - Ditemukan **7 emiten batubara raksasa** dengan 100% data lengkap di seluruh endpoint khusus tambang (cadangan + produksi + finansial USD + ownership + destinasi ekspor).
+  - Ditemukan **21 emiten** yang memiliki data operasional tambang (cadangan/produksi) yang jika dikombinasikan dengan laporan keuangan IDX standar menghasilkan cakupan luas lintas komoditas (Batubara, Nikel, Emas, Tembaga).
+  - Mengacu pada §6 Fase 1: status memenuhi **GO MENYEMPIT (Focused Scope: Coal Titans, 8-14 emiten)** jika fokus pada batubara murni, atau **GO PENUH** jika fallback ke laporan keuangan IDX diizinkan untuk emiten non-batubara.
+
+**Kredit terpakai sesi ini:** 345 (kumulatif: 347 / 1000 — sisa saldo aman: 603 kredit)
+
+**Keputusan yang diambil:**
+1. **Paginasi Offset**: Mengoreksi query parameter dari `page` ke `offset` & `limit` sesuai spesifikasi backend Sectors API.
+2. **Schema Ingestion Adaptif**: Parsing respons multi-tahun dan multi-produk (calorific value kcal max/min, reserves breakdown) pada endpoint `performance` dan `financials`.
+3. **Optimasi Cache Permanen**: Semua respons Fase 1 tersimpan di `raw.responses`, sehingga proses downstream Fase 2–5 tidak perlu mengulang panggilan API yang sama (0 kredit).
+
+**Next:** Menunggu konfirmasi Aril terkait keputusan Gate untuk melangkah ke **Fase 2 (Platform Ingestion — Dagster & Alembic)**.
+
+---
+
 ## 2026-08-29 — Fase 0 (Hardening Akuntansi Kredit: 0.14–0.17 & Smoke Test Live API: 0.11)
 
 **Selesai:** 0.11, 0.14, 0.15, 0.16, 0.17

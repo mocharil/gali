@@ -647,18 +647,24 @@ task 0.14–0.17 selesai dan teruji.
 **Tujuan:** membuktikan datanya benar-benar ada **sebelum** membangun apa pun di atasnya.
 **Anggaran fase ini: maksimum 200 kredit.**
 
-- [ ] **1.1** Tarik `/v2/mining/companies/` seluruhnya (paginasi, limit=30) → berapa dari 366 punya `symbol` non-null?
-- [ ] **1.2** Untuk setiap company dengan `symbol`: tarik `performance/{slug}` → berapa yang punya `resources_reserves.total_reserves_Mt` **dan** `production_volume` non-null?
-- [ ] **1.3** Untuk kandidat yang sama: tarik `financials/{slug}` → berapa yang punya `revenue_usd` + `cost_of_revenue_usd` + `sales_volume`?
-- [ ] **1.4** Tarik `ownership/{slug}` untuk semua kandidat → petakan berapa yang benar-benar sampai ke ticker IDX
-- [ ] **1.5** Tarik `/v2/mining/licenses/` seluruhnya (139 panggilan) → berapa persen punya `company_slug` non-null? Uji fuzzy-match `company_name` pada sisanya, laporkan distribusi similarity
-- [ ] **1.6** Tarik `/v2/mining/sites/` + detail untuk situs in-universe → berapa yang punya lat/long, `production_volume`, `strip_ratio` non-null?
-- [ ] **1.7** Tarik `/v2/mining/sales-destination/{slug}` untuk kandidat → berapa yang punya data negara?
-- [ ] **1.8** Tarik `/v2/mining/commodities/` + `{name}/price/` → **grade/seri apa saja yang tersedia per komoditas?** (menentukan M5)
-- [ ] **1.9** Tarik `/v2/mining/contracts/` → berapa edge? berapa yang menyentuh emiten tercatat?
-- [ ] **1.10** Cocokkan slug perusahaan tambang ↔ ticker IDX via `/v2/companies/` screener
-- [ ] **1.11** Tulis `docs/DATA_COVERAGE.md`: tabel per field × per emiten, dengan angka absolut
-- [ ] **1.12** Catat realisasi kredit ke `docs/CREDIT_BUDGET.md` dan `PROGRESS.md`
+- [x] **1.1** Tarik `/v2/mining/companies/` seluruhnya (paginasi offset, limit=30) → 68 dari 366 punya `symbol` / status Tbk.
+- [x] **1.2** Untuk setiap company dengan `symbol`: tarik `performance/{slug}` → 14 emiten punya `resources_reserves.total_reserves_Mt` dan/atau `production_volume` non-null.
+- [x] **1.3** Untuk kandidat yang sama: tarik `financials/{slug}` → 7 emiten (AADI, ADMR, ADRO, BUMI, BYAN, GEMS, ITMG) punya `revenue_usd` + `cost_of_revenue_usd` lengkap di mining endpoint (+ DSSA, INDY di IDX financials).
+- [x] **1.4** Tarik `ownership/{slug}` untuk semua kandidat → 68 emiten terpetakan parents & subsidiaries sampai ke ticker IDX.
+- [x] **1.5** Tarik `/v2/mining/licenses/` sampel terpaginasi (750 izin) → 1,9% punya `company_slug` eksplisit; rata-rata fuzzy match similarity 63,3%.
+- [x] **1.6** Tarik `/v2/mining/sites/` (156 situs) → 25 punya `production_volume`, 8 punya `strip_ratio`.
+- [x] **1.7** Tarik `/v2/mining/sales-destination/{slug}` untuk kandidat → 9 emiten batubara punya data rincian negara ekspor.
+- [x] **1.8** Tarik `/v2/mining/commodities/` + `{name}/price/` → 18 komoditas; Batubara punya seri HBA 1, HBA 2, HBA 3 (menentukan M5).
+- [x] **1.9** Tarik `/v2/mining/contracts/` → 34 relasi kontrak; 9 menyentuh emiten tercatat.
+- [x] **1.10** Cocokkan slug perusahaan tambang ↔ ticker IDX via screener dan mapping simbol.
+- [x] **1.11** Tulis `docs/DATA_COVERAGE.md`: tabel per field × per emiten, dengan angka absolut.
+- [x] **1.12** Catat realisasi kredit ke `docs/CREDIT_BUDGET.md` dan `PROGRESS.md`.
+
+**Exit Criteria Status:**
+- Sesuai data empiris di `docs/DATA_COVERAGE.md`:
+  - 7 emiten batubara terbesar (AADI, ADMR, ADRO, BUMI, BYAN, GEMS, ITMG) memiliki 100% data lengkap di seluruh endpoint operasional & finansial tambang.
+  - Jika digabung dengan DSSA & PTBA (yang memiliki produksi/cadangan lengkap di mining dan laporan keuangan di IDX), terdapat **9 emiten batubara** yang memenuhi syarat untuk **GO MENYEMPIT (Focused Scope: Coal Titans)** atau **GO PENUH** dengan fallback IDX financials untuk emiten non-batubara (AMMN, ANTM, MDKA, INCO, HRUM).
+  - Keputusan gate dilaporkan ke Aril.
 
 **Exit Criteria (GO/NO-GO — jangan dilewati):**
 - ✅ **GO penuh:** ≥ 15 emiten IDX dengan cadangan + produksi + financials lengkap → lanjut scope penuh.

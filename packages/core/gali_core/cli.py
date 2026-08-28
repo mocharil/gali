@@ -21,9 +21,11 @@ app = typer.Typer(
 )
 credits_app = typer.Typer(help="Manage and inspect Sectors API credit usage.")
 db_app = typer.Typer(help="Database operations and migrations.")
+audit_app = typer.Typer(help="Phase 1 Data Truth Audit operations.")
 
 app.add_typer(credits_app, name="credits")
 app.add_typer(db_app, name="db")
+app.add_typer(audit_app, name="audit")
 
 console = Console()
 
@@ -103,7 +105,6 @@ def db_migrate(revision: str = "head") -> None:
 @app.command("smoke")
 def smoke_test() -> None:
     """Run Task 0.11 smoke test: call /v2/subsectors/ and verify DB persistence."""
-    import asyncio
 
     from sqlalchemy import desc, select
 
@@ -163,6 +164,44 @@ def smoke_test() -> None:
                 raise typer.Exit(code=1)
         finally:
             await client.close()
+
+
+@audit_app.command("run")
+def audit_run(max_credits: int = 200) -> None:
+    """Execute Phase 1 Data Truth Audit and generate documentation."""
+    import asyncio
+
+    from gali_core.audit.coverage_report import (
+        generate_coverage_markdown,
+        generate_credit_budget_markdown,
+        print_audit_terminal_summary,
+    )
+    from gali_core.audit.runner import AuditRunner
+
+    async def _run() -> None:
+        console.print(f"[bold blue]Starting Phase 1 Data Truth Audit (Max Credits: {max_credits})...[/bold blue]")
+        runner = AuditRunner()
+        result = await runner.run(max_credits=max_credits)
+
+        budget = CreditBudget()
+        async with async_session() as session:
+            credit_report = await budget.get_report_async(session)
+
+        # Print terminal summary
+        print_audit_terminal_summary(result, credit_report)
+
+        # Write docs/DATA_COVERAGE.md
+        docs_dir = REPO_ROOT / "docs"
+        docs_dir.mkdir(exist_ok=True)
+
+        coverage_md = generate_coverage_markdown(result, credit_report)
+        (docs_dir / "DATA_COVERAGE.md").write_text(coverage_md, encoding="utf-8")
+        console.print("[bold green][OK] Written docs/DATA_COVERAGE.md[/bold green]")
+
+        # Write docs/CREDIT_BUDGET.md
+        budget_md = generate_credit_budget_markdown(credit_report)
+        (docs_dir / "CREDIT_BUDGET.md").write_text(budget_md, encoding="utf-8")
+        console.print("[bold green][OK] Written docs/CREDIT_BUDGET.md[/bold green]")
 
     asyncio.run(_run())
 
