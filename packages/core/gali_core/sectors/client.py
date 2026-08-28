@@ -9,12 +9,6 @@ from typing import Any
 import httpx
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
-from tenacity import (
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-)
 
 from gali_core.config import Settings, get_settings
 from gali_core.db.base import async_session
@@ -30,6 +24,20 @@ logger = structlog.get_logger(__name__)
 
 class DryRunCacheMissError(Exception):
     """Raised when GALI_DRY_RUN=True and a requested endpoint is not present in raw.responses."""
+
+
+class SectorsNotFoundError(Exception):
+    """Raised when Sectors API returns 404 (Resource Not Found).
+
+    Note: Sectors bills exactly 1 credit for 404 responses. This exception is distinct
+    from network/transport errors so that callers (e.g. Fase 1 data audit loops) can catch
+    it cleanly as missing coverage without failing the entire pipeline.
+    """
+
+    def __init__(self, message: str, endpoint: str, params: dict[str, Any] | None = None) -> None:
+        super().__init__(message)
+        self.endpoint = endpoint
+        self.params = params or {}
 
 
 class RateLimiter:
@@ -57,6 +65,9 @@ class SectorsClient:
     2. In GALI_DRY_RUN=1 (default dev mode), cache miss raises DryRunCacheMissError.
     3. Live calls are gated by CreditBudget (hard ceiling: 950).
     4. Every live call writes immutable payload to raw.responses and records spend to ops.credit_ledger.
+    5. 404 responses are charged exactly 1 credit, persisted with status_code=404, and raise SectorsNotFoundError.
+    6. 429 rate limits are retried with backoff and cost 0 credits for failed attempts.
+    7. 400/401/403/5xx errors raise without charging credits or saving to database.
     """
 
     def __init__(
@@ -119,8 +130,8 @@ class SectorsClient:
             )
 
         async with async_session() as managed_session:
-            async with managed_session.begin():
-                return await self._get_with_session(
+            try:
+                result = await self._get_with_session(
                     endpoint=endpoint,
                     params=clean_params,
                     params_hash=params_hash,
@@ -130,6 +141,15 @@ class SectorsClient:
                     session=managed_session,
                     force_refresh=force_refresh,
                 )
+                await managed_session.commit()
+                return result
+            except SectorsNotFoundError:
+                # 404 accounting (raw.responses + ops.credit_ledger) must be persisted
+                await managed_session.commit()
+                raise
+            except Exception:
+                await managed_session.rollback()
+                raise
 
     async def _get_with_session(
         self,
@@ -142,7 +162,7 @@ class SectorsClient:
         session: AsyncSession,
         force_refresh: bool,
     ) -> Any:
-        # 1. Check raw.responses cache first
+        # 1. Check raw.responses cache first (strictly status_code == 200)
         if not force_refresh:
             cached = await get_cached_response_async(endpoint, params_hash, session)
             if cached is not None:
@@ -173,7 +193,45 @@ class SectorsClient:
 
         payload, status_code = await self._execute_http_request(http_client, endpoint, params)
 
-        # 5. Persist to raw.responses and debit ops.credit_ledger
+        # 5. Handle 404: charges exactly 1 credit, records raw.responses, raises SectorsNotFoundError
+        if status_code == 404:
+            charged_credits = 1
+            raw_entry = await save_raw_response_async(
+                endpoint=endpoint,
+                params=params,
+                params_hash=params_hash,
+                payload=None,
+                status_code=404,
+                credits_charged=charged_credits,
+                tier=tier,
+                session=session,
+                run_id=run_id,
+            )
+
+            await self.budget.record_spend_async(
+                endpoint=endpoint,
+                credits=charged_credits,
+                tier=tier,
+                status_code=404,
+                session=session,
+                run_id=run_id,
+                raw_response_id=raw_entry.id,
+            )
+
+            logger.warning(
+                "api_resource_not_found_404",
+                endpoint=endpoint,
+                params=params,
+                credits_charged=charged_credits,
+            )
+
+            raise SectorsNotFoundError(
+                f"Resource not found (404) for endpoint '{endpoint}' with params {params}",
+                endpoint=endpoint,
+                params=params,
+            )
+
+        # 6. Handle 200 (Success): persist to raw.responses and debit ops.credit_ledger
         raw_entry = await save_raw_response_async(
             endpoint=endpoint,
             params=params,
@@ -206,18 +264,57 @@ class SectorsClient:
 
         return payload
 
-    @retry(
-        retry=retry_if_exception_type((httpx.TransportError, httpx.TimeoutException)),
-        stop=stop_after_attempt(4),
-        wait=wait_exponential(multiplier=1, min=1, max=10),
-        reraise=True,
-    )
     async def _execute_http_request(
         self,
         client: httpx.AsyncClient,
         endpoint: str,
         params: dict[str, Any],
     ) -> tuple[Any, int]:
-        response = await client.get(endpoint, params=params)
-        response.raise_for_status()
-        return response.json(), response.status_code
+        """Execute HTTP request with 429 retry backoff and network error handling."""
+        max_attempts = self.settings.sectors_max_retries
+        for attempt in range(max_attempts + 1):
+            try:
+                response = await client.get(endpoint, params=params)
+
+                # 429: Rate limited -> retry with backoff, respect Retry-After header
+                if response.status_code == 429:
+                    if attempt == max_attempts:
+                        response.raise_for_status()
+                    retry_after_hdr = response.headers.get("Retry-After")
+                    wait_time: float = min(1.0 * (2**attempt), 10.0)
+                    if retry_after_hdr:
+                        try:
+                            wait_time = float(retry_after_hdr)
+                        except ValueError:
+                            pass
+                    logger.warning(
+                        "rate_limited_429",
+                        endpoint=endpoint,
+                        attempt=attempt + 1,
+                        retry_after=wait_time,
+                    )
+                    await asyncio.sleep(wait_time)
+                    continue
+
+                # 404: Not Found -> return immediately without exception (caller handles credit & raises SectorsNotFoundError)
+                if response.status_code == 404:
+                    return None, 404
+
+                # 200 or other 4xx/5xx
+                response.raise_for_status()
+                return response.json(), response.status_code
+
+            except (httpx.TransportError, httpx.TimeoutException) as exc:
+                if attempt == max_attempts:
+                    raise
+                wait_time = min(1.0 * (2**attempt), 10.0)
+                logger.warning(
+                    "network_error_retry",
+                    endpoint=endpoint,
+                    attempt=attempt + 1,
+                    error=str(exc),
+                )
+                await asyncio.sleep(wait_time)
+                continue
+
+        raise httpx.RequestError(f"Exhausted {max_attempts} retries for endpoint '{endpoint}'")

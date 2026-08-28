@@ -596,8 +596,52 @@ Total tersedia: **1.000 kredit.** Habis = proyek mati. Tiga jenjang TTL:
 - [x] **0.12** GitHub Actions `ci.yml`: ruff + mypy + pytest (boleh kosong dulu) hijau
 - [x] **0.13** Buat `PROGRESS.md` dengan entri pertama
 
+#### Hardening akuntansi kredit — WAJIB selesai sebelum Fase 1
+
+Ditemukan saat review Fase 0. Ketiganya menyangkut akurasi `ops.credit_ledger`, yang menjadi dasar
+`CreditBudget`. Aturan billing resmi Sectors (docs.sectors.app, bagian "Billing & Credits"):
+
+| Respons | Ditagih? |
+|---|---|
+| 2xx | Ya — sesuai biaya endpoint (umumnya 1; company report multi-section lebih) |
+| **404** | **Ya — 1 kredit.** Request valid, lookup dijalankan, hasilnya tidak ada |
+| 400 / 401 / 403 / 429 / 5xx | Tidak — gratis |
+| Screener `?q=` (natural language) | 3 kredit bila sukses; 1 kredit bila 400 setelah model jalan |
+| Screener `where`/`order_by` (terstruktur) | 1 kredit |
+
+- [x] **0.14** **Tagih 1 kredit pada 404.** Saat ini `_execute_http_request` memanggil
+      `raise_for_status()`, sehingga 404 melempar exception **sebelum** ledger ditulis — kredit
+      terpakai nyata tapi tidak tercatat. Arahnya berbahaya: ledger *undercount*, `CreditBudget`
+      berhenti terlambat, dan pemakaian nyata bisa melewati 950.
+      Perbaikan: tangkap `httpx.HTTPStatusError`; jika `status_code == 404`, tulis
+      `ops.credit_ledger` sebesar **1** (bukan `credit_cost` endpoint) dan persist baris
+      `raw.responses` dengan `status_code=404` untuk jejak audit, lalu re-raise.
+      **Paling mendesak: Fase 1 memprobe `performance/{slug}`, `financials/{slug}`,
+      `ownership/{slug}`, `sales-destination/{slug}` untuk ~70 slug — 404 akan sering terjadi.**
+- [x] **0.15** **Retry pada 429.** `429` gratis menurut aturan billing, tapi saat ini melempar
+      `HTTPStatusError` yang tidak masuk daftar retry, sehingga satu rate-limit di tengah run
+      membatalkan seluruh proses. Fase 1 melakukan 139 panggilan paginasi berturut-turut untuk
+      lisensi — persis skenario yang memicu ini.
+      Perbaikan: retry `429` dengan exponential backoff (hormati header `Retry-After` bila ada),
+      terpisah dari retry `TransportError`/`TimeoutException` yang sudah ada.
+- [x] **0.16** **Encode biaya screener natural-language.** `ENDPOINTS` memberi semua screener
+      `credit_cost=1`. Kalau `?q=` dipakai, biaya sebenarnya **3**. Rencana §5 memakai `where`
+      terstruktur (1 kredit), jadi risikonya rendah — tapi daftarkan keduanya sebagai entri
+      terpisah supaya ledger tidak pernah salah kalau `?q=` dipakai belakangan.
+- [x] **0.17** Unit test untuk 0.14 dan 0.15: 404 mencatat tepat 1 kredit; 429 di-retry lalu sukses
+      tanpa mencatat kredit untuk percobaan yang gagal.
+
 **Exit Criteria:** `docker compose up` jalan · satu respons Sectors nyata tersimpan di `raw.responses`
-dengan kredit tercatat di ledger · CI hijau · repo publik dengan first commit hari ini.
+dengan kredit tercatat di ledger · CI hijau · repo publik dengan first commit hari ini ·
+task 0.14–0.17 selesai dan teruji.
+
+> **Status per 29 Ags 2026 (terverifikasi independen):** 0.5, 0.6, 0.7, 0.9, 0.10, 0.12, 0.13 ✅
+> — 14 test lolos, CI hijau di 3 commit terakhir, repo publik bersih (tidak ada secret di
+> seluruh history), schema `raw`+`ops` ada di database.
+>
+> **Exit Criteria BELUM terpenuhi.** `raw.responses` = 0 baris, `ops.credit_ledger` = 0 baris,
+> dan file `.env` belum ada sama sekali. Task 0.11 tidak bisa dijalankan tanpa
+> `SECTORS_API_KEY`. **Fase 1 belum boleh dimulai.**
 
 ---
 

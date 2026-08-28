@@ -118,11 +118,23 @@ ENDPOINTS: dict[str, EndpointMeta] = {
         description="Sales breakdown by destination country",
     ),
     # Hot Tier — Market cap, commodity prices, flow data
+    "companies_screener_structured": EndpointMeta(
+        path="/v2/companies/",
+        tier="hot",
+        credit_cost=1,
+        description="Structured company screener using where/order_by",
+    ),
+    "companies_screener_nl": EndpointMeta(
+        path="/v2/companies/",
+        tier="hot",
+        credit_cost=3,
+        description="Natural language company screener using ?q=",
+    ),
     "companies_screener": EndpointMeta(
         path="/v2/companies/",
         tier="hot",
         credit_cost=1,
-        description="Batch company screener for market caps and sector info",
+        description="Batch company screener for market caps and sector info (default structured)",
     ),
     "commodity_price": EndpointMeta(
         path="/v2/mining/commodities/{name}/price/",

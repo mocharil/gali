@@ -1,4 +1,114 @@
-# Prompt Kickoff untuk Agent Pelaksana
+# Prompt untuk Agent Pelaksana
+
+> **Sesi 2 ada di bawah ini.** Prompt kickoff Sesi 1 diarsipkan di bagian bawah file.
+> Selalu paste blok sesi terbaru.
+
+---
+
+# SESI 2 — Hardening Akuntansi Kredit (task 0.14–0.17)
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Konteks
+
+Fase 0 sudah hampir selesai dan **sudah diverifikasi independen**: task 0.5, 0.6, 0.7, 0.9, 0.10,
+0.12, 0.13 tuntas, 14 test lolos, CI hijau, repo publik bersih tanpa secret di history. Kerja bagus.
+
+Review menemukan **tiga celah di akuntansi kredit** yang harus ditutup sebelum Fase 1, karena Fase 1
+justru fase yang paling banyak memicu kondisi-kondisi ini. Task 0.14–0.17 sudah ditambahkan ke
+`BUILD_PLAN.md` (Fase 0, tepat setelah task 0.13). **Baca bagian itu dulu**, lalu kerjakan.
+
+### Tugasmu sesi ini: HANYA task 0.14–0.17
+
+**Jangan mulai Fase 1.** Exit Criteria Fase 0 belum terpenuhi — `raw.responses` masih 0 baris karena
+`SECTORS_API_KEY` belum ada. Fase 1 baru boleh jalan setelah Aril mengisi `.env` dan `gali smoke`
+(task 0.11) lolos.
+
+Semua task sesi ini **tidak butuh API key** — semuanya diuji dengan mock (`respx`).
+
+### Aturan billing resmi Sectors (rujukan)
+
+| Respons | Ditagih? |
+|---|---|
+| 2xx | Ya — sesuai biaya endpoint |
+| **404** | **Ya — 1 kredit** (request valid, lookup dijalankan, resource tidak ada) |
+| 400 / 401 / 403 / 429 / 5xx | Tidak — gratis |
+| Screener `?q=` sukses | 3 kredit |
+| Screener `where`/`order_by` | 1 kredit |
+
+### 0.14 — Tagih 1 kredit pada 404, dan jadikan 404 hasil kelas satu
+
+Masalah: `_execute_http_request` memanggil `response.raise_for_status()`, sehingga 404 melempar
+exception **sebelum** ledger ditulis. Kredit terpakai nyata tapi tidak tercatat → ledger undercount →
+`CreditBudget` berhenti terlambat → pemakaian bisa melewati 950 tanpa terdeteksi.
+
+Yang harus dilakukan:
+1. Ganti `raise_for_status()` dengan penanganan status eksplisit.
+2. Pada **404**: persist baris `raw.responses` dengan `status_code=404` (payload boleh body respons
+   atau `null`) sebagai jejak audit, catat `ops.credit_ledger` sebesar **tepat 1** — bukan
+   `credit_cost` endpoint — lalu lempar exception bertipe khusus, mis. `SectorsNotFoundError`.
+3. Pada **400 / 401 / 403 / 5xx**: lempar exception, **jangan** catat kredit.
+
+**Poin desain yang penting:** di Fase 1, 404 bukan kegagalan — itu **temuan coverage**
+("perusahaan ini tidak punya data performance"). Audit harus bisa menangkapnya dengan bersih lalu
+melanjutkan loop, bukan berhenti. Karena itu 404 wajib punya tipe exception sendiri, terpisah dari
+error jaringan.
+
+### 0.15 — Retry pada 429
+
+`429` gratis menurut aturan billing, tapi saat ini melempar `HTTPStatusError` yang tidak masuk daftar
+retry — satu rate-limit di tengah run membatalkan seluruh proses. Fase 1 melakukan **139 panggilan
+paginasi beruntun** untuk lisensi; ini persis skenario pemicunya.
+
+Tambahkan retry khusus `429` dengan exponential backoff, hormati header `Retry-After` bila ada,
+terpisah dari retry `TransportError`/`TimeoutException` yang sudah ada. Percobaan yang gagal
+**tidak boleh** mencatat kredit.
+
+### 0.16 — Pisahkan biaya screener
+
+`ENDPOINTS` memberi semua screener `credit_cost=1`. Screener natural-language (`?q=`) sebenarnya
+**3 kredit**. Rencana §5 memakai `where` terstruktur, jadi risikonya rendah — tapi daftarkan sebagai
+dua entri terpisah (`companies_screener_structured` = 1, `companies_screener_nl` = 3) supaya ledger
+tidak pernah salah kalau `?q=` dipakai belakangan.
+
+### 0.17 — Test
+
+Tambahkan unit test dengan `respx`:
+- 404 → tercatat **tepat 1** kredit, ada baris `raw.responses` dengan `status_code=404`, dan
+  `SectorsNotFoundError` terlempar
+- 404 pada endpoint ber-`credit_cost=3` (`company_report`) → tetap tercatat **1**, bukan 3
+- 429 lalu 200 → di-retry, sukses, dan hanya **satu** entri kredit tercatat
+- 400 dan 500 → **tidak ada** entri kredit sama sekali
+- Regression: cache tetap hanya menyajikan `status_code == 200` (perilaku ini sudah benar, jaga
+  jangan sampai rusak oleh perubahan di 0.14)
+
+### Definisi selesai
+
+1. `./.venv/Scripts/python.exe -m pytest packages/core/tests -q` hijau, jumlah test bertambah
+2. `ruff check` dan `mypy` bersih
+3. Checkbox 0.14–0.17 dicentang di `BUILD_PLAN.md`
+4. Entri baru di `PROGRESS.md` sesuai format yang sudah ada
+5. Commit + push ke `main`; verifikasi CI hijau dengan `gh run list --repo Mocharil/gali`
+
+### Setelah selesai
+
+Lapor hasilnya, lalu **berhenti**. Jangan lanjut ke Fase 1.
+
+Kalau saat kamu bekerja file `.env` ternyata sudah ada dan `SECTORS_API_KEY` terisi, kamu boleh
+menjalankan `gali smoke` untuk menutup task 0.11 (biaya 1 kredit) — verifikasi `raw.responses` dan
+`ops.credit_ledger` masing-masing bertambah satu baris. Kalau `.env` belum ada, lewati dan laporkan
+bahwa 0.11 masih terblokir.
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Kickoff Sesi 1</b></summary>
+
 
 Paste blok di bawah ini **apa adanya** ke agent yang akan mengeksekusi build GALI.
 Blok ini sengaja self-contained: agent yang belum tahu apa-apa soal proyek ini pun harus
@@ -141,3 +251,5 @@ tersandera di sini:
 Satu hal yang perlu kamu tahu: aturan hackathon mewajibkan repo **tetap publik minimal 90 hari**
 setelah pengumuman pemenang (9 Okt 2026), jadi jangan di-private sampai sekitar awal Januari 2027.
 Menjadikannya private sebelum itu menggugurkan hak hadiah.
+
+</details>
