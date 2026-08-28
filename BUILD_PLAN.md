@@ -576,7 +576,7 @@ Total tersedia: **1.000 kredit.** Habis = proyek mati. Tiga jenjang TTL:
 - [ ] **0.2** Buat akun Sectors dan **selesaikan onboarding penuh** di `sectors.app` (diverifikasi panitia)
 - [ ] **0.3** Klaim **1.000 API credits** via halaman tim di portal
 - [ ] **0.4** Generate Sectors API key → simpan di `.env` (**jangan pernah di-commit**); tambahkan `.env` ke `.gitignore`
-- [ ] **0.5** `git init` + buat repo publik **`Mocharil/gali`** di GitHub dan push.
+- [x] **0.5** `git init` + buat repo publik **`Mocharil/gali`** di GitHub dan push.
       Akun sudah terautentikasi di mesin ini (`gh auth status` → `mocharil`, active).
       ```bash
       git init -b main

@@ -128,7 +128,7 @@ class Settings(BaseSettings):
     # --- Ops ---------------------------------------------------------------
     log_level: str = "INFO"
     sentry_dsn: str = ""
-    environment: Literal["development", "staging", "production"] = "development"
+    environment: Literal["development", "staging", "production", "test"] = "development"
 
     @property
     def cors_origins(self) -> list[str]:
