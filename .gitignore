@@ -1,0 +1,43 @@
+# --- secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# --- dagster ---
+tmp*/
+.dagster_home/
+dagster_home/
+
+# --- node / next ---
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# --- editors / os ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- local data ---
+*.db
+*.sqlite3
+/data/

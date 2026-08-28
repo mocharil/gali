@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gali-pipeline"
+version = "0.1.0"
+description = "GALI Dagster code location: raw -> core -> graph -> metrics asset graph."
+requires-python = ">=3.11"
+dependencies = [
+  "gali-core",
+  "dagster>=1.9",
+  "dagster-webserver>=1.9",
+  "dagster-postgres>=0.25",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3", "ruff>=0.8", "mypy>=1.13"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["gali_pipeline"]
+
+[tool.dagster]
+module_name = "gali_pipeline.definitions"
+code_location_name = "gali"

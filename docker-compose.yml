@@ -1,0 +1,82 @@
+# Local development parity for GALI.
+#   docker compose up -d          -> postgres + redis
+#   docker compose --profile app up  -> also api + dagster
+#
+# Production runs the same images: Postgres on Neon, Redis on Upstash,
+# api + pipeline on Fly.io. See docs/ARCHITECTURE.md.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gali-postgres
+    environment:
+      POSTGRES_USER: gali
+      POSTGRES_PASSWORD: gali
+      POSTGRES_DB: gali
+    ports:
+      - "5433:5432"
+    volumes:
+      - gali-pgdata:/var/lib/postgresql/data
+      - ./infra/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gali -d gali"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: gali-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - gali-redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    container_name: gali-api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://gali:gali@postgres:5432/gali
+      DATABASE_URL_SYNC: postgresql+psycopg://gali:gali@postgres:5432/gali
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  dagster:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.pipeline
+    container_name: gali-dagster
+    env_file: .env
+    environment:
+      DAGSTER_HOME: /opt/dagster/home
+      DATABASE_URL: postgresql+asyncpg://gali:gali@postgres:5432/gali
+      DATABASE_URL_SYNC: postgresql+psycopg://gali:gali@postgres:5432/gali
+    ports:
+      - "3001:3000"
+    volumes:
+      - gali-dagster-home:/opt/dagster/home
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  gali-pgdata:
+  gali-redisdata:
+  gali-dagster-home:
