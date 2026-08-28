@@ -206,5 +206,216 @@ def audit_run(max_credits: int = 200) -> None:
     asyncio.run(_run())
 
 
+@app.command("ingest")
+def ingest_command(
+    tier: str = typer.Option("all", "--tier", "-t", help="Tier to ingest: cold, warm, hot, or all"),
+) -> None:
+    """Normalize raw responses from raw.responses to core.* and market.* tables."""
+    import asyncio
+
+    from sqlalchemy import desc, select
+
+    from gali_core.db.models import RawResponse
+    from gali_core.normalize.core_normalizer import (
+        normalize_commodity_prices,
+        normalize_company_financials,
+        normalize_company_performance,
+        normalize_mining_companies,
+        normalize_mining_contracts,
+        normalize_mining_licenses,
+        normalize_mining_sites,
+        normalize_sales_destinations,
+        upsert_commodity_prices,
+        upsert_company_financials,
+        upsert_company_performance,
+        upsert_mining_companies,
+        upsert_mining_contracts,
+        upsert_mining_licenses,
+        upsert_mining_sites,
+        upsert_sales_destinations,
+    )
+    from gali_core.normalize.market_normalizer import normalize_idx_companies, upsert_idx_companies
+
+    async def _run() -> None:
+        console.print(f"[bold blue]Starting GALI Normalization Ingestion (Tier: {tier})...[/bold blue]")
+        stats: dict[str, int] = {}
+
+        async with async_session() as session:
+            async with session.begin():
+                # 1. Mining Companies
+                if tier in ("cold", "all"):
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(RawResponse.endpoint == "/v2/mining/companies/", RawResponse.status_code == 200)
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload:
+                            rows = normalize_mining_companies(raw.payload)
+                            count += await upsert_mining_companies(session, rows)
+                    stats["core.mining_company"] = count
+
+                    # 2. Mining Sites
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(RawResponse.endpoint == "/v2/mining/sites/", RawResponse.status_code == 200)
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    site_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload:
+                            s_rows, p_rows = normalize_mining_sites(raw.payload)
+                            site_count += await upsert_mining_sites(session, s_rows, p_rows)
+                    stats["core.mining_site & prod"] = site_count
+
+                    # 3. Mining Contracts
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(RawResponse.endpoint == "/v2/mining/contracts/", RawResponse.status_code == 200)
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    c_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload:
+                            rows = normalize_mining_contracts(raw.payload)
+                            c_count += await upsert_mining_contracts(session, rows)
+                    stats["core.mining_contract"] = c_count
+
+                    # 4. Mining Licenses
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(RawResponse.endpoint == "/v2/mining/licenses/", RawResponse.status_code == 200)
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    lic_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload:
+                            rows = normalize_mining_licenses(raw.payload)
+                            lic_count += await upsert_mining_licenses(session, rows)
+                    stats["core.mining_license"] = lic_count
+
+                # 5. Performance (Warm)
+                if tier in ("warm", "all"):
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(
+                            RawResponse.endpoint.like("/v2/mining/companies/performance/%"),
+                            RawResponse.status_code == 200,
+                        )
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    perf_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload and raw.endpoint:
+                            slug = raw.endpoint.strip("/").split("/")[-1]
+                            p_rows, pr_rows = normalize_company_performance(slug, raw.payload)
+                            perf_count += await upsert_company_performance(session, p_rows, pr_rows)
+                    stats["core.company_performance"] = perf_count
+
+                    # 6. Financials (Warm)
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(
+                            RawResponse.endpoint.like("/v2/mining/companies/financials/%"),
+                            RawResponse.status_code == 200,
+                        )
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    fin_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload and raw.endpoint:
+                            slug = raw.endpoint.strip("/").split("/")[-1]
+                            f_rows = normalize_company_financials(slug, raw.payload)
+                            fin_count += await upsert_company_financials(session, f_rows)
+                    stats["core.company_financials"] = fin_count
+
+                    # 7. Destinations (Warm)
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(
+                            RawResponse.endpoint.like("/v2/mining/sales-destination/%"), RawResponse.status_code == 200
+                        )
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    dest_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload and raw.endpoint:
+                            slug = raw.endpoint.strip("/").split("/")[-1]
+                            d_rows = normalize_sales_destinations(slug, raw.payload)
+                            dest_count += await upsert_sales_destinations(session, d_rows)
+                    stats["core.sales_destination"] = dest_count
+
+                # 8. Commodities & Market (Hot / All)
+                if tier in ("hot", "all"):
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(
+                            RawResponse.endpoint.like("/v2/mining/commodities/%/price/"), RawResponse.status_code == 200
+                        )
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    comm_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload and raw.endpoint:
+                            parts = raw.endpoint.strip("/").split("/")
+                            comm_name = parts[-2] if len(parts) >= 2 else "Coal"
+                            cp_rows = normalize_commodity_prices(comm_name, raw.payload)
+                            comm_count += await upsert_commodity_prices(session, cp_rows)
+                    stats["core.commodity_price"] = comm_count
+
+                    res = await session.execute(
+                        select(RawResponse)
+                        .where(RawResponse.endpoint == "/v2/companies/", RawResponse.status_code == 200)
+                        .order_by(desc(RawResponse.fetched_at))
+                    )
+                    idx_count = 0
+                    for raw in res.scalars().all():
+                        if raw.payload:
+                            i_rows = normalize_idx_companies(raw.payload)
+                            idx_count += await upsert_idx_companies(session, i_rows)
+                    stats["market.idx_company"] = idx_count
+
+        table = Table(title="GALI Normalization Summary (0 Credits Spent)")
+        table.add_column("Target Table", style="cyan")
+        table.add_column("Upserted Rows", style="green", justify="right")
+        for tbl, count in stats.items():
+            table.add_row(tbl, str(count))
+        console.print(table)
+        console.print("[bold green][OK] Ingestion completed successfully from local raw cache![/bold green]")
+
+    asyncio.run(_run())
+
+
+@app.command("coverage")
+def coverage_command() -> None:
+    """Print current table row counts and database data coverage."""
+    import asyncio
+
+    from sqlalchemy import text
+
+    async def _run() -> None:
+        table = Table(title="GALI Database Layer Coverage")
+        table.add_column("Schema", style="cyan")
+        table.add_column("Table Name", style="white")
+        table.add_column("Row Count", style="green", justify="right")
+
+        async with async_session() as session:
+            for schema in ("raw", "core", "market", "graph", "metrics", "ops"):
+                tables_res = await session.execute(
+                    text(
+                        f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}' ORDER BY table_name;"
+                    )
+                )
+                for (tbl_name,) in tables_res.all():
+                    cnt_res = await session.execute(text(f"SELECT count(*) FROM {schema}.{tbl_name};"))
+                    cnt = cnt_res.scalar_one_or_none() or 0
+                    table.add_row(schema, tbl_name, str(cnt))
+
+        console.print(table)
+
+    asyncio.run(_run())
+
+
 if __name__ == "__main__":
     app()

@@ -3,6 +3,30 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+## 2026-08-29 — Fase 2 (Platform Ingestion — Dagster & Alembic)
+
+**Selesai:** 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12
+
+**Detail yang terverifikasi:**
+- **2.1 (Schema & Migrasi Alembic)**: ORM SQLAlchemy 2.0 untuk schema `core`, `market`, `graph`, `metrics`, dan `ops` dibuat lengkap (32 tabel) dan dimigrasikan ke PostgreSQL via Alembic revision `0bbeeadf8dff_0002_core_market_graph_metrics.py`.
+- **2.2–2.3 (Sectors Client & Endpoints)**: `SectorsClient` v1 dengan tiered TTL cache, hard cap guard, retry logic, dan typed wrappers di `gali_core.sectors.endpoints` terverifikasi.
+- **2.4–2.5 (Dagster Resources & Raw Assets)**: `SectorsResource`, `DbResource`, `RedisResource`, dan Software-Defined Assets (`raw_mining_companies`, `raw_mining_sites`, `raw_mining_contracts`, `raw_mining_commodities`) diimplementasikan di `gali_pipeline`.
+- **2.6–2.7 (Normalizers)**: Normalizer idempoten di `gali_core.normalize` mengekstrak data dari `raw.responses` ke tabel-tabel `core` dan `market` dengan in-batch deduplication primary key.
+- **2.8–2.9 (Schedules & Observability)**: Jadwal Dagster `cold_refresh_schedule` (bulanan), `warm_refresh_schedule` (kuartalan), dan `hot_refresh_schedule` (harian 18:30 WIB) dibuat di `gali_pipeline.schedules`. `dagster definitions validate` tervalidasi bersih.
+- **2.10 (CLI)**: Perintah CLI `gali ingest --tier {cold,warm,hot,all}` dan `gali coverage` berjalan mulus.
+- **2.11 (Golden Tests)**: 4 fixture golden response di `tests/golden/` menguji seluruh fungsi normalisasi tanpa panggilan jaringan (0 kredit). 25 unit test lolos 100%.
+- **2.12 (Ingest Verification)**: Menjalankan `gali ingest --tier all` berhasil meng-upsert 366 perusahaan tambang, 143 situs tambang, 151 data produksi situs, 34 kontrak jasa, 750 izin IUP/IUPK, 36 performa tambang, 118 produk spesifikasi kalori, 9 finansial USD, 82 destinasi ekspor, dan 50 emiten IDX. Kredit terpakai: **0 kredit**.
+
+**Blocker:** Tidak ada blocker.
+
+**Kredit terpakai sesi ini:** 0 kredit (kumulatif tetap: 347 / 1000 — sisa saldo aman: 603 kredit)
+
+**Keputusan yang diambil:**
+1. **Opsi A (Focused Scope: Coal Titans)** dipilih sebagai fokus universe analisis sesuai keputusan Hard Gate Fase 1.
+2. **In-batch Primary Key Deduplication**: Mencegah `CardinalityViolationError` pada PostgreSQL `ON CONFLICT DO UPDATE` saat memproses payload dengan pagination/multi-tahun.
+
+**Next:** Lanjut ke **Fase 3 (Entity Resolution & Ownership Graph)**.
+
 ---
 
 ## 2026-08-29 — Fase 1 (Data Truth Audit — Hard Gate)

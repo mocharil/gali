@@ -1,0 +1,21 @@
+{
+  "year": 2024,
+  "data": {
+    "China": {
+      "commodity_type": "Coal",
+      "unit": "Mt",
+      "revenue_usd": 1500000000.0,
+      "percentage_of_total_revenue": 28.2,
+      "volume": 13.5,
+      "percentage_of_sales_volume": 28.4
+    },
+    "India": {
+      "commodity_type": "Coal",
+      "unit": "Mt",
+      "revenue_usd": 1200000000.0,
+      "percentage_of_total_revenue": 22.5,
+      "volume": 10.8,
+      "percentage_of_sales_volume": 22.7
+    }
+  }
+}

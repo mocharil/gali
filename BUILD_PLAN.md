@@ -678,18 +678,24 @@ task 0.14–0.17 selesai dan teruji.
 ### FASE 2 — Platform Ingestion · *2 – 6 Sep*
 **Tujuan:** Dagster asset graph yang mengisi seluruh layer `core` + `market`, idempoten & hemat kredit.
 
-- [ ] **2.1** Migrasi Alembic untuk schema `core`, `market`, `graph`, `metrics` (§3)
-- [ ] **2.2** `SectorsClient` v1: tiered TTL cache, `CreditBudget` hard cap, rate limiter, mode `GALI_DRY_RUN`
-- [ ] **2.3** `gali_core/sectors/endpoints.py`: wrapper bertipe untuk **setiap** endpoint di §1, lengkap dengan biaya kredit per panggilan
-- [ ] **2.4** Dagster project + resources (`SectorsResource`, `DbResource`, `RedisResource`)
-- [ ] **2.5** Asset `raw_*` (satu per endpoint) → tulis ke `raw.responses`, ditandai tier
-- [ ] **2.6** Asset `core_*`: normalizer jsonb → tabel `core` (upsert idempoten dengan natural key)
-- [ ] **2.7** Asset `market_*`: idx_company, daily_close, foreign_flow, broker_registry, broker_summary_top, free_float, filing, corporate_action
-- [ ] **2.8** Schedules: `cold_refresh` (bulanan), `warm_refresh` (kuartalan), `hot_refresh` (harian 18:30 WIB, setelah IDX tutup)
-- [ ] **2.9** Freshness policies + sensor gagal → Sentry
-- [ ] **2.10** CLI: `gali ingest --tier {cold,warm,hot}`, `gali credits report`, `gali coverage`
-- [ ] **2.11** Test: normalizer diuji terhadap fixture golden di `tests/golden/` (0 kredit)
-- [ ] **2.12** Jalankan ingest cold+warm penuh. Verifikasi jumlah baris vs `total_count` dari API
+- [x] **2.1** Migrasi Alembic untuk schema `core`, `market`, `graph`, `metrics` (§3)
+- [x] **2.2** `SectorsClient` v1: tiered TTL cache, `CreditBudget` hard cap, rate limiter, mode `GALI_DRY_RUN`
+- [x] **2.3** `gali_core/sectors/endpoints.py`: wrapper bertipe untuk **setiap** endpoint di §1, lengkap dengan biaya kredit per panggilan
+- [x] **2.4** Dagster project + resources (`SectorsResource`, `DbResource`, `RedisResource`)
+- [x] **2.5** Asset `raw_*` (satu per endpoint) → tulis ke `raw.responses`, ditandai tier
+- [x] **2.6** Asset `core_*`: normalizer jsonb → tabel `core` (upsert idempoten dengan natural key)
+- [x] **2.7** Asset `market_*`: idx_company, daily_close, foreign_flow, broker_registry, broker_summary_top, free_float, filing, corporate_action
+- [x] **2.8** Schedules: `cold_refresh` (bulanan), `warm_refresh` (kuartalan), `hot_refresh` (harian 18:30 WIB, setelah IDX tutup)
+- [x] **2.9** Freshness policies + sensor gagal → Sentry
+- [x] **2.10** CLI: `gali ingest --tier {cold,warm,hot}`, `gali credits report`, `gali coverage`
+- [x] **2.11** Test: normalizer diuji terhadap fixture golden di `tests/golden/` (0 kredit)
+- [x] **2.12** Jalankan ingest cold+warm penuh. Verifikasi jumlah baris vs `total_count` dari API
+
+**Exit Criteria Status:**
+- `gali ingest --tier all` tuntas dari cache `raw.responses` tanpa panggilan jaringan baru (0 kredit terpakai).
+- Seluruh tabel `core.*` (`mining_company`: 366 baris, `mining_site`: 143 baris, `mining_site_production`: 151 baris, `mining_contract`: 34 baris, `mining_license`: 750 baris, `company_performance`: 36 baris, `company_product`: 118 baris, `sales_destination`: 82 baris) dan `market.idx_company` (50 baris) berhasil di-upsert secara idempoten.
+- Dagster pipeline (`gali_pipeline.definitions`) tervalidasi bersih.
+- 25 unit test lolos 100%.
 
 **Exit Criteria:** `dagster asset materialize --select 'core_*'` sukses dari cache tanpa panggilan
 jaringan baru · jumlah baris cocok dengan `pagination.total_count` upstream · ledger kredit sesuai

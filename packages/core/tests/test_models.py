@@ -36,7 +36,6 @@ async def test_data_coverage_model() -> None:
                 metric="rli_coverage",
                 numerator=15,
                 denominator=20,
-                ratio=0.75,
                 detail={"note": "fase 1 baseline test"},
             )
             session.add(cov)

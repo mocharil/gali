@@ -1,0 +1,32 @@
+{
+  "data": [
+    {
+      "year": 2024,
+      "commodity_type": "Coal",
+      "commodity_sub_type": "Thermal Coal",
+      "commodity_stats": {
+        "mining_operation_status": "Active",
+        "unit": "Mt",
+        "production_volume": 48.11,
+        "sales_volume": 47.50,
+        "overburden_removal_volume": 210.4,
+        "strip_ratio": 4.37,
+        "resources_reserves": {
+          "measurement_year": 2024,
+          "proven_reserves_Mt": 510.0,
+          "probable_reserves_Mt": 309.0,
+          "total_reserves_Mt": 819.0,
+          "total_resources_Mt": 1250.0
+        },
+        "products": [
+          {
+            "product_name": "Envirocoal 4000",
+            "calorific_value_kcal": {"min": 3800, "max": 4200},
+            "total_moisture_pct": {"min": 35.0, "max": 40.0},
+            "ash_content_adb": {"min": 1.0, "max": 2.5}
+          }
+        ]
+      }
+    }
+  ]
+}

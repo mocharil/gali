@@ -1,0 +1,21 @@
+{
+  "count": 2,
+  "results": [
+    {
+      "slug": "pt-adaro-andalan-indonesia-tbk",
+      "name": "PT Adaro Andalan Indonesia Tbk",
+      "symbol": "AADI",
+      "company_type": "Public",
+      "key_operation": "Thermal Coal Mining",
+      "commodity_type": ["Coal"]
+    },
+    {
+      "slug": "pt-bumi-resources-tbk",
+      "name": "PT Bumi Resources Tbk",
+      "symbol": "BUMI",
+      "company_type": "Public",
+      "key_operation": "Thermal Coal Mining",
+      "commodity_type": ["Coal"]
+    }
+  ]
+}

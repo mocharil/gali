@@ -1,0 +1,17 @@
+{
+  "data": [
+    {
+      "year": 2024,
+      "symbol": "AADI.JK",
+      "assets_usd": 6800000000.0,
+      "revenue_usd": 5320000000.0,
+      "cost_of_revenue_usd": 3850000000.0,
+      "profit_usd": 1100000000.0,
+      "cost_of_revenue_breakdown": {
+        "mining_costs_usd": 1500000000.0,
+        "royalties_usd": 850000000.0,
+        "freight_costs_usd": 600000000.0
+      }
+    }
+  ]
+}
