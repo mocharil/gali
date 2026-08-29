@@ -707,15 +707,15 @@ prediksi §5 ±10% · re-run kedua menghabiskan **0 kredit**.
 **Tujuan:** menghubungkan entitas tambang fisik ke ticker IDX dengan bobot dan confidence. **Ini inti
 technical depth proyek.**
 
-- [ ] **3.1** `graph/entity_match.py`: normalizer sufiks legal + pg_trgm similarity (§4.2 langkah 4)
-- [ ] **3.2** Isi `graph.ownership_edge` dari `raw` ownership responses
-- [ ] **3.3** `graph/ownership.py`: closure eff-ownership berbobot, DFS bermemoisasi, batas depth 6, deteksi siklus
-- [ ] **3.4** Isi `graph.issuer` (universe + coverage jsonb) dan `graph.issuer_mining_link`
-- [ ] **3.5** Backfill `core.mining_license.company_slug` untuk yang null via fuzzy match + simpan `match_confidence`/`match_method`
-- [ ] **3.6** Property test: `0 < eff_own ≤ 1.0 + 1e-6` untuk semua pasangan; graf bebas siklus setelah pemutusan
-- [ ] **3.7** Unit test: kasus Adaro — `pt-adaro-andalan-indonesia-tbk` harus tertaut ke `ADRO` lewat `PT Alamtri Resources Indonesia Tbk` (15,37%)
-- [ ] **3.8** Dagster asset `graph_*` dengan dependensi ke `core_*`
-- [ ] **3.9** Regenerate `docs/DATA_COVERAGE.md` dengan angka setelah linking
+- [x] **3.1** `graph/entity_match.py`: normalizer sufiks legal + pg_trgm similarity (§4.2 langkah 4)
+- [x] **3.2** Isi `graph.ownership_edge` dari `raw` ownership responses
+- [x] **3.3** `graph/ownership.py`: closure eff-ownership berbobot, DFS bermemoisasi, batas depth 6, deteksi siklus
+- [x] **3.4** Isi `graph.issuer` (universe + coverage jsonb) dan `graph.issuer_mining_link`
+- [x] **3.5** Backfill `core.mining_license.company_slug` untuk yang null via fuzzy match + simpan `match_confidence`/`match_method`
+- [x] **3.6** Property test: `0 < eff_own ≤ 1.0 + 1e-6` untuk semua pasangan; graf bebas siklus setelah pemutusan
+- [x] **3.7** Unit test: kasus Adaro — `pt-adaro-andalan-indonesia-tbk` harus tertaut ke `ADRO` lewat `PT Alamtri Resources Indonesia Tbk` (15,37%)
+- [x] **3.8** Dagster asset `graph_*` dengan dependensi ke `core_*`
+- [x] **3.9** Regenerate `docs/DATA_COVERAGE.md` dengan angka setelah linking
 
 **Exit Criteria:** setiap emiten in-universe punya ≥1 `issuer_mining_link` dengan confidence ≥ 0,72 ·
 property test hijau · tingkat link lisensi terdokumentasi dan ditampilkan sebagai angka, bukan diklaim.

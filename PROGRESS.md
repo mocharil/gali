@@ -3,6 +3,33 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+## 2026-08-29 — Fase 3 (Entity Resolution & Ownership Graph)
+
+**Selesai:** 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9
+
+**Detail yang terverifikasi:**
+- **3.1 (Entity Normalization & Trigram Matcher)**: Modul `gali_core.graph.entity_match` mengimplementasikan pembersih sufiks legal (PT, Tbk, Persero, CV, Holdings, dsb.) dan penghitung kesamaan trigram karakter ber-padding (`calculate_trigram_similarity`). Klasifikasi ambang batas: $\ge 0.72$ (fuzzy/headline), $0.55 - 0.72$ (fuzzy_low/non-headline), $< 0.55$ (unlinked).
+- **3.2 (Ownership Edge Extraction)**: 183 sisi relasi kepemilikan orang tua (`parents`) dan anak usaha (`subsidiaries`) diekstrak dari `raw.responses` dan disimpan ke `graph.ownership_edge`.
+- **3.3 (Transitive Ownership Closure Engine)**: Mesin `OwnershipGraph` di `gali_core.graph.ownership` menghitung kepemilikan efektif kumulatif ($\text{eff\_own} = \sum \prod w$) menggunakan DFS bermemoisasi, deteksi pemutusan siklus (cycle breaker), dan batas kedalaman maksimum 6.
+- **3.4 (Issuer & Mining Link Population)**: 81 emiten diinisialisasi pada `graph.issuer` dan 384 tautan kepemilikan operasional dihasilkan pada `graph.issuer_mining_link`. Seluruh 9 emiten batubara in-universe (`AADI`, `ADMR`, `ADRO`, `BUMI`, `BYAN`, `GEMS`, `ITMG`, `PTBA`, `DSSA`) terhubung ke entitas tambang fisik dengan confidence $\ge 0.95$.
+- **3.5 (License Backfill)**: 85 izin IUP/IUPK di `core.mining_license` yang sebelumnya memiliki `company_slug` bernilai NULL berhasil ditautkan ke perusahaan tambang melalui pencocokan fuzzy trigram dengan `match_confidence` dan `match_method` tersimpan. Total lisensi tertaut menjadi 99 (13.2%).
+- **3.6 (Property Test Invariant)**: Pengujian properti `test_ownership_invariant_property` memastikan $0 < \text{eff\_own} \le 100.0$ pada seluruh jalur graf multi-parent dan pemutusan siklus berhasil tanpa infinite loop.
+- **3.7 (Adaro Golden Test)**: Pengujian golden `test_adaro_adro_aadi_linking_golden` memverifikasi `pt-adaro-andalan-indonesia-tbk` tertaut ke `ADRO` (`pt-alamtri-resources-indonesia-tbk`) dengan kepemilikan efektif tepat 15.37% (post-spin-off).
+- **3.8 (Dagster Graph Assets)**: Asset Software-Defined `graph_ownership_structure` dan `graph_license_backfill` ditambahkan ke `gali_pipeline.assets.graph` dan tervalidasi bersih via `dagster definitions validate`.
+- **3.9 (Dokumentasi Data Coverage)**: `docs/DATA_COVERAGE.md` diperbarui dengan statistik pasca-linking lengkap.
+
+**Blocker:** Tidak ada blocker.
+
+**Kredit terpakai sesi ini:** 0 kredit (kumulatif tetap: 347 / 1000 — sisa saldo aman: 603 kredit)
+
+**Keputusan yang diambil:**
+1. **Pencegahan Parallel Edge Duplication**: Menangani duplikasi edge berarah pada `OwnershipGraph.add_edge` agar bobot tidak terakumulasi ganda saat membaca sumber data berulang.
+2. **Pengecualian Lisensi < 0.55**: Menjaga integritas data metrik M3 dengan membiarkan lisensi tak bertaut sebagai `unlinked` daripada memaksakan pasangan salah.
+
+**Next:** Lanjut ke **Fase 4 (Metric Engines — M1 hingga M9)**.
+
+---
+
 ## 2026-08-29 — Fase 2 (Platform Ingestion — Dagster & Alembic)
 
 **Selesai:** 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12

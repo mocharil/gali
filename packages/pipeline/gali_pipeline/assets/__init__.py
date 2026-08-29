@@ -9,6 +9,10 @@ from gali_pipeline.assets.core import (
     core_mining_sites,
     core_sales_destinations,
 )
+from gali_pipeline.assets.graph import (
+    graph_license_backfill,
+    graph_ownership_structure,
+)
 from gali_pipeline.assets.market import market_idx_companies
 from gali_pipeline.assets.raw import (
     raw_mining_commodities,
@@ -34,8 +38,13 @@ CORE_ASSETS = [
     core_commodity_prices,
 ]
 
+GRAPH_ASSETS = [
+    graph_ownership_structure,
+    graph_license_backfill,
+]
+
 MARKET_ASSETS = [
     market_idx_companies,
 ]
 
-ALL_ASSETS = [*RAW_ASSETS, *CORE_ASSETS, *MARKET_ASSETS]
+ALL_ASSETS = [*RAW_ASSETS, *CORE_ASSETS, *GRAPH_ASSETS, *MARKET_ASSETS]

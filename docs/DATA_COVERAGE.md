@@ -132,3 +132,36 @@
 | cold | 48 | 13.8% |
 | warm | 280 | 80.7% |
 | hot | 19 | 5.5% |
+
+---
+
+## 5. Statistik Pasca-Linking Entity Resolution (Fase 3)
+
+Hasil eksekusi graf kepemilikan dan penutupan transitif (transitive closure):
+
+### A. Metrik Utama Graf Kepemilikan
+- **Total Emiten Terdaftar (`graph.issuer`)**: **81 emiten**
+- **Emiten In-Universe Fokus Batubara**: **9 emiten** (`AADI`, `ADMR`, `ADRO`, `BUMI`, `BYAN`, `GEMS`, `ITMG`, `PTBA`, `DSSA`)
+- **Total Tautan Kepemilikan Efektif (`graph.issuer_mining_link`)**: **384 tautan**
+- **Total Sisi Relasi Kepemilikan (`graph.ownership_edge`)**: **183 sisi**
+- **Persentase Emiten In-Universe Memiliki Tautan**: **100.0%** (seluruh 9 emiten memiliki $\ge 1$ tautan dengan confidence $\ge 0.95$)
+
+### B. Distribusi Entitas Terhubung per Emiten In-Universe
+| Ticker | Nama Entitas Induk | Entitas Operasional Terhubung | Contoh Entitas Utama & Kepemilikan Efektif |
+|---|---|---|---|
+| **AADI** | PT Adaro Andalan Indonesia Tbk | 13 | PT Adaro Indonesia (100%), PT Ratah Coal (100%), PT Adaro Logistics (99.83%) |
+| **ADMR** | PT Adaro Minerals Indonesia Tbk | 7 | PT Lahai Coal (100%), PT Maruwai Coal (100%), PT Kalteng Coal (100%) |
+| **ADRO** | PT Alamtri Resources Indonesia Tbk | 22 | PT Saptaindra Sejati (100%), PT Adaro Minerals Indonesia Tbk (68.50%), PT Adaro Andalan Indonesia Tbk (15.37%) |
+| **BUMI** | PT Bumi Resources Tbk | 10 | PT Arutmin Indonesia (90%), PT Pendopo Energi Batubara (84.52%), PT Kaltim Prima Coal (51%) |
+| **BYAN** | PT Bayan Resources Tbk | 19 | PT Wahana Baratama Mining (100%), PT Perkasa Inakakerta (100%), PT Teguh Sinarabadi (100%) |
+| **GEMS** | PT Golden Energy Mines Tbk | 6 | PT Borneo Indobara (100%), PT Kuansing Inti Makmur (100%), PT Barasentosa Lestari (100%) |
+| **ITMG** | PT Indo Tambangraya Megah Tbk | 11 | PT Kitadin (100%), PT Indominco Mandiri (99.99%), PT Trubaindo Coal Mining (99.99%) |
+| **PTBA** | PT Bukit Asam Tbk | 6 | PT Bukit Asam Banko (99.99%), PT Bukit Asam Prima (99.99%), PT Batubara Bukit Kendi (99.39%) |
+| **DSSA** | PT Dian Swastatika Sentosa Tbk | 7 | PT Golden Energy Mines Tbk (100%), PT Borneo Indobara (100%), PT Kuansing Inti Makmur (100%) |
+
+### C. Cakupan Tautan Lisensi Tambang (`core.mining_license`)
+- **Total Lisensi Terdaftar**: 750 lisensi
+- **Lisensi Tertaut ke `company_slug`**: **99 lisensi (13.2%)**
+  - Matched via Direct/Lookup: 14 lisensi
+  - Matched via Trigram Fuzzy Normalization ($\ge 0.72$): 85 lisensi
+- **Keterangan**: Seluruh lisensi yang tidak tertaut (< 0.55 similarity) ditandai eksplisit sebagai unlinked untuk menjaga integritas data perhitungan metrik M3 (License Cliff).

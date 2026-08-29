@@ -22,10 +22,12 @@ app = typer.Typer(
 credits_app = typer.Typer(help="Manage and inspect Sectors API credit usage.")
 db_app = typer.Typer(help="Database operations and migrations.")
 audit_app = typer.Typer(help="Phase 1 Data Truth Audit operations.")
+graph_app = typer.Typer(help="Entity resolution and ownership graph operations.")
 
 app.add_typer(credits_app, name="credits")
 app.add_typer(db_app, name="db")
 app.add_typer(audit_app, name="audit")
+app.add_typer(graph_app, name="graph")
 
 console = Console()
 
@@ -413,6 +415,42 @@ def coverage_command() -> None:
                     table.add_row(schema, tbl_name, str(cnt))
 
         console.print(table)
+
+    asyncio.run(_run())
+
+
+@graph_app.command("resolve")
+def graph_resolve_command() -> None:
+    """Build ownership graph, resolve effective ownership, and populate graph.* tables."""
+    import asyncio
+
+    from gali_core.graph.ownership import build_and_persist_ownership_graph
+
+    async def _run() -> None:
+        console.print("[bold blue]Resolving Ownership Graph and Transitive Links...[/bold blue]")
+        async with async_session() as session, session.begin():
+            edges, links, issuers = await build_and_persist_ownership_graph(session)
+
+        console.print(f"[green][OK] Ownership edges mapped: [bold]{edges}[/bold][/green]")
+        console.print(f"[green][OK] Issuer mining links resolved: [bold]{links}[/bold][/green]")
+        console.print(f"[green][OK] Issuers initialized: [bold]{issuers}[/bold][/green]")
+
+    asyncio.run(_run())
+
+
+@graph_app.command("backfill-licenses")
+def graph_backfill_licenses_command() -> None:
+    """Backfill unlinked core.mining_license rows using entity matching."""
+    import asyncio
+
+    from gali_core.graph.ownership import backfill_license_company_slugs
+
+    async def _run() -> None:
+        console.print("[bold blue]Backfilling Mining Licenses via Fuzzy Entity Matching...[/bold blue]")
+        async with async_session() as session, session.begin():
+            count = await backfill_license_company_slugs(session)
+
+        console.print(f"[green][OK] Backfilled licenses: [bold]{count}[/bold][/green]")
 
     asyncio.run(_run())
 
