@@ -18,6 +18,7 @@ from typing import Any
 @dataclass(frozen=True)
 class ContractorResult:
     """Computed M7 Contractor Risk result."""
+
     symbol: str
     contractor_hhi: float | None
     contract_cliff_12m: float | None

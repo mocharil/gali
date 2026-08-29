@@ -31,9 +31,7 @@ from gali_core.metrics.score import compute_ground_truth_scores
 
 def test_adaro_rli_golden():
     """Golden Test: Adaro (AADI) RLI must equal 17.02 ± 0.05 years (819.0 Mt / 48.11 Mt)."""
-    links = [
-        {"company_slug": "pt-adaro-andalan-indonesia-tbk", "effective_ownership_pct": 100.0}
-    ]
+    links = [{"company_slug": "pt-adaro-andalan-indonesia-tbk", "effective_ownership_pct": 100.0}]
     perf_map = {
         "pt-adaro-andalan-indonesia-tbk": {
             "total_reserves_mt": 819.0,
@@ -52,9 +50,7 @@ def test_adaro_rli_golden():
 
 def test_dssa_rli_must_be_null():
     """DSSA has no total_reserves_mt reported -> RLI MUST be NULL (no proxy imputation)."""
-    links = [
-        {"company_slug": "pt-dian-swastatika-sentosa-tbk", "effective_ownership_pct": 100.0}
-    ]
+    links = [{"company_slug": "pt-dian-swastatika-sentosa-tbk", "effective_ownership_pct": 100.0}]
     perf_map = {
         "pt-dian-swastatika-sentosa-tbk": {
             "total_reserves_mt": None,
@@ -77,9 +73,7 @@ def test_dssa_rli_must_be_null():
 
 def test_ptba_rbv_must_be_null():
     """PTBA has no revenue_usd / cost_of_revenue_usd reported -> RBV MUST be NULL."""
-    links = [
-        {"company_slug": "pt-bukit-asam-tbk", "effective_ownership_pct": 100.0}
-    ]
+    links = [{"company_slug": "pt-bukit-asam-tbk", "effective_ownership_pct": 100.0}]
     fin_map = {
         "pt-bukit-asam-tbk": {
             "revenue_usd": None,
@@ -102,9 +96,7 @@ def test_ptba_rbv_must_be_null():
 
 def test_dssa_rbv_must_be_null_due_to_null_rli():
     """DSSA has RLI=None -> RBV MUST be NULL."""
-    links = [
-        {"company_slug": "pt-dian-swastatika-sentosa-tbk", "effective_ownership_pct": 100.0}
-    ]
+    links = [{"company_slug": "pt-dian-swastatika-sentosa-tbk", "effective_ownership_pct": 100.0}]
     fin_map = {
         "pt-dian-swastatika-sentosa-tbk": {
             "revenue_usd": 3_018_000_000.0,
@@ -213,9 +205,34 @@ def test_ptba_cash_cost_must_be_null():
 def test_national_cost_curve_ranking():
     """Verify sorting and cumulative volume percentile calculations."""
     issuers = [
-        CashCostResult(symbol="B", cash_cost_per_ton_usd=50.0, realized_price_per_ton_usd=80.0, unit_margin_usd=30.0, breakeven_benchmark_price_usd=62.5, cost_curve_percentile=None, annual_volume_mt=40.0),
-        CashCostResult(symbol="A", cash_cost_per_ton_usd=20.0, realized_price_per_ton_usd=80.0, unit_margin_usd=60.0, breakeven_benchmark_price_usd=25.0, cost_curve_percentile=None, annual_volume_mt=60.0),
-        CashCostResult(symbol="C", cash_cost_per_ton_usd=None, realized_price_per_ton_usd=None, unit_margin_usd=None, breakeven_benchmark_price_usd=None, cost_curve_percentile=None, annual_volume_mt=None, is_partial=True),
+        CashCostResult(
+            symbol="B",
+            cash_cost_per_ton_usd=50.0,
+            realized_price_per_ton_usd=80.0,
+            unit_margin_usd=30.0,
+            breakeven_benchmark_price_usd=62.5,
+            cost_curve_percentile=None,
+            annual_volume_mt=40.0,
+        ),
+        CashCostResult(
+            symbol="A",
+            cash_cost_per_ton_usd=20.0,
+            realized_price_per_ton_usd=80.0,
+            unit_margin_usd=60.0,
+            breakeven_benchmark_price_usd=25.0,
+            cost_curve_percentile=None,
+            annual_volume_mt=60.0,
+        ),
+        CashCostResult(
+            symbol="C",
+            cash_cost_per_ton_usd=None,
+            realized_price_per_ton_usd=None,
+            unit_margin_usd=None,
+            breakeven_benchmark_price_usd=None,
+            cost_curve_percentile=None,
+            annual_volume_mt=None,
+            is_partial=True,
+        ),
     ]
     curve = build_national_cost_curve(issuers)
     # A should be first (cash cost 20.0), B second (cash cost 50.0), C last

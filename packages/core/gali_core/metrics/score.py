@@ -29,6 +29,7 @@ BASE_WEIGHTS: dict[str, float] = {
 @dataclass(frozen=True)
 class ScoreResult:
     """Computed M8 Ground Truth Score result for an issuer."""
+
     symbol: str
     ground_truth_score: float | None
     component_scores: dict[str, float | None]

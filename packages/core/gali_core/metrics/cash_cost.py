@@ -22,6 +22,7 @@ from typing import Any
 @dataclass(frozen=True)
 class CashCostResult:
     """Computed M4 Cash Cost result for an issuer."""
+
     symbol: str
     cash_cost_per_ton_usd: float | None
     realized_price_per_ton_usd: float | None

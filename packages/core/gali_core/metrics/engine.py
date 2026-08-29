@@ -47,6 +47,7 @@ from gali_core.metrics.score import compute_ground_truth_scores
 
 class MetricValidationError(Exception):
     """Raised when a metric run fails sanity check validation."""
+
     pass
 
 
@@ -89,16 +90,14 @@ async def run_metric_pipeline(
     # 2. Fetch active in-universe issuers (9 coal titans)
     res_issuers = await session.execute(
         select(Issuer).where(
-            Issuer.symbol.in_(['AADI', 'ADMR', 'ADRO', 'BUMI', 'BYAN', 'GEMS', 'ITMG', 'PTBA', 'DSSA'])
+            Issuer.symbol.in_(["AADI", "ADMR", "ADRO", "BUMI", "BYAN", "GEMS", "ITMG", "PTBA", "DSSA"])
         )
     )
     issuers = res_issuers.scalars().all()
     symbols = [i.symbol for i in issuers]
 
     # 3. Fetch graph links
-    res_links = await session.execute(
-        select(IssuerMiningLink).where(IssuerMiningLink.symbol.in_(symbols))
-    )
+    res_links = await session.execute(select(IssuerMiningLink).where(IssuerMiningLink.symbol.in_(symbols)))
     all_links = res_links.scalars().all()
     links_by_symbol: dict[str, list[dict[str, Any]]] = {s: [] for s in symbols}
     all_company_slugs: set[str] = set()
@@ -207,9 +206,7 @@ async def run_metric_pipeline(
             cont_map[ct.contractor_slug].append(cont_dict)
 
     # 5. Fetch market cap & foreign flows
-    res_mcap = await session.execute(
-        select(IdxCompany).where(IdxCompany.symbol.in_(symbols))
-    )
+    res_mcap = await session.execute(select(IdxCompany).where(IdxCompany.symbol.in_(symbols)))
     mcap_map: dict[str, float] = {c.symbol: float(c.market_cap_idr or 0.0) for c in res_mcap.scalars().all()}
 
     res_flows = await session.execute(
@@ -263,7 +260,9 @@ async def run_metric_pipeline(
         all_sym_lics: list[dict[str, Any]] = []
         for lnk in l_list:
             all_sym_lics.extend(lic_map.get(lnk["company_slug"], []))
-        cliff_res = compute_license_cliff(sym, all_sym_lics, as_of=today, min_confidence=ASSUMPTIONS.min_match_confidence)
+        cliff_res = compute_license_cliff(
+            sym, all_sym_lics, as_of=today, min_confidence=ASSUMPTIONS.min_match_confidence
+        )
         cliff_results[sym] = cliff_res
 
         # M4
@@ -336,9 +335,7 @@ async def run_metric_pipeline(
     div_map = {d.symbol: d for d in div_results_list}
 
     # 11. Fetch raw_response_ids for evidence mapping
-    res_raw = await session.execute(
-        select(RawResponse.id, RawResponse.endpoint).where(RawResponse.status_code == 200)
-    )
+    res_raw = await session.execute(select(RawResponse.id, RawResponse.endpoint).where(RawResponse.status_code == 200))
     raw_responses_lookup = res_raw.all()
     all_raw_ids = [r[0] for r in raw_responses_lookup]
 
@@ -360,13 +357,21 @@ async def run_metric_pipeline(
         if rli.rli_years is None:
             null_fields.append({"field": "rli_years", "reason": rli.null_reason or "missing reserves/production data"})
         if rbv.reserve_backed_value_usd is None:
-            null_fields.append({"field": "reserve_backed_value_usd", "reason": rbv.null_reason or "missing financials or RLI"})
+            null_fields.append(
+                {"field": "reserve_backed_value_usd", "reason": rbv.null_reason or "missing financials or RLI"}
+            )
         if cc.cash_cost_per_ton_usd is None:
-            null_fields.append({"field": "cash_cost_per_ton_usd", "reason": cc.null_reason or "missing cost of revenue"})
+            null_fields.append(
+                {"field": "cash_cost_per_ton_usd", "reason": cc.null_reason or "missing cost of revenue"}
+            )
         if dst.destination_hhi is None:
-            null_fields.append({"field": "destination_hhi", "reason": dst.null_reason or "no sales destination data reported"})
+            null_fields.append(
+                {"field": "destination_hhi", "reason": dst.null_reason or "no sales destination data reported"}
+            )
         if ct.contractor_hhi is None:
-            null_fields.append({"field": "contractor_hhi", "reason": ct.null_reason or "no mining contractor contracts recorded"})
+            null_fields.append(
+                {"field": "contractor_hhi", "reason": ct.null_reason or "no mining contractor contracts recorded"}
+            )
 
         field_prov = {
             "linked_operating_entities": [lnk["company_slug"] for lnk in links_by_symbol.get(sym, [])],
@@ -445,8 +450,12 @@ async def run_metric_pipeline(
 
         # Check no NaN or Inf
         for field_name in (
-            "rli_years", "reserve_backed_value_usd", "cash_cost_per_ton_usd",
-            "ground_truth_score", "license_cliff_3y", "destination_hhi"
+            "rli_years",
+            "reserve_backed_value_usd",
+            "cash_cost_per_ton_usd",
+            "ground_truth_score",
+            "license_cliff_3y",
+            "destination_hhi",
         ):
             val = getattr(r, field_name)
             if val is not None and (math.isnan(val) or math.isinf(val)):

@@ -20,6 +20,7 @@ from typing import Any
 @dataclass(frozen=True)
 class LicenseCliffResult:
     """Computed M3 License Cliff result."""
+
     symbol: str
     total_licensed_area_ha: float | None
     total_licenses_count: int
@@ -57,7 +58,8 @@ def compute_license_cliff(
     five_years = today + dt.timedelta(days=365 * 5)
 
     valid_licenses = [
-        lic for lic in licenses
+        lic
+        for lic in licenses
         if (lic.get("match_confidence") is None or float(lic.get("match_confidence") or 1.0) >= min_confidence)
     ]
 

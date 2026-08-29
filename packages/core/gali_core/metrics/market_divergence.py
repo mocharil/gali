@@ -18,6 +18,7 @@ from gali_core.metrics.score import percentile_rank_ascending
 @dataclass(frozen=True)
 class DivergenceResult:
     """Computed M9 Market Divergence result for an issuer."""
+
     symbol: str
     divergence_spread: float | None
     rbv_gap_percentile: float | None

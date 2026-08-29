@@ -17,6 +17,7 @@ from typing import Any
 @dataclass(frozen=True)
 class DestinationResult:
     """Computed M6 Destination Concentration result."""
+
     symbol: str
     destination_hhi: float | None
     top_destination: str | None

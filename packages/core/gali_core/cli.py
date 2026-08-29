@@ -517,9 +517,7 @@ def metrics_report_command() -> None:
 
     async def _run() -> None:
         async with async_session() as session:
-            pointer_res = await session.execute(
-                select(PublishedPointer).where(PublishedPointer.singleton.is_(True))
-            )
+            pointer_res = await session.execute(select(PublishedPointer).where(PublishedPointer.singleton.is_(True)))
             pointer = pointer_res.scalar_one_or_none()
             if not pointer:
                 console.print("[bold red]No published metric run found. Run `gali metrics run` first.[/bold red]")
@@ -533,7 +531,13 @@ def metrics_report_command() -> None:
             )
             rows = res.scalars().all()
 
-        console.print(Panel(f"[bold]Published Run ID:[/bold] {run_id}", title="[bold]GALI Ground Truth Leaderboard[/bold]", expand=False))
+        console.print(
+            Panel(
+                f"[bold]Published Run ID:[/bold] {run_id}",
+                title="[bold]GALI Ground Truth Leaderboard[/bold]",
+                expand=False,
+            )
+        )
 
         table = Table(title="Coal Titans Universe (M1–M9)")
         table.add_column("Symbol", style="bold cyan")
@@ -550,12 +554,12 @@ def metrics_report_command() -> None:
             is_partial = r.symbol in ("PTBA", "DSSA")
             quality_badge = "[yellow]PARSIAL[/yellow]" if is_partial else "[green]LENGKAP[/green]"
             score_str = f"{r.ground_truth_score:.1f}" if r.ground_truth_score is not None else "-"
-            
+
             conf_pct = (r.confidence.get("effective_weight", 1.0) * 100) if r.confidence else 100.0
             conf_str = f"{conf_pct:.0f}%"
 
             rli_str = f"{r.rli_years:.1f} yr" if r.rli_years is not None else "[dim]NULL[/dim]"
-            
+
             if r.reserve_backed_value_usd is not None:
                 rbv_str = f"${r.reserve_backed_value_usd / 1e9:.2f}B"
             else:
@@ -563,7 +567,7 @@ def metrics_report_command() -> None:
 
             cliff_str = f"{r.license_cliff_3y:.1f}%" if r.license_cliff_3y is not None else "-"
             cost_str = f"${r.cash_cost_per_ton_usd:.1f}/t" if r.cash_cost_per_ton_usd is not None else "[dim]NULL[/dim]"
-            
+
             top_dest = f"{r.top_destination} ({r.top_destination_pct:.0f}%)" if r.top_destination else "-"
 
             table.add_row(

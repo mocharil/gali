@@ -21,9 +21,7 @@ from gali_pipeline.resources import DbResource
         "core_mining_contracts",
     ],
 )
-def metric_run_all(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def metric_run_all(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Calculate M1-M9 metrics, enforce sanity checks, and publish Blue/Green pointer."""
 
     async def _run() -> uuid.UUID:

@@ -17,6 +17,7 @@ from typing import Any
 @dataclass
 class ScenarioShockParams:
     """Parametric shock scenario definition."""
+
     price_shock_pct: float = 0.0  # e.g. -0.20 for -20% price drop
     destination_shocks: dict[str, float] = field(default_factory=dict)  # e.g. {"China": 0.30}
     discount_rate: float = 0.12
@@ -27,6 +28,7 @@ class ScenarioShockParams:
 @dataclass(frozen=True)
 class IssuerScenarioImpact:
     """Impact of scenario shock on a single issuer."""
+
     symbol: str
     baseline_rbv_usd: float | None
     post_shock_rbv_usd: float | None
@@ -44,6 +46,7 @@ class IssuerScenarioImpact:
 @dataclass(frozen=True)
 class ScenarioSimulationResult:
     """Overall result of a parametric scenario shock simulation."""
+
     params: ScenarioShockParams
     issuer_impacts: list[IssuerScenarioImpact]
     execution_time_ms: float

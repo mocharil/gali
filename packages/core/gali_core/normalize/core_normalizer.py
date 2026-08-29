@@ -719,11 +719,7 @@ async def backfill_in_universe_site_gps(
                     values_to_update["project_name"] = proj
 
                 if values_to_update:
-                    stmt = (
-                        update(MiningSite)
-                        .where(MiningSite.slug == slug)
-                        .values(**values_to_update)
-                    )
+                    stmt = update(MiningSite).where(MiningSite.slug == slug).values(**values_to_update)
                     await session.execute(stmt)
                     if lat is not None or lon is not None:
                         updated_count += 1

@@ -18,6 +18,7 @@ from typing import Any
 @dataclass(frozen=True)
 class RLIComponent:
     """Breakdown per operating subsidiary."""
+
     company_slug: str
     effective_ownership_pct: float
     total_reserves_mt: float | None
@@ -31,6 +32,7 @@ class RLIComponent:
 @dataclass(frozen=True)
 class RLIResult:
     """Computed M1 Reserve Life Index result."""
+
     symbol: str
     rli_years: float | None
     attributable_reserves_mt: float | None
@@ -119,7 +121,14 @@ def compute_rli(
         )
 
     # If primary entity reports production but no reserves (e.g. DSSA), do not proxy from subsidiaries
-    primary_link = next((lnk for lnk in links if float(lnk.get("effective_ownership_pct", 0.0)) >= 99.0 and lnk["company_slug"].endswith("-tbk")), None)
+    primary_link = next(
+        (
+            lnk
+            for lnk in links
+            if float(lnk.get("effective_ownership_pct", 0.0)) >= 99.0 and lnk["company_slug"].endswith("-tbk")
+        ),
+        None,
+    )
     if primary_link:
         primary_perf = performance_map.get(primary_link["company_slug"], {})
         if primary_perf.get("production_volume") is not None and primary_perf.get("total_reserves_mt") is None:

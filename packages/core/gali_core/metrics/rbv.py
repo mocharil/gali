@@ -22,6 +22,7 @@ from typing import Any
 @dataclass(frozen=True)
 class RBVResult:
     """Computed M2 Reserve-Backed Value result."""
+
     symbol: str
     attributable_gross_profit_usd: float | None
     reserve_backed_value_usd: float | None

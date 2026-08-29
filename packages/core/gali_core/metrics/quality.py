@@ -18,6 +18,7 @@ from typing import Any
 @dataclass(frozen=True)
 class QualityResult:
     """Computed M5 Quality Adjustment result."""
+
     symbol: str
     weighted_cv_kcal: float | None
     benchmark_grade: str | None
@@ -98,7 +99,9 @@ def compute_quality_adjustment(
         weighted_cv_kcal=round(weighted_cv, 1) if weighted_cv is not None else None,
         benchmark_grade=grade,
         benchmark_price_usd=round(bench_price, 2),
-        realized_price_per_ton_usd=round(realized_price_per_ton_usd, 2) if realized_price_per_ton_usd is not None else None,
+        realized_price_per_ton_usd=round(realized_price_per_ton_usd, 2)
+        if realized_price_per_ton_usd is not None
+        else None,
         quality_discount_pct=round(quality_discount, 2) if quality_discount is not None else None,
         products_count=len(products),
         is_partial=False,

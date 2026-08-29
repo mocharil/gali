@@ -1,6 +1,5 @@
 """Unit Tests for Task 4.11 Scenario Studio Parametric Shock Engine."""
 
-
 from gali_core.scenario.engine import (
     ScenarioShockParams,
     simulate_scenario_shock,
