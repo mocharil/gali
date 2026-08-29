@@ -12,9 +12,7 @@ from gali_pipeline.resources import DbResource
 
 
 @asset(group_name="graph", compute_kind="graph_closure", deps=["core_mining_companies"])
-def graph_ownership_structure(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def graph_ownership_structure(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Resolve transitive ownership graph and emit graph.ownership_edge, graph.issuer, graph.issuer_mining_link."""
 
     async def _run() -> tuple[int, int, int]:
@@ -36,9 +34,7 @@ def graph_ownership_structure(
     compute_kind="fuzzy_matching",
     deps=["core_mining_licenses", "core_mining_companies"],
 )
-def graph_license_backfill(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def graph_license_backfill(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Backfill core.mining_license.company_slug using trigram fuzzy matching."""
 
     async def _run() -> int:

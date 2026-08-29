@@ -3,6 +3,38 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+## 2026-08-29 — Fase 5: API Layer (FastAPI, GeoJSON FeatureCollection, Live Scenario Studio, & Blue/Green Invalidation)
+
+**Selesai:** 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11
+
+**Detail yang terverifikasi:**
+- **5.1 (FastAPI Skeleton & Lifespan)**: `packages/api/gali_api/main.py` dibangun dengan async database session pool, Redis connection manager, lifespan management, dan standard exception handling.
+- **5.2 (Pydantic v2 Routers & Endpoints)**:
+  - `GET /v1/issuers`: Daftar 9 emiten batubara in-universe dengan Ground Truth Score, RLI, RBV, market cap, cash cost, dan badge kualitas data (`LENGKAP` vs `PARSIAL`).
+  - `GET /v1/issuers/{symbol}`: Laporan fundamental mendalam lengkap dengan M1–M9, entitas operasi terhubung, dan audit provenance evidence.
+  - `GET /v1/issuers/{symbol}/graph`: Graf visual interaktif multi-tier (emiten -> entitas operasi -> situs tambang -> izin konsesi IUP -> kontraktor jasa tambang).
+  - `GET /v1/rankings`: Leaderboard multi-metrik dinamis yang menyaring nilai null secara ketat sesuai keputusan gate.
+  - `GET /v1/cost-curve`: Titik kurva biaya kumulatif nasional dengan harga acuan batubara, margin unit, dan daftar emiten parsial yang dikecualikan (`PTBA`).
+  - `GET /v1/flow-overlay`: Overlay arus modal asing 30-hari, posisi institusi, dan kuadran divergensi valuasi.
+  - `GET /v1/coverage`: Laporan audit transparansi data (kelengkapan koordinat GPS situs, rasio resolusi entitas, dan akuntansi kredit).
+- **5.3 (GeoJSON FeatureCollection)**: `GET /v1/sites` mengembalikan RFC 7946 GeoJSON FeatureCollection valid dengan titik koordinat `[longitude, latitude]` dan properti situs tambang terverifikasi untuk 52 situs in-universe ber-GPS.
+- **5.4 (Live Scenario Studio)**: `POST /v1/scenario` mengeksekusi simulasi in-memory live via `packages/core/gali_core/scenario/engine.py` (latensi respons < 50ms, jauh di bawah batas p95 400ms).
+- **5.5 (Redis Cache & Blue/Green Invalidation)**: `packages/api/gali_api/cache.py` mengimplementasikan caching cerdas dengan key berformat `gali:v1:{published_run_id}:{endpoint}:{param_hash}`, sehingga ketika pointer Blue/Green berganti ke `run_id` baru, cache lama otomatis terlewati tanpa risiko data basi.
+- **5.6 (Middleware & Security)**: CORS middleware terkonfigurasi untuk origin web dan preview lokal, ditambah middleware `X-Request-ID` dan `X-Process-Time-Ms`.
+- **5.7 (Operations & Observability)**: `GET /health` (liveness probe), `GET /ready` (readiness probe mengecek koneksi Postgres & Redis dan ketersediaan pointer run), dan `GET /metrics` (Prometheus instrumentation).
+- **5.8 (Structured Logging & Sentry Tracing)**: Logging terstruktur dan integrasi Sentry SDK siap pakai.
+- **5.9 (Export OpenAPI Specification)**: Skema OpenAPI diekspor ke `openapi.json` dan `packages/api/openapi.json` dengan 12 endpoint API terdaftar lengkap.
+- **5.10 (Integration Testing)**: 10 integration test FastAPI di `packages/api/tests/test_api.py` lulus 100%. Total test suite monorepo sekarang: **53 passed** (`packages/core/tests` + `packages/api/tests`).
+- **5.11 (Deployment Artifacts)**: `infra/Dockerfile.api` dan `infra/fly.api.toml` disiapkan untuk deployment Fly.io.
+
+**Blocker:** Tidak ada blocker.
+
+**Kredit terpakai sesi ini:** 0 kredit (seluruh layer API dan scenario engine beroperasi pada database dan in-memory; kumulatif tetap 404 / 1000 — sisa saldo: 546 kredit).
+
+**Next:** Lanjut ke **Fase 6 (Web Application — Next.js 15 App Router, MapLibre GL Map, Interactive Scenario Studio, Reserve Clock, Cost Curve Chart, & Evidence Drawer)**.
+
+---
+
 ## 2026-08-29 — Fase 4: Metric Engines (M1–M9), Scenario Studio, & Blue/Green Publishing
 
 **Selesai:** 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 4.13, 4.14

@@ -1,0 +1,2039 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GALI \u2014 Ground-truth Analytics for Listed Issuers API",
+    "description": "Production read API and live scenario simulation engine bridging upstream Indonesian mining concession intelligence (ESDM) with listed capital market equity valuations (IDX).",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/metrics": {
+      "get": {
+        "summary": "Metrics",
+        "description": "Endpoint that serves Prometheus metrics.",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Operations & Health"
+        ],
+        "summary": "Health Check",
+        "description": "Liveness probe returning 200 OK if FastAPI process is alive.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": [
+          "Operations & Health"
+        ],
+        "summary": "Readiness Check",
+        "description": "Readiness probe checking database connectivity and published metric run availability.",
+        "operationId": "readiness_check_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/issuers": {
+      "get": {
+        "tags": [
+          "Issuers & Fundamental Analytics"
+        ],
+        "summary": "List Issuers",
+        "description": "List all in-universe issuers with summary ground truth scores, RLI, RBV, and data quality badges.",
+        "operationId": "list_issuers_v1_issuers_get",
+        "parameters": [
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by commodity (e.g. Coal)",
+              "title": "Commodity"
+            },
+            "description": "Filter by commodity (e.g. Coal)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IssuerSummary"
+                  },
+                  "title": "Response List Issuers V1 Issuers Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/issuers/{symbol}": {
+      "get": {
+        "tags": [
+          "Issuers & Fundamental Analytics"
+        ],
+        "summary": "Get Issuer Detail",
+        "description": "Retrieve full fundamental intelligence report for an issuer (M1\u2013M9, linked entities, and audit evidence).",
+        "operationId": "get_issuer_detail_v1_issuers__symbol__get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Symbol"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuerDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/issuers/{symbol}/graph": {
+      "get": {
+        "tags": [
+          "Issuers & Fundamental Analytics"
+        ],
+        "summary": "Get Issuer Graph",
+        "description": "Generate interactive node-edge graph connecting listed issuer -> operating subsidiaries -> mining sites -> licenses -> contractors.",
+        "operationId": "get_issuer_graph_v1_issuers__symbol__graph_get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Symbol"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuerGraphResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites": {
+      "get": {
+        "tags": [
+          "Mining Sites & Geospatial Map"
+        ],
+        "summary": "Get Mining Sites Geojson",
+        "description": "Retrieve verified mining concession sites as an RFC 7946 GeoJSON FeatureCollection.",
+        "operationId": "get_mining_sites_geojson_v1_sites_get",
+        "parameters": [
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by commodity (e.g. Coal)",
+              "title": "Commodity"
+            },
+            "description": "Filter by commodity (e.g. Coal)"
+          },
+          {
+            "name": "issuer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by ticker symbol (e.g. ADRO, AADI)",
+              "title": "Issuer"
+            },
+            "description": "Filter by ticker symbol (e.g. ADRO, AADI)"
+          },
+          {
+            "name": "in_universe_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Filter sites belonging to in-universe issuers",
+              "default": true,
+              "title": "In Universe Only"
+            },
+            "description": "Filter sites belonging to in-universe issuers"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoJSONFeatureCollection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rankings": {
+      "get": {
+        "tags": [
+          "Leaderboards & Rankings"
+        ],
+        "summary": "Get Metric Rankings",
+        "description": "Retrieve filtered leaderboard rankings for a specific fundamental or market metric.",
+        "operationId": "get_metric_rankings_v1_rankings_get",
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'",
+              "default": "ground_truth_score",
+              "title": "Metric"
+            },
+            "description": "Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cost-curve": {
+      "get": {
+        "tags": [
+          "National Cost Curve"
+        ],
+        "summary": "Get National Cost Curve",
+        "description": "Retrieve national cumulative cost curve curve points, unit margins, and benchmark breakevens.",
+        "operationId": "get_national_cost_curve_v1_cost_curve_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostCurveResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scenario": {
+      "post": {
+        "tags": [
+          "Scenario Studio & Live Shocks"
+        ],
+        "summary": "Run Scenario Simulation",
+        "description": "Execute live parametric macroeconomic, trade restriction, and concession shock simulations.",
+        "operationId": "run_scenario_simulation_v1_scenario_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioShockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/flow-overlay": {
+      "get": {
+        "tags": [
+          "Market Flow & Capital Overlay"
+        ],
+        "summary": "Get Flow Overlay",
+        "description": "Retrieve market capital flows, institutional positioning, and divergence spreads across universe issuers.",
+        "operationId": "get_flow_overlay_v1_flow_overlay_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowOverlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coverage": {
+      "get": {
+        "tags": [
+          "Data Truth & Coverage Audit"
+        ],
+        "summary": "Get Data Coverage Report",
+        "description": "Retrieve full audit metrics detailing database coverage, entity resolution rates, and GPS coordinates completeness.",
+        "operationId": "get_data_coverage_report_v1_coverage_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataCoverageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CostCurvePoint": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "cash_cost_per_ton_usd": {
+            "type": "number",
+            "title": "Cash Cost Per Ton Usd"
+          },
+          "annual_volume_mt": {
+            "type": "number",
+            "title": "Annual Volume Mt"
+          },
+          "cumulative_volume_mt": {
+            "type": "number",
+            "title": "Cumulative Volume Mt"
+          },
+          "cost_curve_percentile": {
+            "type": "number",
+            "title": "Cost Curve Percentile"
+          },
+          "realized_price_per_ton_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Realized Price Per Ton Usd"
+          },
+          "unit_margin_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Margin Usd"
+          },
+          "breakeven_benchmark_price_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakeven Benchmark Price Usd"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "name",
+          "cash_cost_per_ton_usd",
+          "annual_volume_mt",
+          "cumulative_volume_mt",
+          "cost_curve_percentile"
+        ],
+        "title": "CostCurvePoint"
+      },
+      "CostCurveResponse": {
+        "properties": {
+          "commodity": {
+            "type": "string",
+            "title": "Commodity",
+            "default": "Coal"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "benchmark_price_usd": {
+            "type": "number",
+            "title": "Benchmark Price Usd"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/CostCurvePoint"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "partial_issuers_excluded": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Partial Issuers Excluded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "benchmark_price_usd",
+          "points"
+        ],
+        "title": "CostCurveResponse"
+      },
+      "CoverageItem": {
+        "properties": {
+          "layer": {
+            "type": "string",
+            "title": "Layer"
+          },
+          "entity": {
+            "type": "string",
+            "title": "Entity"
+          },
+          "numerator": {
+            "type": "integer",
+            "title": "Numerator"
+          },
+          "denominator": {
+            "type": "integer",
+            "title": "Denominator"
+          },
+          "coverage_pct": {
+            "type": "number",
+            "title": "Coverage Pct"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "layer",
+          "entity",
+          "numerator",
+          "denominator",
+          "coverage_pct",
+          "description"
+        ],
+        "title": "CoverageItem"
+      },
+      "DataCoverageResponse": {
+        "properties": {
+          "gate_decision": {
+            "type": "string",
+            "title": "Gate Decision",
+            "default": "GO MENYEMPIT (Coal Titans \u2014 9 Emiten)"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "credits_used": {
+            "type": "integer",
+            "title": "Credits Used"
+          },
+          "credits_cap": {
+            "type": "integer",
+            "title": "Credits Cap",
+            "default": 1000
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageItem"
+            },
+            "type": "array",
+            "title": "Metrics"
+          },
+          "in_universe_issuers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "In Universe Issuers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "updated_at",
+          "credits_used",
+          "metrics",
+          "in_universe_issuers"
+        ],
+        "title": "DataCoverageResponse"
+      },
+      "FlowOverlayResponse": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "issuers": {
+            "items": {
+              "$ref": "#/components/schemas/IssuerFlowItem"
+            },
+            "type": "array",
+            "title": "Issuers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "as_of",
+          "issuers"
+        ],
+        "title": "FlowOverlayResponse"
+      },
+      "GeoJSONFeature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Feature",
+            "title": "Type",
+            "default": "Feature"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/GeoJSONGeometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/MiningSiteProperties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "geometry",
+          "properties"
+        ],
+        "title": "GeoJSONFeature"
+      },
+      "GeoJSONFeatureCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "FeatureCollection",
+            "title": "Type",
+            "default": "FeatureCollection"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/GeoJSONFeature"
+            },
+            "type": "array",
+            "title": "Features"
+          },
+          "total_features": {
+            "type": "integer",
+            "title": "Total Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features",
+          "total_features"
+        ],
+        "title": "GeoJSONFeatureCollection"
+      },
+      "GeoJSONGeometry": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "Point",
+            "title": "Type",
+            "default": "Point"
+          },
+          "coordinates": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Coordinates",
+            "description": "[longitude, latitude]"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coordinates"
+        ],
+        "title": "GeoJSONGeometry"
+      },
+      "GraphEdge": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "label"
+        ],
+        "title": "GraphEdge"
+      },
+      "GraphNode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "issuer",
+              "operating_company",
+              "mining_site",
+              "license",
+              "contractor"
+            ],
+            "title": "Type"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "type"
+        ],
+        "title": "GraphNode"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ok",
+            "example": "ok"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "v1.0.0"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse"
+      },
+      "IssuerDetail": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sub_sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub Sector"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "data_quality": {
+            "type": "string",
+            "title": "Data Quality"
+          },
+          "rli_years": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rli Years"
+          },
+          "implied_life_years": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Implied Life Years"
+          },
+          "reserve_life_gap_years": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reserve Life Gap Years"
+          },
+          "attributable_gross_profit_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attributable Gross Profit Usd"
+          },
+          "reserve_backed_value_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reserve Backed Value Usd"
+          },
+          "market_cap_idr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Cap Idr"
+          },
+          "market_cap_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Cap Usd"
+          },
+          "rbv_gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rbv Gap Pct"
+          },
+          "license_cliff_1y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Cliff 1Y"
+          },
+          "license_cliff_3y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Cliff 3Y"
+          },
+          "license_cliff_5y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Cliff 5Y"
+          },
+          "cnc_coverage_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cnc Coverage Pct"
+          },
+          "weighted_days_to_expiry": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Days To Expiry"
+          },
+          "cash_cost_per_ton_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cash Cost Per Ton Usd"
+          },
+          "realized_price_per_ton_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Realized Price Per Ton Usd"
+          },
+          "unit_margin_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Margin Usd"
+          },
+          "breakeven_benchmark_price_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakeven Benchmark Price Usd"
+          },
+          "cost_curve_percentile": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Curve Percentile"
+          },
+          "weighted_cv_kcal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Cv Kcal"
+          },
+          "benchmark_grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark Grade"
+          },
+          "benchmark_price_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark Price Usd"
+          },
+          "quality_discount_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Discount Pct"
+          },
+          "destination_hhi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination Hhi"
+          },
+          "top_destination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Destination"
+          },
+          "top_destination_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Destination Pct"
+          },
+          "contractor_hhi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contractor Hhi"
+          },
+          "contract_cliff_12m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Cliff 12M"
+          },
+          "ground_truth_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ground Truth Score"
+          },
+          "component_scores": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Component Scores"
+          },
+          "confidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Confidence"
+          },
+          "linked_entities": {
+            "items": {
+              "$ref": "#/components/schemas/LinkedOperatingEntity"
+            },
+            "type": "array",
+            "title": "Linked Entities"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "name",
+          "as_of",
+          "run_id",
+          "data_quality"
+        ],
+        "title": "IssuerDetail"
+      },
+      "IssuerFlowItem": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quadrant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quadrant"
+          },
+          "divergence_spread": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Divergence Spread"
+          },
+          "rbv_gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rbv Gap Pct"
+          },
+          "ground_truth_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ground Truth Score"
+          },
+          "net_foreign_flow_30d_idr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Foreign Flow 30D Idr"
+          },
+          "market_cap_idr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Cap Idr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "name",
+          "quadrant",
+          "divergence_spread",
+          "rbv_gap_pct",
+          "ground_truth_score",
+          "net_foreign_flow_30d_idr",
+          "market_cap_idr"
+        ],
+        "title": "IssuerFlowItem"
+      },
+      "IssuerGraphResponse": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            },
+            "type": "array",
+            "title": "Edges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "nodes",
+          "edges"
+        ],
+        "title": "IssuerGraphResponse"
+      },
+      "IssuerScenarioImpactSchema": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "baseline_rbv_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Rbv Usd"
+          },
+          "post_shock_rbv_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Shock Rbv Usd"
+          },
+          "delta_rbv_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Rbv Usd"
+          },
+          "delta_rbv_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Rbv Pct"
+          },
+          "baseline_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Rank"
+          },
+          "post_shock_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Shock Rank"
+          },
+          "rank_change": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Change"
+          },
+          "volume_at_risk_pct": {
+            "type": "number",
+            "title": "Volume At Risk Pct"
+          },
+          "revenue_at_risk_usd": {
+            "type": "number",
+            "title": "Revenue At Risk Usd"
+          },
+          "post_shock_gp_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Shock Gp Usd"
+          },
+          "is_partial": {
+            "type": "boolean",
+            "title": "Is Partial"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "baseline_rbv_usd",
+          "post_shock_rbv_usd",
+          "delta_rbv_usd",
+          "delta_rbv_pct",
+          "baseline_rank",
+          "post_shock_rank",
+          "rank_change",
+          "volume_at_risk_pct",
+          "revenue_at_risk_usd",
+          "post_shock_gp_usd",
+          "is_partial"
+        ],
+        "title": "IssuerScenarioImpactSchema"
+      },
+      "IssuerSummary": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sub_sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub Sector"
+          },
+          "data_quality": {
+            "type": "string",
+            "title": "Data Quality",
+            "description": "'LENGKAP' (complete) or 'PARSIAL' (partial)"
+          },
+          "ground_truth_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ground Truth Score",
+            "description": "M8 composite score (0-100)"
+          },
+          "confidence_pct": {
+            "type": "number",
+            "title": "Confidence Pct",
+            "description": "Effective weight utilized (0-100%)",
+            "default": 100.0
+          },
+          "rli_years": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rli Years",
+            "description": "M1 Reserve Life Index"
+          },
+          "reserve_backed_value_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reserve Backed Value Usd",
+            "description": "M2 Reserve-Backed Value in USD"
+          },
+          "market_cap_idr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Cap Idr"
+          },
+          "market_cap_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Cap Usd"
+          },
+          "rbv_gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rbv Gap Pct",
+            "description": "M2 valuation premia / discount %"
+          },
+          "license_cliff_3y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Cliff 3Y",
+            "description": "M3 3-year concession expiry %"
+          },
+          "cash_cost_per_ton_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cash Cost Per Ton Usd",
+            "description": "M4 unit cash cost FOB"
+          },
+          "top_destination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Destination",
+            "description": "M6 top export market"
+          },
+          "top_destination_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Destination Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "name",
+          "data_quality"
+        ],
+        "title": "IssuerSummary"
+      },
+      "LinkedOperatingEntity": {
+        "properties": {
+          "company_slug": {
+            "type": "string",
+            "title": "Company Slug"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "effective_ownership_pct": {
+            "type": "number",
+            "title": "Effective Ownership Pct"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          }
+        },
+        "type": "object",
+        "required": [
+          "company_slug",
+          "effective_ownership_pct"
+        ],
+        "title": "LinkedOperatingEntity"
+      },
+      "MiningSiteProperties": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "commodity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commodity"
+          },
+          "company_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Slug"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "issuer_symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer Symbol"
+          },
+          "province": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Province"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "project_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Name"
+          },
+          "production_volume_mt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Production Volume Mt"
+          },
+          "is_in_universe": {
+            "type": "boolean",
+            "title": "Is In Universe",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "MiningSiteProperties"
+      },
+      "RankingItem": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "data_quality": {
+            "type": "string",
+            "title": "Data Quality"
+          },
+          "metric_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Value"
+          },
+          "formatted_value": {
+            "type": "string",
+            "title": "Formatted Value"
+          },
+          "confidence_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "symbol",
+          "name",
+          "data_quality",
+          "metric_value",
+          "formatted_value"
+        ],
+        "title": "RankingItem"
+      },
+      "RankingsResponse": {
+        "properties": {
+          "metric": {
+            "type": "string",
+            "title": "Metric"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RankingItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric",
+          "run_id",
+          "items"
+        ],
+        "title": "RankingsResponse"
+      },
+      "ReadyResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ready",
+            "example": "ready"
+          },
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "redis": {
+            "type": "boolean",
+            "title": "Redis"
+          },
+          "published_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published Run Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "database",
+          "redis"
+        ],
+        "title": "ReadyResponse"
+      },
+      "ScenarioResponse": {
+        "properties": {
+          "params": {
+            "$ref": "#/components/schemas/ScenarioShockRequest"
+          },
+          "impacts": {
+            "items": {
+              "$ref": "#/components/schemas/IssuerScenarioImpactSchema"
+            },
+            "type": "array",
+            "title": "Impacts"
+          },
+          "execution_time_ms": {
+            "type": "number",
+            "title": "Execution Time Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "params",
+          "impacts",
+          "execution_time_ms"
+        ],
+        "title": "ScenarioResponse"
+      },
+      "ScenarioShockRequest": {
+        "properties": {
+          "price_shock_pct": {
+            "type": "number",
+            "title": "Price Shock Pct",
+            "description": "Percentage shock to commodity benchmark price (-1.0 to 2.0)",
+            "default": 0.0,
+            "example": -0.2
+          },
+          "destination_shocks": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Destination Shocks",
+            "description": "Country-specific volume demand shocks (0.0 to 1.0 reduction)",
+            "example": {
+              "China": 0.3,
+              "India": 0.1
+            }
+          },
+          "discount_rate": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": 0.01,
+            "title": "Discount Rate",
+            "description": "Real discount rate hurdle for annuity valuation",
+            "default": 0.12,
+            "example": 0.12
+          },
+          "variable_cost_share": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Variable Cost Share",
+            "description": "Proportion of cash cost that scales with production volume",
+            "default": 0.65,
+            "example": 0.65
+          },
+          "license_cliff_expiry_shock": {
+            "type": "boolean",
+            "title": "License Cliff Expiry Shock",
+            "description": "If true, assumes 3-year expiring concession areas fail renewal",
+            "default": false,
+            "example": false
+          }
+        },
+        "type": "object",
+        "title": "ScenarioShockRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

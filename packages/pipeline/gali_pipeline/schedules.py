@@ -37,8 +37,7 @@ warm_schedule = ScheduleDefinition(
 # Hot tier refresh job (daily at 18:30 WIB / 11:30 UTC after IDX close)
 hot_job = define_asset_job(
     name="hot_refresh_job",
-    selection=AssetSelection.groups("market")
-    | AssetSelection.assets("core_commodity_prices"),
+    selection=AssetSelection.groups("market") | AssetSelection.assets("core_commodity_prices"),
     description="Daily refresh after IDX market close.",
 )
 

@@ -20,9 +20,7 @@ class DbResource(ConfigurableResource):
 class SectorsResource(ConfigurableResource):
     """Provides SectorsClient instance with caching and rate limiting."""
 
-    dry_run: bool = Field(
-        default=False, description="Whether to run in offline dry-run mode."
-    )
+    dry_run: bool = Field(default=False, description="Whether to run in offline dry-run mode.")
 
     def get_client(self) -> SectorsClient:
         settings = get_settings()
@@ -34,6 +32,4 @@ class SectorsResource(ConfigurableResource):
 class RedisResource(ConfigurableResource):
     """Provides Redis connection parameters."""
 
-    redis_url: str = Field(
-        default="redis://localhost:6379/0", description="Redis connection URL."
-    )
+    redis_url: str = Field(default="redis://localhost:6379/0", description="Redis connection URL.")

@@ -14,9 +14,7 @@ from gali_pipeline.resources import DbResource
 
 
 @asset(group_name="market", compute_kind="sql_upsert")
-def market_idx_companies(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def market_idx_companies(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize raw company screener responses into market.idx_company."""
 
     async def _run() -> int:

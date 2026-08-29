@@ -30,9 +30,7 @@ from gali_pipeline.resources import DbResource
 
 
 @asset(group_name="core", compute_kind="sql_upsert", deps=["raw_mining_companies"])
-def core_mining_companies(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_mining_companies(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw mining companies to core.mining_company."""
 
     async def _run() -> int:
@@ -64,9 +62,7 @@ def core_mining_companies(
     compute_kind="sql_upsert",
     deps=["raw_mining_sites", "core_mining_companies"],
 )
-def core_mining_sites(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_mining_sites(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw mining sites to core.mining_site."""
 
     async def _run() -> int:
@@ -97,9 +93,7 @@ def core_mining_sites(
     compute_kind="sql_upsert",
     deps=["raw_mining_contracts", "core_mining_companies"],
 )
-def core_mining_contracts(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_mining_contracts(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw mining contracts to core.mining_contract."""
 
     async def _run() -> int:
@@ -126,9 +120,7 @@ def core_mining_contracts(
 
 
 @asset(group_name="core", compute_kind="sql_upsert", deps=["core_mining_companies"])
-def core_company_performance(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_company_performance(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw company performance to core.company_performance."""
 
     async def _run() -> int:
@@ -147,12 +139,8 @@ def core_company_performance(
                 if raw.payload and raw.endpoint:
                     # Extract company slug from endpoint URL
                     slug = raw.endpoint.strip("/").split("/")[-1]
-                    perf_rows, prod_rows = normalize_company_performance(
-                        slug, raw.payload
-                    )
-                    count = await upsert_company_performance(
-                        session, perf_rows, prod_rows
-                    )
+                    perf_rows, prod_rows = normalize_company_performance(slug, raw.payload)
+                    count = await upsert_company_performance(session, perf_rows, prod_rows)
                     total_upserted += count
         return total_upserted
 
@@ -161,9 +149,7 @@ def core_company_performance(
 
 
 @asset(group_name="core", compute_kind="sql_upsert", deps=["core_mining_companies"])
-def core_company_financials(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_company_financials(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw company financials to core.company_financials."""
 
     async def _run() -> int:
@@ -191,9 +177,7 @@ def core_company_financials(
 
 
 @asset(group_name="core", compute_kind="sql_upsert", deps=["core_mining_companies"])
-def core_sales_destinations(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_sales_destinations(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw sales destination to core.sales_destination."""
 
     async def _run() -> int:
@@ -221,9 +205,7 @@ def core_sales_destinations(
 
 
 @asset(group_name="core", compute_kind="sql_upsert", deps=["raw_mining_commodities"])
-def core_commodity_prices(
-    context: AssetExecutionContext, db: DbResource
-) -> MaterializeResult:
+def core_commodity_prices(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw commodity prices to core.commodity_price."""
 
     async def _run() -> int:

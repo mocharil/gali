@@ -804,17 +804,17 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 ### FASE 5 — API Layer · *15 – 17 Sep*
 **Tujuan:** FastAPI produksi yang melayani seluruh surface di §4.3.
 
-- [ ] **5.1** Skeleton FastAPI + async SQLAlchemy session + lifespan (pool DB, klien Redis)
-- [ ] **5.2** Semua router GET di §4.3 dengan Pydantic v2 response model
-- [ ] **5.3** `GET /v1/sites` mengembalikan **GeoJSON FeatureCollection** yang valid (uji dengan geojsonlint)
-- [ ] **5.4** `POST /v1/scenario` — compute live via `scenario/engine.py`, target p95 < 400 ms
-- [ ] **5.5** Cache Redis + stampede lock; key menyertakan `published_pointer.run_id` (invalidasi otomatis saat run baru)
-- [ ] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web
-- [ ] **5.7** `/health`, `/ready` (cek DB+Redis), `/metrics` (Prometheus)
-- [ ] **5.8** structlog + request-id + integrasi Sentry
-- [ ] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
-- [ ] **5.10** pytest integration test terhadap Postgres ephemeral (testcontainers atau service CI)
-- [ ] **5.11** `infra/Dockerfile.api` + `fly.api.toml`; deploy ke Fly.io; `/health` hijau di publik
+- [x] **5.1** Skeleton FastAPI + async SQLAlchemy session + lifespan (pool DB, klien Redis)
+- [x] **5.2** Semua router GET di §4.3 dengan Pydantic v2 response model
+- [x] **5.3** `GET /v1/sites` mengembalikan **GeoJSON FeatureCollection** yang valid (uji dengan geojsonlint)
+- [x] **5.4** `POST /v1/scenario` — compute live via `scenario/engine.py`, target p95 < 400 ms
+- [x] **5.5** Cache Redis + stampede lock; key menyertakan `published_pointer.run_id` (invalidasi otomatis saat run baru)
+- [x] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web
+- [x] **5.7** `/health`, `/ready` (cek DB+Redis), `/metrics` (Prometheus)
+- [x] **5.8** structlog + request-id + integrasi Sentry
+- [x] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
+- [x] **5.10** pytest integration test terhadap Postgres ephemeral (testcontainers atau service CI)
+- [x] **5.11** `infra/Dockerfile.api` + `fly.api.toml`; deploy ke Fly.io; `/health` hijau di publik
 
 **Exit Criteria:** API ter-deploy publik · `/v1/issuers/ADRO` mengembalikan laporan lengkap ·
 `POST /v1/scenario` mengubah ranking sesuai shock · OpenAPI ter-generate · p95 < 400 ms pada load test.

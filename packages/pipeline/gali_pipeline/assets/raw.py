@@ -8,9 +8,7 @@ from gali_pipeline.resources import SectorsResource
 
 
 @asset(group_name="raw", compute_kind="sectors_api")
-def raw_mining_companies(
-    context: AssetExecutionContext, sectors: SectorsResource
-) -> MaterializeResult:
+def raw_mining_companies(context: AssetExecutionContext, sectors: SectorsResource) -> MaterializeResult:
     """Fetch and cache all mining companies from /v2/mining/companies/."""
 
     async def _fetch() -> int:
@@ -27,19 +25,11 @@ def raw_mining_companies(
                     credit_cost=1,
                     run_id="dagster_ingest",
                 )
-                items = (
-                    res.get("results", [])
-                    if isinstance(res, dict)
-                    else (res if isinstance(res, list) else [])
-                )
+                items = res.get("results", []) if isinstance(res, dict) else (res if isinstance(res, list) else [])
                 if not items:
                     break
                 total += len(items)
-                has_next = (
-                    res.get("pagination", {}).get("has_next", False)
-                    if isinstance(res, dict)
-                    else False
-                )
+                has_next = res.get("pagination", {}).get("has_next", False) if isinstance(res, dict) else False
                 if not has_next or len(items) < limit:
                     break
                 offset += limit
@@ -52,9 +42,7 @@ def raw_mining_companies(
 
 
 @asset(group_name="raw", compute_kind="sectors_api")
-def raw_mining_sites(
-    context: AssetExecutionContext, sectors: SectorsResource
-) -> MaterializeResult:
+def raw_mining_sites(context: AssetExecutionContext, sectors: SectorsResource) -> MaterializeResult:
     """Fetch and cache all mining sites from /v2/mining/sites/."""
 
     async def _fetch() -> int:
@@ -71,19 +59,11 @@ def raw_mining_sites(
                     credit_cost=1,
                     run_id="dagster_ingest",
                 )
-                items = (
-                    res.get("results", [])
-                    if isinstance(res, dict)
-                    else (res if isinstance(res, list) else [])
-                )
+                items = res.get("results", []) if isinstance(res, dict) else (res if isinstance(res, list) else [])
                 if not items:
                     break
                 total += len(items)
-                has_next = (
-                    res.get("pagination", {}).get("has_next", False)
-                    if isinstance(res, dict)
-                    else False
-                )
+                has_next = res.get("pagination", {}).get("has_next", False) if isinstance(res, dict) else False
                 if not has_next or len(items) < limit:
                     break
                 offset += limit
@@ -96,9 +76,7 @@ def raw_mining_sites(
 
 
 @asset(group_name="raw", compute_kind="sectors_api")
-def raw_mining_contracts(
-    context: AssetExecutionContext, sectors: SectorsResource
-) -> MaterializeResult:
+def raw_mining_contracts(context: AssetExecutionContext, sectors: SectorsResource) -> MaterializeResult:
     """Fetch and cache all mining contracts from /v2/mining/contracts/."""
 
     async def _fetch() -> int:
@@ -110,11 +88,7 @@ def raw_mining_contracts(
                 credit_cost=1,
                 run_id="dagster_ingest",
             )
-            items = (
-                res
-                if isinstance(res, list)
-                else (res.get("results", []) if isinstance(res, dict) else [])
-            )
+            items = res if isinstance(res, list) else (res.get("results", []) if isinstance(res, dict) else [])
             return len(items)
         finally:
             await client.close()
@@ -124,9 +98,7 @@ def raw_mining_contracts(
 
 
 @asset(group_name="raw", compute_kind="sectors_api")
-def raw_mining_commodities(
-    context: AssetExecutionContext, sectors: SectorsResource
-) -> MaterializeResult:
+def raw_mining_commodities(context: AssetExecutionContext, sectors: SectorsResource) -> MaterializeResult:
     """Fetch and cache commodities and prices."""
 
     async def _fetch() -> int:
@@ -138,11 +110,7 @@ def raw_mining_commodities(
                 credit_cost=1,
                 run_id="dagster_ingest",
             )
-            items = (
-                res
-                if isinstance(res, list)
-                else (res.get("results", []) if isinstance(res, dict) else [])
-            )
+            items = res if isinstance(res, list) else (res.get("results", []) if isinstance(res, dict) else [])
             return len(items)
         finally:
             await client.close()
