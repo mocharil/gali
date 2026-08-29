@@ -3,6 +3,39 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+
+## 2026-08-29 — Review Koordinator: Bug Scenario Studio & Koreksi Status Deploy
+
+**Konteks:** Review independen atas Fase 5 (API Layer) sebelum membuka Fase 6. API dijalankan
+langsung secara lokal (bukan cuma membaca laporan) untuk verifikasi nyata.
+
+**Yang terverifikasi solid:** `/health`, `/ready`, `GET /v1/issuers/{symbol}`, `GET /v1/sites`
+(GeoJSON valid, RFC 7946, 52 situs dengan koordinat nyata di Kalimantan Timur/Selatan) semuanya
+berfungsi. Null-handling PTBA/DSSA benar di level API (`rli_years=null`, `reserve_backed_value_usd=null`
+untuk DSSA, sesuai aturan). OpenAPI 12 endpoint valid. 53 test hijau, ruff+mypy bersih. **Proses kerja
+membaik dari sesi sebelumnya**: kali ini benar-benar commit + push + CI hijau sebelum lapor selesai.
+
+**Bug ditemukan:** `POST /v1/scenario` dengan body kosong (`{}`, tanpa shock apa pun) menghasilkan
+penurunan RBV 28–100% di seluruh emiten — seharusnya delta = 0 kalau tidak ada shock. Akar masalah:
+`baseline_rbv` memakai `attributable_gross_profit_usd` (agregat lintas anak usaha berbobot kepemilikan,
+untuk ADRO = $1.495M), sementara logika post-shock di `scenario/engine.py` menghitung ulang gross
+profit dari `revenue_usd − cost_of_revenue_usd` satu baris `company_financials` (ADRO = $874M) —
+metodologi berbeda menghasilkan angka berbeda, independen dari shock yang sebenarnya diminta. Detail
+lengkap + perbaikan yang diminta ada di `BUILD_PLAN.md` task **5.12** (baru).
+
+**Koreksi status lain:** task 5.11 (deploy Fly.io) dipecah jadi 5.11a (artefak, selesai) dan 5.11b
+(deployment publik sungguhan, **belum** — diblokir oleh task 0.8 yang masih tanggung jawab Aril).
+Narasi detail di entri Fase 5 sebelumnya sebenarnya sudah jujur soal ini ("Deployment Artifacts... untuk
+deployment Fly.io"), hanya checkbox ringkasannya yang tidak akurat.
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 404 / 1000)
+
+**Keputusan:** Perbaiki 5.12 (bug scenario) sebelum Fase 6 task 6.8 (Scenario Studio UI) mulai —
+kalau tidak, fitur andalan Fase 6 akan menampilkan angka yang salah secara visual saat direkam untuk
+video. Task 5.11b (deploy publik) ditunda, bergantung pada Aril menyelesaikan task 0.8 (provisioning
+Neon + Upstash). Fase 6 boleh mulai dikerjakan terhadap API lokal sambil menunggu itu.
+
+---
 ## 2026-08-29 — Fase 5: API Layer (FastAPI, GeoJSON FeatureCollection, Live Scenario Studio, & Blue/Green Invalidation)
 
 **Selesai:** 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11

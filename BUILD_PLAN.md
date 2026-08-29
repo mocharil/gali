@@ -814,10 +814,49 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 - [x] **5.8** structlog + request-id + integrasi Sentry
 - [x] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
 - [x] **5.10** pytest integration test terhadap Postgres ephemeral (testcontainers atau service CI)
-- [x] **5.11** `infra/Dockerfile.api` + `fly.api.toml`; deploy ke Fly.io; `/health` hijau di publik
+- [x] **5.11a** `infra/Dockerfile.api` + `fly.api.toml` disiapkan (artefak deployment ada).
+- [ ] **5.11b** Deploy sungguhan ke Fly.io + `/health` hijau di URL publik. **Diblokir oleh task 0.8**
+      (provisioning Neon + Upstash) yang belum dikerjakan Aril — `.env` masih menunjuk ke Postgres/Redis
+      Docker lokal. Ini task manusia, bukan sesuatu yang bisa diselesaikan agent sendirian (butuh akun
+      Fly.io + kredensial). **Catatan koreksi:** sesi sebelumnya mencentang task 5.11 gabungan ini
+      sebagai selesai padahal bagian deployment publik belum terjadi — dipecah jadi 5.11a/5.11b supaya
+      status sebenarnya terlihat jelas.
+
+- [ ] **5.12** **Perbaiki bug Scenario Studio (prioritas tinggi, sebelum Fase 6 task 6.8).**
+      `simulate_scenario_shock()` harus memakai basis profit yang SAMA untuk baseline maupun
+      post-shock — yaitu `attributable_gross_profit_usd` yang sudah dihitung benar oleh `metrics/rbv.py`
+      (§4.1 M2), bukan menghitung ulang dari `revenue_usd`/`cost_of_revenue_usd` satu baris
+      `company_financials`. Terapkan shock sebagai penyesuaian *relatif* terhadap `attributable_gross_profit_usd`
+      itu sendiri (mis. skala proporsional berdasarkan `price_shock_pct` dan `vol_at_risk_pct`), bukan
+      derivasi dari sumber data yang berbeda.
+      **Wajib tambah regression test invariant:** dengan `ScenarioShockParams()` default (semua shock
+      nol), `post_shock_rbv_usd` HARUS sama persis dengan `baseline_rbv_usd` untuk setiap emiten
+      (toleransi floating point). Perbaiki juga fixture di `test_scenario.py` yang saat ini salah
+      memakai `revenue-cost` sebagai pengganti `attributable_gross_profit_usd` — pakai angka
+      `attributable_gross_profit_usd` yang benar (ambil dari `metrics.issuer_metrics` nyata via query,
+      seperti test golden Adaro di Fase 3–4).
 
 **Exit Criteria:** API ter-deploy publik · `/v1/issuers/ADRO` mengembalikan laporan lengkap ·
-`POST /v1/scenario` mengubah ranking sesuai shock · OpenAPI ter-generate · p95 < 400 ms pada load test.
+`POST /v1/scenario` mengubah ranking **secara benar** sesuai shock · OpenAPI ter-generate ·
+p95 < 400 ms pada load test.
+
+> **Status per 29 Ags 2026 (terverifikasi independen, API dijalankan langsung):** `/health`, `/ready`,
+> `GET /v1/issuers/{symbol}`, `GET /v1/sites` (GeoJSON valid, 52 situs, koordinat nyata Kalimantan)
+> semuanya berfungsi dan diuji nyata — bukan cuma dipercaya dari laporan. Null-handling PTBA/DSSA
+> benar di level API. OpenAPI 12 endpoint, 53 test hijau, commit+push+CI hijau (proses membaik dari
+> sesi sebelumnya).
+>
+> **Tapi ditemukan bug nyata di `POST /v1/scenario`:** dengan body request kosong (`{}`, tanpa shock
+> apa pun), RBV tetap turun 28–100% di seluruh emiten. Akar masalah: `baseline_rbv` memakai
+> `attributable_gross_profit_usd` (agregat lintas anak usaha berbobot kepemilikan, sesuai §4.1 M2 —
+> untuk ADRO = $1.495M), sementara `post_shock_rbv` di `scenario/engine.py` menghitung ulang gross
+> profit dari `revenue_usd − cost_of_revenue_usd` satu baris `core.company_financials` ($874M untuk
+> ADRO) — angka yang sama sekali berbeda karena hanya mencakup satu entitas, bukan seluruh pohon anak
+> usaha. Baseline dan post-shock dihitung dengan metodologi berbeda, sehingga delta yang muncul adalah
+> artefak perbedaan metode, bukan dampak skenario sungguhan. Ini persis pelanggaran prinsip §2.1 butir
+> 4 ("satu implementasi matematika, tidak boleh diduplikasi"). Test yang ada (`test_scenario.py`) tidak
+> menangkap ini karena fixture-nya memakai `revenue-cost` sebagai pengganti `attributable_gross_profit_usd`,
+> menutupi ketidakcocokan. **Exit Criteria BELUM terpenuhi** — lihat task 5.12 (baru) di bawah.
 
 ---
 
