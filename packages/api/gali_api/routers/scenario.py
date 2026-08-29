@@ -60,10 +60,6 @@ async def run_scenario_simulation(
                 "symbol": m.symbol,
                 "rli_years": m.rli_years,
                 "attributable_gross_profit_usd": m.attributable_gross_profit_usd,
-                "revenue_usd": None,  # Will fallback to base_gp
-                "cost_of_revenue_usd": (m.cash_cost_per_ton_usd * (m.rli_years or 1.0) * 1e6)
-                if m.cash_cost_per_ton_usd
-                else 0.0,
                 "market_cap_usd": m.market_cap_usd,
                 "destinations": symbol_dests.get(m.symbol, []),
                 "license_cliff_3y": m.license_cliff_3y,

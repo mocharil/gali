@@ -165,6 +165,28 @@ async def test_get_cost_curve():
 
 
 @pytest.mark.anyio
+async def test_post_scenario_empty_body_invariant():
+    """Task 5.12 API Invariant: Verify POST /v1/scenario with empty body produces exactly 0 delta on all complete issuers."""
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        resp = await client.post("/v1/scenario", json={})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["impacts"]) == 9
+
+        for imp in data["impacts"]:
+            if imp["is_partial"]:
+                assert imp["baseline_rbv_usd"] is None
+                assert imp["post_shock_rbv_usd"] is None
+            else:
+                assert imp["baseline_rbv_usd"] is not None
+                assert imp["post_shock_rbv_usd"] is not None
+                assert imp["post_shock_rbv_usd"] == imp["baseline_rbv_usd"]
+                assert imp["delta_rbv_usd"] == 0.0
+                assert imp["delta_rbv_pct"] == 0.0
+                assert imp["rank_change"] == 0
+
+
+@pytest.mark.anyio
 async def test_post_scenario_simulation():
     """Verify POST /v1/scenario executes live parametric shocks and returns pre/post valuations."""
     payload = {

@@ -1,4 +1,6 @@
-"""Unit Tests for Task 4.11 Scenario Studio Parametric Shock Engine."""
+"""Unit Tests for Task 4.11 / 5.12 Scenario Studio Parametric Shock Engine."""
+
+import math
 
 from gali_core.scenario.engine import (
     ScenarioShockParams,
@@ -6,15 +8,96 @@ from gali_core.scenario.engine import (
 )
 
 
+def test_scenario_zero_shock_invariant():
+    """Task 5.12 Regression Invariant: With zero shocks, post_shock_rbv_usd MUST equal baseline_rbv_usd."""
+    issuers = [
+        {
+            "symbol": "ADRO",
+            "rli_years": 16.24,
+            "attributable_gross_profit_usd": 1_495_353_919.0,
+            "destinations": [
+                {"country": "China", "pct_of_sales_volume": 30.0},
+                {"country": "Japan", "pct_of_sales_volume": 56.0},
+            ],
+            "license_cliff_3y": 0.0,
+        },
+        {
+            "symbol": "BYAN",
+            "rli_years": 40.22,
+            "attributable_gross_profit_usd": 1_332_570_000.0,
+            "destinations": [
+                {"country": "Philippines", "pct_of_sales_volume": 30.0},
+                {"country": "China", "pct_of_sales_volume": 20.0},
+            ],
+            "license_cliff_3y": 0.0,
+        },
+        {
+            "symbol": "AADI",
+            "rli_years": 17.02,
+            "attributable_gross_profit_usd": 1_466_370_000.0,
+            "destinations": [{"country": "Indonesia", "pct_of_sales_volume": 25.0}],
+            "license_cliff_3y": 0.0,
+        },
+        {
+            "symbol": "BUMI",
+            "rli_years": 31.51,
+            "attributable_gross_profit_usd": 169_610_000.0,
+            "destinations": [{"country": "Indonesia", "pct_of_sales_volume": 30.0}],
+            "license_cliff_3y": 0.0,
+        },
+        {
+            "symbol": "GEMS",
+            "rli_years": 17.74,
+            "attributable_gross_profit_usd": 1_104_060_000.0,
+            "destinations": [{"country": "China", "pct_of_sales_volume": 40.0}],
+            "license_cliff_3y": 100.0,
+        },
+        {
+            "symbol": "PTBA",
+            "rli_years": 67.77,
+            "attributable_gross_profit_usd": None,  # Partial data
+            "destinations": [],
+            "license_cliff_3y": 0.0,
+        },
+        {
+            "symbol": "DSSA",
+            "rli_years": None,  # Partial data (missing reserves)
+            "attributable_gross_profit_usd": 2_332_670_000.0,
+            "destinations": [],
+            "license_cliff_3y": 100.0,
+        },
+    ]
+
+    # Zero shock params (default)
+    params = ScenarioShockParams()
+
+    res = simulate_scenario_shock(issuers, params)
+    assert len(res.issuer_impacts) == len(issuers)
+
+    for imp in res.issuer_impacts:
+        if imp.is_partial:
+            assert imp.baseline_rbv_usd is None
+            assert imp.post_shock_rbv_usd is None
+            assert imp.delta_rbv_usd is None
+        else:
+            assert imp.baseline_rbv_usd is not None
+            assert imp.post_shock_rbv_usd is not None
+            # Must be exactly equal within roundoff
+            assert math.isclose(imp.post_shock_rbv_usd, imp.baseline_rbv_usd, rel_tol=1e-4)
+            assert imp.delta_rbv_usd == 0.0
+            assert imp.delta_rbv_pct == 0.0
+            assert imp.rank_change == 0
+            assert imp.volume_at_risk_pct == 0.0
+            assert imp.revenue_at_risk_usd == 0.0
+
+
 def test_scenario_price_and_destination_shock():
     """Verify parametric price shock and destination reduction impact on RBV and ranks."""
     issuers = [
         {
             "symbol": "ADRO",
-            "rli_years": 16.2,
-            "attributable_gross_profit_usd": 874_310_000.0,
-            "revenue_usd": 2_079_000_000.0,
-            "cost_of_revenue_usd": 1_204_690_000.0,
+            "rli_years": 16.24,
+            "attributable_gross_profit_usd": 1_495_353_919.0,
             "destinations": [
                 {"country": "China", "pct_of_sales_volume": 30.0},
                 {"country": "Japan", "pct_of_sales_volume": 56.0},
@@ -24,10 +107,8 @@ def test_scenario_price_and_destination_shock():
         },
         {
             "symbol": "BYAN",
-            "rli_years": 40.2,
+            "rli_years": 40.22,
             "attributable_gross_profit_usd": 1_332_570_000.0,
-            "revenue_usd": 3_446_000_000.0,
-            "cost_of_revenue_usd": 2_113_430_000.0,
             "destinations": [
                 {"country": "Philippines", "pct_of_sales_volume": 30.0},
                 {"country": "China", "pct_of_sales_volume": 20.0},
@@ -36,10 +117,8 @@ def test_scenario_price_and_destination_shock():
         },
         {
             "symbol": "PTBA",
-            "rli_years": 67.8,
+            "rli_years": 67.77,
             "attributable_gross_profit_usd": None,  # Partial data
-            "revenue_usd": None,
-            "cost_of_revenue_usd": None,
             "destinations": [],
             "license_cliff_3y": 0.0,
         },

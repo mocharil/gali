@@ -3,6 +3,24 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+## 2026-08-29 — Perbaikan Bug Scenario Studio (Task 5.12) & Regression Invariant
+
+**Selesai:** 5.12
+
+**Detail yang terverifikasi:**
+- **Penyelarasan Basis Profit (Task 5.12)**: `packages/core/gali_core/scenario/engine.py::simulate_scenario_shock()` diperbaiki agar menggunakan basis laba kotor yang **konsisten** (`attributable_gross_profit_usd` dari §4.1 M2) untuk kalkulasi baseline maupun post-shock. Shock parameter (harga acuan komoditas, volume ekspor per negara, dan shock perpanjangan izin IUP) diterapkan secara murni relatif terhadap basis ini, bukan derivasi dari entitas finansial tunggal yang terpisah.
+- **Regression Invariant Zero-Shock**: Ditambahkan unit test invariant di `packages/core/tests/test_scenario.py` dan integration test di `packages/api/tests/test_api.py` (`test_post_scenario_empty_body_invariant`): dengan parameter shock default (semua shock nol / request body `{}`), nilai `post_shock_rbv_usd` terbukti **sama persis** dengan `baseline_rbv_usd` untuk setiap emiten in-universe, `delta_rbv_usd = 0.0`, `delta_rbv_pct = 0.0`, dan pergeseran peringkat `rank_change = 0`.
+- **Perbaikan Fixture Test**: Fixture di `test_scenario.py` diperbarui menggunakan angka `attributable_gross_profit_usd` nyata dari database `metrics.issuer_metrics` (ADRO: $1.495B, BYAN: $1.332B, AADI: $1.466B, BUMI: $169.6M, GEMS: $1.104B, PTBA: `None`, DSSA: $2.332B).
+- **Hasil Pengujian**: Seluruh 55 test (`pytest packages/core/tests packages/api/tests`) lulus 100%, `ruff format --check .` 83 files already formatted, `ruff check .` all checks passed, dan `mypy` 0 errors across 56 source files.
+
+**Blocker:** Tidak ada blocker untuk memulai Fase 6 (Web Application).
+
+**Kredit terpakai sesi ini:** 0 kredit (kalkulasi in-memory & test lokal; kumulatif tetap 404 / 1000 — sisa saldo: 546 kredit).
+
+**Next:** Mulai **Fase 6 — Web Application (Next.js 15 App Router, MapLibre GL Map, Scenario Studio Slider, Reserve Clock, Cost Curve Chart, & Evidence Drawer)**.
+
+---
+
 
 ## 2026-08-29 — Review Koordinator: Bug Scenario Studio & Koreksi Status Deploy
 

@@ -822,7 +822,7 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
       sebagai selesai padahal bagian deployment publik belum terjadi — dipecah jadi 5.11a/5.11b supaya
       status sebenarnya terlihat jelas.
 
-- [ ] **5.12** **Perbaiki bug Scenario Studio (prioritas tinggi, sebelum Fase 6 task 6.8).**
+- [x] **5.12** **Perbaiki bug Scenario Studio (prioritas tinggi, sebelum Fase 6 task 6.8).**
       `simulate_scenario_shock()` harus memakai basis profit yang SAMA untuk baseline maupun
       post-shock — yaitu `attributable_gross_profit_usd` yang sudah dihitung benar oleh `metrics/rbv.py`
       (§4.1 M2), bukan menghitung ulang dari `revenue_usd`/`cost_of_revenue_usd` satu baris

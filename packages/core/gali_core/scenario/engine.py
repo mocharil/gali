@@ -1,4 +1,4 @@
-"""Task 4.11 — Parametric Scenario Studio Simulation Engine.
+"""Task 4.11 / 5.12 — Parametric Scenario Studio Simulation Engine.
 
 A high-performance in-memory simulation engine for live macroeconomic, export market,
 concession cliff, and commodity price shock testing.
@@ -10,6 +10,7 @@ endpoint (POST /v1/scenario).
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -58,18 +59,20 @@ def simulate_scenario_shock(
 ) -> ScenarioSimulationResult:
     """Execute in-memory shock simulation across universe issuers.
 
+    Consistent relative scaling model (Task 5.12):
+    Both baseline and post-shock valuations use the exact same attributable_gross_profit_usd
+    foundation (M2 methodology), ensuring zero delta when shocks are zero.
+
     Args:
         base_issuers: List of issuer dictionaries containing:
-            symbol, rli_years, attributable_gross_profit_usd, revenue_usd, cost_of_revenue_usd,
-            market_cap_usd, destinations (list of dict with country and pct_of_sales_volume),
+            symbol, rli_years, attributable_gross_profit_usd, market_cap_usd,
+            destinations (list of dict with country and pct_of_sales_volume),
             license_cliff_3y.
-        params: ScenarioShockParams with price, destination, and discount shocks.
+        params: ScenarioShockParams with price, destination, discount rate, and concession shocks.
 
     Returns:
         ScenarioSimulationResult with pre/post valuations and rank deltas.
     """
-    import time
-
     start_time = time.perf_counter()
 
     impacts: list[IssuerScenarioImpact] = []
@@ -78,19 +81,17 @@ def simulate_scenario_shock(
         symbol = issuer["symbol"]
         rli = issuer.get("rli_years")
         base_gp = issuer.get("attributable_gross_profit_usd")
-        rev = issuer.get("revenue_usd") or base_gp
-        cost = issuer.get("cost_of_revenue_usd") or 0.0
         dests = issuer.get("destinations") or []
         cliff_3y = float(issuer.get("license_cliff_3y") or 0.0)
 
-        # Baseline RBV
-        baseline_rbv = None
+        # Baseline RBV using M2 attributable gross profit annuity
+        baseline_rbv: float | None = None
         if base_gp is not None and base_gp > 0 and rli is not None and rli > 0:
             effective_years = min(rli, 30.0)
             ann_factor = (1.0 - math.pow(1.0 + params.discount_rate, -effective_years)) / params.discount_rate
             baseline_rbv = base_gp * ann_factor
 
-        # If data is partial (e.g. PTBA/DSSA without complete financials or RLI)
+        # Partial data handling (e.g. PTBA without financials or DSSA without reserves)
         if base_gp is None or rli is None or rli <= 0:
             impacts.append(
                 IssuerScenarioImpact(
@@ -120,25 +121,25 @@ def simulate_scenario_shock(
                 vol_at_risk_pct += (pct / 100.0) * shock_fraction
 
         vol_at_risk_pct = min(vol_at_risk_pct, 1.0)
-        rev_at_risk_usd = (rev * vol_at_risk_pct) if rev else (base_gp * vol_at_risk_pct)
+        rev_at_risk_usd = base_gp * vol_at_risk_pct
 
         # 2. Adjust for License Cliff Expiry Shock if active
         effective_rli = rli
         if params.license_cliff_expiry_shock and cliff_3y > 0:
             effective_rli = max(rli * (1.0 - (cliff_3y / 100.0)), 1.0)
 
-        # 3. Calculate Post-Shock Financials
-        post_rev = max(((rev or base_gp) - rev_at_risk_usd) * (1.0 + params.price_shock_pct), 0.0)
-        post_cost = max(cost * (1.0 - (vol_at_risk_pct * params.variable_cost_share)), 0.0)
-        post_gp = max(post_rev - post_cost, 0.0)
+        # 3. Calculate Post-Shock Gross Profit relative to attributable_gross_profit_usd
+        price_factor = max(1.0 + params.price_shock_pct, 0.0)
+        vol_factor = max(1.0 - vol_at_risk_pct, 0.0)
+        post_gp = max(base_gp * price_factor * vol_factor, 0.0)
 
         # 4. Calculate Post-Shock RBV
         post_eff_years = min(effective_rli, 30.0)
         post_ann_factor = (1.0 - math.pow(1.0 + params.discount_rate, -post_eff_years)) / params.discount_rate
         post_shock_rbv = post_gp * post_ann_factor
 
-        delta_rbv_usd = post_shock_rbv - (baseline_rbv or 0.0)
-        delta_rbv_pct = ((delta_rbv_usd / baseline_rbv) * 100.0) if baseline_rbv and baseline_rbv > 0 else None
+        delta_rbv_usd = post_shock_rbv - (baseline_rbv if baseline_rbv is not None else 0.0)
+        delta_rbv_pct = ((delta_rbv_usd / baseline_rbv) * 100.0) if baseline_rbv and baseline_rbv > 0 else 0.0
 
         impacts.append(
             IssuerScenarioImpact(
@@ -146,7 +147,7 @@ def simulate_scenario_shock(
                 baseline_rbv_usd=round(baseline_rbv, 2) if baseline_rbv is not None else None,
                 post_shock_rbv_usd=round(post_shock_rbv, 2),
                 delta_rbv_usd=round(delta_rbv_usd, 2),
-                delta_rbv_pct=round(delta_rbv_pct, 2) if delta_rbv_pct is not None else None,
+                delta_rbv_pct=round(delta_rbv_pct, 2),
                 baseline_rank=None,
                 post_shock_rank=None,
                 rank_change=None,
