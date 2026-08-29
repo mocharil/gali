@@ -1,0 +1,13 @@
+{
+  "name": "gali",
+  "private": true,
+  "version": "0.1.0",
+  "description": "GALI monorepo root -- pnpm workspace for packages/web. Python packages (core/api/pipeline) are managed separately via pip, see .venv.",
+  "scripts": {
+    "dev": "pnpm --filter @gali/web dev",
+    "build": "pnpm --filter @gali/web build",
+    "lint": "pnpm --filter @gali/web lint",
+    "typecheck": "pnpm --filter @gali/web typecheck",
+    "gen:api": "pnpm --filter @gali/web gen:api"
+  }
+}

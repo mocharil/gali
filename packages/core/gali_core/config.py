@@ -88,6 +88,23 @@ COAL_BENCHMARK_BANDS: tuple[tuple[float, float, str], ...] = (
 
 ASSUMPTIONS = Assumptions()
 
+# The Phase 1 gate decision, confirmed by Aril on 2026-08-29 after the audit's own
+# recommendation (NO_GO, 7 clean issuers) was relaxed to include two partial issuers.
+# See BUILD_PLAN.md Fase 1 "KEPUTUSAN RESMI" for the full reasoning. Defined once here
+# so no router or page hardcodes this string independently.
+GATE_DECISION = "GO MENYEMPIT (Coal Titans — 9 Emiten: 7 lengkap + 2 parsial)"
+IN_UNIVERSE_SYMBOLS: tuple[str, ...] = (
+    "AADI",
+    "ADMR",
+    "ADRO",
+    "BUMI",
+    "BYAN",
+    "GEMS",
+    "ITMG",
+    "PTBA",
+    "DSSA",
+)
+
 
 class Settings(BaseSettings):
     """Environment-driven settings. See .env.example for the full template."""

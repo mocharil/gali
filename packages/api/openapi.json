@@ -600,7 +600,7 @@
           "gate_decision": {
             "type": "string",
             "title": "Gate Decision",
-            "default": "GO MENYEMPIT (Coal Titans \u2014 9 Emiten)"
+            "default": "GO MENYEMPIT (Coal Titans \u2014 9 Emiten: 7 lengkap + 2 parsial)"
           },
           "updated_at": {
             "type": "string",

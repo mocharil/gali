@@ -6,6 +6,7 @@ import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from gali_api.cache import get_cached_json, make_cache_key, set_cached_json
 from gali_api.dependencies import get_db, get_published_run_id, get_redis
+from gali_api.derive import data_quality_label
 from gali_api.schemas.graph import GraphEdge, GraphNode, IssuerGraphResponse
 from gali_api.schemas.issuers import IssuerDetail, IssuerSummary, LinkedOperatingEntity
 from gali_core.db.models import (
@@ -47,7 +48,6 @@ async def list_issuers(
 
     items: list[IssuerSummary] = []
     for m, c in rows:
-        is_partial = m.symbol in ("PTBA", "DSSA")
         conf = (m.confidence or {}).get("effective_weight", 1.0) * 100.0
 
         items.append(
@@ -55,7 +55,11 @@ async def list_issuers(
                 symbol=m.symbol,
                 name=c.name if c else m.symbol,
                 sub_sector=c.sub_sector if c else "Coal",
-                data_quality="PARSIAL" if is_partial else "LENGKAP",
+                data_quality=data_quality_label(
+                    rli_years=m.rli_years,
+                    reserve_backed_value_usd=m.reserve_backed_value_usd,
+                    cash_cost_per_ton_usd=m.cash_cost_per_ton_usd,
+                ),
                 ground_truth_score=m.ground_truth_score,
                 confidence_pct=round(conf, 1),
                 rli_years=m.rli_years,
@@ -128,15 +132,17 @@ async def get_issuer_detail(
         for lnk, comp in links_res.all()
     ]
 
-    is_partial = sym in ("PTBA", "DSSA")
-
     detail = IssuerDetail(
         symbol=m.symbol,
         name=c.name if c else m.symbol,
         sub_sector=c.sub_sector if c else "Coal",
         as_of=m.as_of,
         run_id=str(m.run_id),
-        data_quality="PARSIAL" if is_partial else "LENGKAP",
+        data_quality=data_quality_label(
+            rli_years=m.rli_years,
+            reserve_backed_value_usd=m.reserve_backed_value_usd,
+            cash_cost_per_ton_usd=m.cash_cost_per_ton_usd,
+        ),
         # M1
         rli_years=m.rli_years,
         # M2
