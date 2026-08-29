@@ -15,8 +15,7 @@ def test_issuer_with_all_headline_metrics_is_lengkap_even_if_m8_dropped_a_compon
     # rli/rbv/cash_cost are all populated.
     assert not is_partial(rli_years=17.02, reserve_backed_value_usd=1.0e10, cash_cost_per_ton_usd=69.06)
     assert (
-        data_quality_label(rli_years=17.02, reserve_backed_value_usd=1.0e10, cash_cost_per_ton_usd=69.06)
-        == "LENGKAP"
+        data_quality_label(rli_years=17.02, reserve_backed_value_usd=1.0e10, cash_cost_per_ton_usd=69.06) == "LENGKAP"
     )
 
 
