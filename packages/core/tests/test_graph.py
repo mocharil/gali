@@ -82,7 +82,24 @@ def test_ownership_invariant_property() -> None:
 @pytest.mark.asyncio
 async def test_adaro_adro_aadi_linking_golden() -> None:
     """Task 3.7 Golden test: pt-adaro-andalan-indonesia-tbk is linked to ADRO with 15.37%."""
-    async with async_session() as session:
+    # 1. Pure algorithm unit test
+    g = OwnershipGraph()
+    g.add_edge("pt-alamtri-resources-indonesia-tbk", "pt-adaro-andalan-indonesia-tbk", 15.37)
+    g.add_edge("pt-adaro-andalan-indonesia-tbk", "pt-adaro-indonesia", 100.0)
+
+    links = g.compute_effective_ownership("pt-alamtri-resources-indonesia-tbk")
+    link_map = {item["company_slug"]: item["effective_ownership_pct"] for item in links}
+
+    assert "pt-adaro-andalan-indonesia-tbk" in link_map
+    assert pytest.approx(link_map["pt-adaro-andalan-indonesia-tbk"], rel=1e-2) == 15.37
+    assert "pt-adaro-indonesia" in link_map
+    assert pytest.approx(link_map["pt-adaro-indonesia"], rel=1e-2) == 15.37
+
+    # 2. Database integration test with build_and_persist_ownership_graph
+    from gali_core.graph.ownership import build_and_persist_ownership_graph
+
+    async with async_session() as session, session.begin():
+        await build_and_persist_ownership_graph(session)
         res = await session.execute(
             select(IssuerMiningLink).where(
                 IssuerMiningLink.symbol == "ADRO",
