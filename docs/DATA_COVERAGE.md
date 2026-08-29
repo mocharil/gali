@@ -7,17 +7,17 @@
 
 ## 1. Ringkasan Eksekutif & Keputusan Gate
 
-- **Keputusan Gate**: **`NO_GO`**
-- **Jumlah Emiten Terkualifikasi Penuh**: **7 emiten** (memiliki cadangan + produksi + finansial lengkap)
-- **Total Perusahaan Tambang Terdeteksi**: 366 entitas
-- **Perusahaan Tambang Berticker IDX**: 68 emiten
-- **Total Titik Tambang (Sites) Terdata**: 156 situs (0 dengan koordinat GPS)
-- **Total Kontrak Jasa Tambang**: 34 kontrak (9 terkait emiten)
+- **Keputusan Gate Final**: **`GO MENYEMPIT (Coal Titans — 9 Emiten)`** (Ditetapkan resmi oleh Aril per 2026-08-29; rujuk `BUILD_PLAN.md` Fase 1 blok "KEPUTUSAN RESMI").
+- **Struktur Universe (9 Emiten Batubara)**:
+  - **7 Lengkap**: `AADI`, `ADMR`, `ADRO`, `BUMI`, `BYAN`, `GEMS`, `ITMG` (cadangan, produksi, finansial USD, ownership, destinasi lengkap).
+  - **2 Parsial**: `PTBA` (tanpa `revenue_usd`/`cost_of_revenue_usd` di mining endpoint → M2 & M4 NULL), `DSSA` (tanpa `total_reserves_Mt` di mining endpoint → M1 & M2 NULL).
+- **Total Perusahaan Tambang Terdeteksi**: 366 entitas (68 berticker IDX/Tbk).
+- **Total Titik Tambang (Sites) In-Universe**: 57 situs (52 dengan koordinat GPS terverifikasi / 91.2%).
+- **Total Kontrak Jasa Tambang**: 34 kontrak (9 terkait emiten).
 
-> [!CAUTION]
-> **STATUS: NO-GO (< 8 Emiten Terkualifikasi)**
-> Hanya ditemukan 7 emiten dengan data lengkap.
-> STOP dan laporkan ke Aril untuk aktivasi rencana cadangan.
+> [!NOTE]
+> **STATUS GATE RESMI: GO MENYEMPIT (Coal Titans — 9 Emiten)**
+> Universe difokuskan pada 9 emiten batubara dengan aturan data ketat: field null tetap null (tanpa estimasi tebakan), badge data parsial pada PTBA/DSSA, dan bobot M8 dinormalisasi ulang secara transparan.
 
 ---
 
@@ -108,36 +108,37 @@
 - **Total Kontrak Terdata**: 34 relasi
 - **Kontrak Terhubung ke Emiten**: 9 relasi
 
-### C. Situs & Titik Operasi Tambang (Task 1.6)
-- **Total Situs**: 156
-- **Situs dengan Koordinat GPS**: 0 (0.0%)
-- **Situs dengan Angka Produksi**: 25
-- **Situs dengan Strip Ratio**: 8
+### C. Situs & Titik Operasi Tambang (Task 1.6 & 3.10)
+- **Total Situs di Database**: 143 situs
+- **Total Situs In-Universe (9 Emiten)**: 57 situs
+- **Situs In-Universe dengan Koordinat GPS Terverifikasi**: **52 situs (91.2%)**
+- **Situs In-Universe dengan Angka Produksi**: 25 situs
+- **Situs In-Universe dengan Strip Ratio**: 8 situs
 
-### D. Izin Usaha Pertambangan (IUP/IUPK ESDM) (Task 1.5)
+### D. Izin Usaha Pertambangan (IUP/IUPK ESDM) (Task 1.5 & 3.5)
 - **Izin Tambang Diperiksa**: 750 izin
-- **Izin dengan Company Slug Eksplisit**: 14 (1.9%)
+- **Izin Tertaut ke Perusahaan (`company_slug`)**: **99 izin (13.2%)**
 - **Rata-rata Fuzzy Match Score pada Nama**: 63.3%
 
 ---
 
-## 4. Realisasi Anggaran Kredit API (Task 1.12)
+## 4. Realisasi Anggaran Kredit API (Task 1.12 & 3.10)
 
-- **Total Kredit Terpakai**: **347 / 1000 kredit**
+- **Total Kredit Terpakai**: **404 / 1000 kredit**
 - **Plafon Batas Keras (Hard Cap)**: 950 kredit
-- **Sisa Kredit di Bawah Cap**: 603 kredit
+- **Sisa Kredit di Bawah Cap**: **546 kredit**
 
 | Tier | Kredit Terpakai | Porsi (%) |
 |---|---|---|
-| cold | 48 | 13.8% |
-| warm | 280 | 80.7% |
-| hot | 19 | 5.5% |
+| cold | 105 | 26.0% |
+| warm | 280 | 69.3% |
+| hot | 19 | 4.7% |
 
 ---
 
-## 5. Statistik Pasca-Linking Entity Resolution (Fase 3)
+## 5. Statistik Pasca-Linking Entity Resolution & GPS Backfill (Fase 3)
 
-Hasil eksekusi graf kepemilikan dan penutupan transitif (transitive closure):
+Hasil eksekusi graf kepemilikan, penutupan transitif, dan penarikan GPS detail:
 
 ### A. Metrik Utama Graf Kepemilikan
 - **Total Emiten Terdaftar (`graph.issuer`)**: **81 emiten**
@@ -165,3 +166,9 @@ Hasil eksekusi graf kepemilikan dan penutupan transitif (transitive closure):
   - Matched via Direct/Lookup: 14 lisensi
   - Matched via Trigram Fuzzy Normalization ($\ge 0.72$): 85 lisensi
 - **Keterangan**: Seluruh lisensi yang tidak tertaut (< 0.55 similarity) ditandai eksplisit sebagai unlinked untuk menjaga integritas data perhitungan metrik M3 (License Cliff).
+
+### D. Cakupan Koordinat GPS Situs Tambang (`core.mining_site`)
+- **Total Situs Terhubung ke 9 Emiten In-Universe**: 57 situs
+- **Situs Berhasil Ditarik Detail (`/v2/mining/sites/{slug}/`)**: **57 situs (100%)**
+- **Situs dengan Koordinat GPS Non-Null**: **52 situs (91.2%)** (5 situs memiliki data lokasi null langsung dari sumber hulu Sectors API)
+- **Kesiapan Fitur**: 100% siap mendukung peta interaktif MapLibre (`/map`) dan visualisasi koordinat lubang tambang di Kalimantan & Sumatera.

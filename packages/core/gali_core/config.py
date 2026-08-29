@@ -86,6 +86,8 @@ COAL_BENCHMARK_BANDS: tuple[tuple[float, float, str], ...] = (
     (5800.0, float("inf"), "ICI-1 / NEWC (6000 GAR)"),
 )
 
+ASSUMPTIONS = Assumptions()
+
 
 class Settings(BaseSettings):
     """Environment-driven settings. See .env.example for the full template."""

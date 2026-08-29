@@ -14,6 +14,7 @@ from gali_pipeline.assets.graph import (
     graph_ownership_structure,
 )
 from gali_pipeline.assets.market import market_idx_companies
+from gali_pipeline.assets.metrics import metric_run_all
 from gali_pipeline.assets.raw import (
     raw_mining_commodities,
     raw_mining_companies,
@@ -47,4 +48,8 @@ MARKET_ASSETS = [
     market_idx_companies,
 ]
 
-ALL_ASSETS = [*RAW_ASSETS, *CORE_ASSETS, *GRAPH_ASSETS, *MARKET_ASSETS]
+METRIC_ASSETS = [
+    metric_run_all,
+]
+
+ALL_ASSETS = [*RAW_ASSETS, *CORE_ASSETS, *GRAPH_ASSETS, *MARKET_ASSETS, *METRIC_ASSETS]

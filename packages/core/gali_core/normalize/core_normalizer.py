@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
-from sqlalchemy import delete
+from sqlalchemy import delete, text, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -396,22 +396,34 @@ def normalize_commodity_prices(commodity: str, payload: dict | list) -> list[dic
         raw_items = payload.get("data", payload.get("results", []))
         if isinstance(raw_items, list):
             items = [x for x in raw_items if isinstance(x, dict)]
-        elif "price" in payload and "date" in payload:
+        elif "date" in payload:
             items = [payload]
 
     rows: list[dict[str, Any]] = []
     for item in items:
         d = parse_date_safe(item.get("date") or item.get("observed_on") or item.get("datetime"))
-        p = parse_float_safe(item.get("price") or item.get("close"))
+        p = None
+        for k in ("price_usd_per_ton", "price_usd_per_oz", "price_usd_per_bbl", "price_usd", "price", "close"):
+            if k in item and item[k] is not None:
+                p = parse_float_safe(item[k])
+                if p is not None:
+                    break
         if d is None or p is None:
             continue
 
+        comm_name = item.get("name") or commodity
+        unit = "USD/ton"
+        if "price_usd_per_oz" in item:
+            unit = "USD/oz"
+        elif item.get("unit"):
+            unit = str(item["unit"])
+
         rows.append(
             {
-                "commodity": commodity,
+                "commodity": str(comm_name).strip(),
                 "observed_on": d,
                 "price": p,
-                "unit": item.get("unit") or "USD/ton",
+                "unit": unit,
             }
         )
     return rows
@@ -653,3 +665,69 @@ async def upsert_commodity_prices(session: AsyncSession, rows: list[dict[str, An
     )
     await session.execute(stmt)
     return len(unique_rows)
+
+
+async def backfill_in_universe_site_gps(
+    session: AsyncSession,
+    client: Any,
+) -> tuple[int, int]:
+    """Fetch detail for in-universe sites from /v2/mining/sites/{slug}/ and backfill GPS coordinates.
+
+    Returns (fetched_count, updated_count).
+    """
+    query = text("""
+        select distinct s.slug
+        from core.mining_site s
+        join graph.issuer_mining_link l on l.company_slug = s.company_slug
+        where l.symbol in ('AADI','ADMR','ADRO','BUMI','BYAN','GEMS','ITMG','PTBA','DSSA')
+        order by s.slug;
+    """)
+    res = await session.execute(query)
+    site_slugs = [r[0] for r in res.all()]
+
+    fetched_count = 0
+    updated_count = 0
+
+    for slug in site_slugs:
+        try:
+            payload = await client.get(
+                endpoint=f"/v2/mining/sites/{slug}/",
+                tier="cold",
+                credit_cost=1,
+                session=session,
+            )
+            fetched_count += 1
+            data = payload.get("data", payload) if isinstance(payload, dict) else {}
+            if isinstance(data, dict):
+                loc = data.get("location") if isinstance(data.get("location"), dict) else {}
+                lat = parse_float_safe(loc.get("latitude") if loc else data.get("latitude"))
+                lon = parse_float_safe(loc.get("longitude") if loc else data.get("longitude"))
+                prov = loc.get("province") if (loc and loc.get("province")) else data.get("province")
+                city = loc.get("city") if (loc and loc.get("city")) else data.get("city")
+                proj = data.get("project_name")
+
+                values_to_update: dict[str, Any] = {}
+                if lat is not None:
+                    values_to_update["latitude"] = lat
+                if lon is not None:
+                    values_to_update["longitude"] = lon
+                if prov:
+                    values_to_update["province"] = prov
+                if city:
+                    values_to_update["city"] = city
+                if proj:
+                    values_to_update["project_name"] = proj
+
+                if values_to_update:
+                    stmt = (
+                        update(MiningSite)
+                        .where(MiningSite.slug == slug)
+                        .values(**values_to_update)
+                    )
+                    await session.execute(stmt)
+                    if lat is not None or lon is not None:
+                        updated_count += 1
+        except Exception:
+            pass
+
+    return fetched_count, updated_count

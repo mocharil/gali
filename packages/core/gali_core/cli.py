@@ -23,11 +23,15 @@ credits_app = typer.Typer(help="Manage and inspect Sectors API credit usage.")
 db_app = typer.Typer(help="Database operations and migrations.")
 audit_app = typer.Typer(help="Phase 1 Data Truth Audit operations.")
 graph_app = typer.Typer(help="Entity resolution and ownership graph operations.")
+sites_app = typer.Typer(help="Mining site operations and GPS backfill.")
+metrics_app = typer.Typer(help="Metric calculation and leaderboard operations.")
 
 app.add_typer(credits_app, name="credits")
 app.add_typer(db_app, name="db")
 app.add_typer(audit_app, name="audit")
 app.add_typer(graph_app, name="graph")
+app.add_typer(sites_app, name="sites")
+app.add_typer(metrics_app, name="metrics")
 
 console = Console()
 
@@ -451,6 +455,130 @@ def graph_backfill_licenses_command() -> None:
             count = await backfill_license_company_slugs(session)
 
         console.print(f"[green][OK] Backfilled licenses: [bold]{count}[/bold][/green]")
+
+    asyncio.run(_run())
+
+
+@sites_app.command("backfill-gps")
+def sites_backfill_gps_command(
+    force_live: bool = typer.Option(False, "--live", help="Force live API calls to backfill GPS coordinates"),
+) -> None:
+    """Backfill GPS coordinates for 57 in-universe mining sites via /v2/mining/sites/{slug}/."""
+    import asyncio
+    import os
+
+    from gali_core.normalize.core_normalizer import backfill_in_universe_site_gps
+    from gali_core.sectors.client import SectorsClient
+
+    async def _run() -> None:
+        if force_live:
+            os.environ["GALI_DRY_RUN"] = "0"
+
+        console.print("[bold blue]Backfilling GPS coordinates for in-universe mining sites...[/bold blue]")
+        client = SectorsClient()
+        try:
+            async with async_session() as session, session.begin():
+                fetched, updated = await backfill_in_universe_site_gps(session, client)
+
+            console.print(f"[green][OK] Site details fetched: [bold]{fetched}[/bold][/green]")
+            console.print(f"[green][OK] Sites with GPS updated: [bold]{updated}[/bold][/green]")
+        finally:
+            await client.close()
+
+    asyncio.run(_run())
+
+
+@metrics_app.command("run")
+def metrics_run_command() -> None:
+    """Execute complete M1-M9 metric calculation, validate sanity gates, and publish Blue/Green pointer."""
+    import asyncio
+
+    from gali_core.metrics.engine import run_metric_pipeline
+
+    async def _run() -> None:
+        console.print("[bold blue]Executing M1-M9 Metric Pipeline across Coal Titans Universe...[/bold blue]")
+        async with async_session() as session:
+            run_id = await run_metric_pipeline(session)
+
+        console.print("[bold green][OK] Metric Run successfully validated and published![/bold green]")
+        console.print(f"[cyan]Published Run ID: [bold]{run_id}[/bold][/cyan]")
+
+    asyncio.run(_run())
+
+
+@metrics_app.command("report")
+def metrics_report_command() -> None:
+    """Print the published Ground Truth Score leaderboard and headline metrics."""
+    import asyncio
+
+    from sqlalchemy import select
+
+    from gali_core.db.models import IssuerMetrics, PublishedPointer
+
+    async def _run() -> None:
+        async with async_session() as session:
+            pointer_res = await session.execute(
+                select(PublishedPointer).where(PublishedPointer.singleton.is_(True))
+            )
+            pointer = pointer_res.scalar_one_or_none()
+            if not pointer:
+                console.print("[bold red]No published metric run found. Run `gali metrics run` first.[/bold red]")
+                return
+
+            run_id = pointer.run_id
+            res = await session.execute(
+                select(IssuerMetrics)
+                .where(IssuerMetrics.run_id == run_id)
+                .order_by(IssuerMetrics.ground_truth_score.desc().nullslast())
+            )
+            rows = res.scalars().all()
+
+        console.print(Panel(f"[bold]Published Run ID:[/bold] {run_id}", title="[bold]GALI Ground Truth Leaderboard[/bold]", expand=False))
+
+        table = Table(title="Coal Titans Universe (M1–M9)")
+        table.add_column("Symbol", style="bold cyan")
+        table.add_column("Data Quality", style="yellow")
+        table.add_column("Score (M8)", style="bold green", justify="right")
+        table.add_column("Confidence", justify="right")
+        table.add_column("RLI (M1)", justify="right")
+        table.add_column("RBV USD (M2)", justify="right")
+        table.add_column("Cliff 3y (M3)", justify="right")
+        table.add_column("Cash Cost (M4)", justify="right")
+        table.add_column("Top Market (M6)")
+
+        for r in rows:
+            is_partial = r.symbol in ("PTBA", "DSSA")
+            quality_badge = "[yellow]PARSIAL[/yellow]" if is_partial else "[green]LENGKAP[/green]"
+            score_str = f"{r.ground_truth_score:.1f}" if r.ground_truth_score is not None else "-"
+            
+            conf_pct = (r.confidence.get("effective_weight", 1.0) * 100) if r.confidence else 100.0
+            conf_str = f"{conf_pct:.0f}%"
+
+            rli_str = f"{r.rli_years:.1f} yr" if r.rli_years is not None else "[dim]NULL[/dim]"
+            
+            if r.reserve_backed_value_usd is not None:
+                rbv_str = f"${r.reserve_backed_value_usd / 1e9:.2f}B"
+            else:
+                rbv_str = "[dim]NULL[/dim]"
+
+            cliff_str = f"{r.license_cliff_3y:.1f}%" if r.license_cliff_3y is not None else "-"
+            cost_str = f"${r.cash_cost_per_ton_usd:.1f}/t" if r.cash_cost_per_ton_usd is not None else "[dim]NULL[/dim]"
+            
+            top_dest = f"{r.top_destination} ({r.top_destination_pct:.0f}%)" if r.top_destination else "-"
+
+            table.add_row(
+                r.symbol,
+                quality_badge,
+                score_str,
+                conf_str,
+                rli_str,
+                rbv_str,
+                cliff_str,
+                cost_str,
+                top_dest,
+            )
+
+        console.print(table)
 
     asyncio.run(_run())
 

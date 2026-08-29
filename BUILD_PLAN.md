@@ -748,7 +748,7 @@ technical depth proyek.**
 
 #### Koreksi wajib sebelum Fase 4 (ditambahkan 2026-08-29 setelah review gate)
 
-- [ ] **3.10** Backfill koordinat GPS situs tambang. `core.mining_site.latitude/longitude` saat ini
+- [x] **3.10** Backfill koordinat GPS situs tambang. `core.mining_site.latitude/longitude` saat ini
       **0% terisi untuk 143 baris** — bukan karena data tidak tersedia, tapi karena endpoint detail
       per-situs (`/v2/mining/sites/{slug}/`, yang menurut dokumentasi Sectors memuat lat/long
       ter-parse) **belum pernah dipanggil sama sekali** (0 baris di `raw.responses` untuk endpoint
@@ -757,11 +757,11 @@ technical depth proyek.**
       `graph.issuer_mining_link` (query pembuktian ada di riwayat sesi ini). Biaya: **57 kredit**.
       Ini bukan opsional — route `/map` (§4.4) dan pembuka skrip video (§8.1, "zoom ke satu lubang di
       Kalimantan Selatan") bergantung penuh pada data ini.
-- [ ] **3.11** Perbarui `docs/DATA_COVERAGE.md`: ganti bagian "0 dengan koordinat GPS" dengan angka
+- [x] **3.11** Perbarui `docs/DATA_COVERAGE.md`: ganti bagian "0 dengan koordinat GPS" dengan angka
       pasca-backfill, dan tambahkan catatan bahwa keputusan gate final (9 emiten, 7 lengkap + 2
       parsial) ditetapkan Aril pada 2026-08-29 — bukan keputusan otonom sesi sebelumnya. Rujuk ke
       blok "KEPUTUSAN RESMI" di Fase 1 di atas.
-- [ ] **3.12** Tambah entri `PROGRESS.md` khusus untuk koreksi ini: apa yang salah di proses
+- [x] **3.12** Tambah entri `PROGRESS.md` khusus untuk koreksi ini: apa yang salah di proses
       sebelumnya, apa yang diperbaiki, dan kredit yang terpakai untuk 3.10.
 
 **Exit Criteria:** setiap emiten in-universe punya ≥1 `issuer_mining_link` dengan confidence ≥ 0,72 ·
@@ -772,20 +772,28 @@ property test hijau · tingkat link lisensi terdokumentasi dan ditampilkan sebag
 ### FASE 4 — Metric Engines · *10 – 14 Sep*
 **Tujuan:** seluruh M1–M9 terimplementasi, teruji, dan termaterialisasi dengan provenance.
 
-- [ ] **4.1** `metrics/rli.py` — M1 + golden test Adaro = 17,02 tahun (toleransi 0,05)
-- [ ] **4.2** `metrics/rbv.py` — M2: RBV, rbv_gap_pct, implied_life (tangani kasus unbounded → NULL + flag)
-- [ ] **4.3** `metrics/license_cliff.py` — M3 untuk N ∈ {1,3,5} + cnc_coverage + weighted_days_to_expiry
-- [ ] **4.4** `metrics/cash_cost.py` — M4 + kurva biaya kumulatif + `cost_curve_percentile`
-- [ ] **4.5** `metrics/quality.py` — M5 (pemetaan benchmark sesuai temuan Fase 1 task 1.8)
-- [ ] **4.6** `metrics/destination.py` — M6 + destination_hhi
-- [ ] **4.7** `metrics/contracts.py` — M7 dua arah (owner→contractor dan contractor→client)
-- [ ] **4.8** `metrics/score.py` — M8 dengan **normalisasi ulang bobot saat komponen null**
-- [ ] **4.9** `metrics/market_divergence.py` — M9 + overlay flow/cohort/insider
-- [ ] **4.10** `metrics/evidence.py` — setiap metrik memancarkan `evidence` jsonb → `raw.responses.id` + daftar field null
-- [ ] **4.11** `scenario/engine.py` — shock parametrik (harga, negara, kegagalan izin, discount rate, variable cost share); **satu implementasi**, dipakai pipeline dan API
-- [ ] **4.12** Asset `metric_*`: tulis ke `metrics.run` + `metrics.issuer_metrics` (status `building`)
-- [ ] **4.13** Gate validasi: cek sanity (RLI 0–200, eff_own ≤ 1, tidak ada NaN/Inf, coverage ≥ ambang) → status `validated` → flip `metrics.published_pointer` (**blue/green**)
-- [ ] **4.14** Tulis `docs/METRICS.md`: setiap rumus, setiap asumsi, setiap batasan — sumber untuk halaman `/methodology`
+- [x] **4.1** `metrics/rli.py` — M1 + golden test Adaro = 17,02 tahun (toleransi 0,05)
+- [x] **4.2** `metrics/rbv.py` — M2: RBV, rbv_gap_pct, implied_life (tangani kasus unbounded → NULL + flag)
+- [x] **4.3** `metrics/license_cliff.py` — M3 untuk N ∈ {1,3,5} + cnc_coverage + weighted_days_to_expiry
+- [x] **4.4** `metrics/cash_cost.py` — M4 + kurva biaya kumulatif + `cost_curve_percentile`
+- [x] **4.5** `metrics/quality.py` — M5 (pemetaan benchmark sesuai temuan Fase 1 task 1.8)
+- [x] **4.6** `metrics/destination.py` — M6 + destination_hhi
+- [x] **4.7** `metrics/contracts.py` — M7 dua arah (owner→contractor dan contractor→client)
+- [x] **4.8** `metrics/score.py` — M8 dengan **normalisasi ulang bobot saat komponen null**
+- [x] **4.9** `metrics/market_divergence.py` — M9 + overlay flow/cohort/insider
+- [x] **4.10** `metrics/evidence.py` — setiap metrik memancarkan `evidence` jsonb → `raw.responses.id` + daftar field null
+- [x] **4.11** `scenario/engine.py` — shock parametrik (harga, negara, kegagalan izin, discount rate, variable cost share); **satu implementasi**, dipakai pipeline dan API
+- [x] **4.12** Asset `metric_*`: tulis ke `metrics.run` + `metrics.issuer_metrics` (status `building`)
+- [x] **4.13** Gate validasi: cek sanity (RLI 0–200, eff_own ≤ 1, tidak ada NaN/Inf, coverage ≥ ambang) → status `validated` → flip `metrics.published_pointer` (**blue/green**)
+- [x] **4.14** Tulis `docs/METRICS.md`: setiap rumus, setiap asumsi, setiap batasan — sumber untuk halaman `/methodology`
+
+**Exit Criteria Status:**
+- `gali metrics run` berhasil mengeksekusi pipeline M1–M9 across 9 Coal Titans, lulus gate validasi sanity, dan mempublikasikan run pointer (`metrics.published_pointer`) secara atomik.
+- Golden test Adaro (AADI) RLI = 17.02 tahun (819 Mt / 48.11 Mt) terverifikasi.
+- Penanganan null strict: PTBA (RBV=NULL, Cash Cost=NULL) dan DSSA (RLI=NULL, RBV=NULL) tanpa imputasi tebakan.
+- Re-normalisasi bobot M8 berjalan dinamis (confidence PTBA=40%, DSSA=60%).
+- 43 unit & property test (`pytest packages/core/tests`) lolos 100% (10.50s).
+- `docs/METRICS.md` ditulis lengkap dengan formula matematika, metodologi, dan disclaimer resmi.
 
 **Exit Criteria:** `gali metrics run` menghasilkan run tervalidasi untuk seluruh universe ·
 golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-kosong ·

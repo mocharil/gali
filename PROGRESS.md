@@ -3,6 +3,57 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+## 2026-08-29 — Fase 4: Metric Engines (M1–M9), Scenario Studio, & Blue/Green Publishing
+
+**Selesai:** 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 4.13, 4.14
+
+**Detail yang terverifikasi:**
+- **M1 (Reserve Life Index)**: `packages/core/gali_core/metrics/rli.py` lulus golden test Adaro (AADI) = 17.02 tahun (819 Mt / 48.11 Mt). DSSA ditangani secara strictly null tanpa imputasi tebakan.
+- **M2 (Reserve-Backed Value & Implied Life)**: `packages/core/gali_core/metrics/rbv.py` menghitung anuitas laba kotor teratribusi, diskonto real 12%, batas 30y, serta mendeteksi kondisi unbounded (tak hingga). PTBA dan DSSA bernilai `NULL`.
+- **M3 (License Cliff)**: `packages/core/gali_core/metrics/license_cliff.py` menghitung risiko kedaluwarsa 1y, 3y, 5y, cakupan Clean & Clear (CNC), dan sisa hari rata-rata tertimbang.
+- **M4 (Cash Cost Curve & Breakeven)**: `packages/core/gali_core/metrics/cash_cost.py` menghitung unit cash cost FOB, unit margin, dan posisi persentil pada kurva biaya nasional kumulatif. PTBA bernilai `NULL`.
+- **M5 (Quality Adjustment)**: `packages/core/gali_core/metrics/quality.py` memetakan CV kcal/kg produk ke grade acuan ICI-1 hingga ICI-4 dan diskon/premi harga realisasi.
+- **M6 (Destination Concentration)**: `packages/core/gali_core/metrics/destination.py` menghitung HHI konsentrasi pasar ekspor dan persentase negara tujuan utama.
+- **M7 (Contractor Risk)**: `packages/core/gali_core/metrics/contracts.py` menghitung HHI kontraktor jasa tambang dan rasio kontrak jatuh tempo dalam 12 bulan.
+- **M8 (Ground Truth Score)**: `packages/core/gali_core/metrics/score.py` mengagregasi 5 pilar (RLI 25%, Cliff 20%, Cost 25%, Dest 15%, Contractor 15%) dengan re-normalisasi bobot dinamis untuk komponen null (confidence PTBA=40%, DSSA=60%).
+- **M9 (Market Divergence)**: `packages/core/gali_core/metrics/market_divergence.py` menghitung spread persentil RBV Gap vs Ground Truth Score, klasifikasi kuadran, dan overlay flow asing.
+- **Provenance & Evidence (4.10)**: `packages/core/gali_core/metrics/evidence.py` menghasilkan JSONB audit berisi `source_raw_response_ids`, field provenance, dan alasan eksplisit field null.
+- **Scenario Studio Engine (4.11)**: `packages/core/gali_core/scenario/engine.py` simulasi in-memory berkinerja tinggi (< 50 ms) untuk shock harga komoditas, pembatasan ekspor, shock izin, dan pergeseran ranking.
+- **Pipeline Orchestrator & Blue/Green Publishing (4.12 & 4.13)**: `packages/core/gali_core/metrics/engine.py` mengeksekusi run `building`, memverifikasi gate validasi sanity (RLI range [0, 200], tidak ada NaN/Inf, evidence non-empty), dan membalik pointer publikasi secara atomik ke `metrics.published_pointer`. Diuji via CLI `gali metrics run` dan `gali metrics report`.
+- **Dagster Asset**: `packages/pipeline/gali_pipeline/assets/metrics.py` mengekspos asset `metric_run_all`.
+- **Dokumentasi Metodologi (4.14)**: `docs/METRICS.md` ditulis lengkap dengan formula matematika, metodologi, dan disclaimer hukum resmi.
+- **Testing & Quality**: 43 unit/property test (`pytest packages/core/tests`) lulus 100%, ruff linting bersih (`All checks passed!`), dan mypy typecheck bersih (`Success: no issues found in 35 source files`).
+
+**Blocker:** Tidak ada blocker.
+
+**Kredit terpakai sesi ini:** 0 kredit (karena seluruh kalkulasi metrik beroperasi 100% in-memory dan dari database lokal; kumulatif tetap 404 / 1000 — sisa saldo aman: 546 kredit).
+
+**Next:** Lanjut ke **Fase 5 (API Layer — FastAPI, Pydantic v2 Models, GeoJSON FeatureCollection, Live Scenario Shock Endpoint, Redis Caching, & OpenAPI)**.
+
+---
+
+## 2026-08-29 — Koreksi Gate & Backfill GPS Situs Tambang (Task 3.10–3.12)
+
+**Selesai:** 3.10, 3.11, 3.12
+
+**Detail yang terverifikasi:**
+- **3.10 (Backfill GPS 57 Situs In-Universe)**: Sebanyak 57 endpoint detail per-situs (`/v2/mining/sites/{slug}/`) ditarik via `SectorsClient` (biaya 57 kredit) khusus untuk situs yang terhubung ke 9 emiten batubara in-universe (`AADI`, `ADMR`, `ADRO`, `BUMI`, `BYAN`, `GEMS`, `ITMG`, `PTBA`, `DSSA`). Sebanyak **52 situs (91.2%)** berhasil dilengkapi koordinat GPS (`latitude`, `longitude`, `province`, `city`, `project_name`) di `core.mining_site`. 5 situs sisanya memiliki koordinat null langsung dari hulu Sectors API.
+- **3.11 (Pembaruan Dokumentasi Data Coverage)**: `docs/DATA_COVERAGE.md` diperbarui mencatat keputusan gate final resmi Aril (9 emiten: 7 lengkap + 2 parsial) dan angka GPS pasca-backfill (52/57 situs terisi GPS).
+- **3.12 (Konfirmasi Aturan Data PTBA & DSSA)**: Dikonfirmasi aturan data bahwa:
+  1. Field yang null di sumber hulu **wajib tetap null di output** (dilarang menggunakan proxy/estimasi/tebakan).
+  2. PTBA (`revenue`/`cost` null) $\to$ M2 (RBV) & M4 (Cash Cost) = `NULL`.
+  3. DSSA (`total_reserves_Mt` null) $\to$ M1 (RLI) & M2 (RBV) = `NULL`.
+  4. M8 (Ground Truth Score) menormalisasi ulang bobot komponen yang null, dan field `confidence` di `metrics.issuer_metrics` mencatat bobot efektif yang sebenarnya terpakai.
+  5. Field `evidence` tetap dibuat untuk field null dan menyatakan secara eksplisit nama field serta alasannya.
+
+**Blocker:** Tidak ada blocker.
+
+**Kredit terpakai sesi ini:** 57 kredit (kumulatif: 404 / 1000 — sisa saldo aman di bawah hard cap: 546 kredit)
+
+**Next:** Mulai **Fase 4 (Metric Engines, Task 4.1 s.d. 4.14)**.
+
+---
+
 ## 2026-08-29 — Review Koordinator & Keputusan Gate Resmi
 
 **Konteks:** Review independen (bukan oleh agent pelaksana) atas Fase 0–3 sebelum membuka Fase 4.
