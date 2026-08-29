@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ShieldAlert, Cpu, Database, CheckCircle2 } from "lucide-react";
+import { ShieldAlert, Database, CheckCircle2 } from "lucide-react";
 
 export function Footer() {
   return (

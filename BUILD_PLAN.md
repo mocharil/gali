@@ -863,21 +863,51 @@ p95 < 400 ms pada load test.
 ### FASE 6 — Web Application · *16 – 23 Sep* *(overlap dengan Fase 5)*
 **Tujuan:** seluruh halaman di §4.4, siap produksi dan siap kamera.
 
-- [ ] **6.1** Next.js 15 App Router + TS strict + Tailwind v4 + shadcn/ui + dark mode
-- [ ] **6.2** `lib/api.ts` dari OpenAPI hasil generate; RSC untuk halaman berat data, TanStack Query untuk interaktif
-- [ ] **6.3** Design system: token warna per komoditas, tipografi, komponen `<ConfidenceBadge>`, `<EvidenceDrawer>`, `<AssumptionBar>`
-- [ ] **6.4** `/` — peta nasional + leaderboard headline + tiga angka besar
-- [ ] **6.5** `/map` — MapLibre GL full-screen, clustering, ukuran = produksi, warna = komoditas, popup → emiten
-- [ ] **6.6** `/issuer/[symbol]` — **reserve clock**, timeline license cliff, posisi kurva biaya, donut negara, graf kepemilikan, Evidence drawer
-- [ ] **6.7** `/cost-curve` — kurva biaya kumulatif visx + garis benchmark yang bisa digeser
-- [ ] **6.8** `/scenario` — Scenario Studio; slider ter-debounce → `POST /v1/scenario`; ranking beranimasi
-- [ ] **6.9** `/divergence` — ground truth vs harga pasar + overlay flow/cohort/insider
-- [ ] **6.10** `/methodology` — render `docs/METRICS.md` + **DISCLAIMER menonjol**
-- [ ] **6.11** `/coverage` — kelengkapan data per emiten/field (halaman kejujuran)
-- [ ] **6.12** Skeleton loading, error boundary, empty state jujur, responsif, cek a11y dasar
-- [ ] **6.13** Footer disclaimer di seluruh halaman + di README
-- [ ] **6.14** Playwright e2e: home → issuer → scenario slider → angka berubah
-- [ ] **6.15** Deploy ke Vercel; hubungkan ke API Fly.io; verifikasi CORS
+- [x] **6.1** Next.js 15 App Router + TS strict + Tailwind v4 + dark mode. **Deviasi:** shadcn/ui tidak
+      dipakai — komponen kustom (`ConfidenceBadge`, `EvidenceDrawer`, dll) sudah cukup untuk scope ini.
+- [x] **6.2** `lib/schema.ts` di-generate dari `packages/api/openapi.json` via `pnpm gen:api`
+      (openapi-typescript); `lib/types.ts` jadi alias tipis di atasnya. TanStack Query terpasang.
+- [x] **6.3** `<ConfidenceBadge>`, `<EvidenceDrawer>`, `<AssumptionBar>` ada dan terverifikasi memakai
+      data nyata (bukan bentuk yang diasumsikan — keduanya sempat salah asumsi bentuk API dan diperbaiki).
+- [x] **6.4** `/` — peta nasional (compact) + leaderboard Ground Truth Score + 3 angka besar. Diverifikasi
+      live di browser dengan data nyata.
+- [x] **6.5** `/map` — MapLibre GL full-screen (basemap gratis openfreemap.org, tanpa API key), 52 situs
+      dengan koordinat nyata, warna per komoditas, popup emiten. Diverifikasi live.
+- [x] **6.6** `/issuer/[symbol]` — reserve life tile, license cliff, cash cost/breakeven, RBV, komponen
+      Ground Truth Score, daftar entitas operasi terhubung, Evidence drawer. Diverifikasi live untuk ADRO
+      (LENGKAP) dan null-case DSSA/PTBA. **Deviasi/gap:** donut chart destinasi dan visualisasi graf
+      kepemilikan (bukan sekadar daftar) belum ada — field mentahnya (`linked_entities`) sudah tersaji,
+      render grafis ditunda.
+- [x] **6.7** `/cost-curve` — kurva biaya kumulatif via Recharts (`Area type="stepAfter"`), bukan visx
+      (deviasi sengaja: cukup untuk bentuk kurva ini, mengurangi dependency). Garis benchmark, tabel detail
+      per emiten. Diverifikasi live — bentuk tangga dan garis benchmark $103/t tampil benar.
+- [x] **6.8** `/scenario` — Scenario Studio dengan slider harga + per-negara + toggle license cliff,
+      `POST /v1/scenario` live. **Diverifikasi live dua kali**: body kosong → delta 0.0% persis di semua
+      emiten (invariant dari task 5.12 terbukti end-to-end di browser sungguhan); shock -20% → POST kedua
+      sukses 200. PTBA/DSSA benar ditandai "Data parsial" dan dikecualikan dari simulasi.
+- [x] **6.9** `/divergence` — dibangun **jujur sesuai data yang benar-benar ada**: `market_cap_idr` dan
+      `rbv_gap_pct` null untuk seluruh 9 emiten karena market cap belum pernah di-ingest dengan benar
+      (satu-satunya panggilan `/v2/companies/` sebelumnya pakai query kosong, tidak mengembalikan field
+      market cap). Halaman menampilkan empty-state eksplisit alih-alih memalsukan kuadran divergensi.
+      **Follow-up nyata, bukan blocker**: ingest market cap 9 simbol in-universe via structured screener
+      (`where symbol IN (...)`, ~1-2 kredit) akan otomatis menghidupkan halaman ini DAN mengisi
+      `rbv_gap_pct` di `/issuer/[symbol]` dan `/v1/rankings`. Syntax `where` clause perlu dicek ulang ke
+      dokumentasi Sectors sebelum mencoba — belum dikerjakan sesi ini untuk menghindari trial-and-error
+      yang boros kredit.
+- [x] **6.10** `/methodology` — render `docs/METRICS.md` langsung (server component, `fs.readFileSync`,
+      di-bake statis saat build — satu sumber kebenaran, bukan retype manual) + disclaimer menonjol di atas.
+- [x] **6.11** `/coverage` — seluruh angka fully DB-derived (diperbaiki dari hardcoded, lihat catatan di
+      atas). Diverifikasi live: 7/9 issuer completeness benar, progress bar coverage per layer.
+- [ ] **6.12** Skeleton/loading state ada di beberapa halaman (home, issuer detail); empty state jujur ada
+      (divergence). **Belum:** global `error.tsx` boundary, audit a11y sistematis, uji responsif mobile
+      yang menyeluruh.
+- [x] **6.13** Footer disclaimer investasi tampil di semua halaman (lewat root layout) dan di `README.md`.
+- [ ] **6.14** Playwright e2e — **belum dikerjakan** sesi ini. Verifikasi dilakukan manual live (browser +
+      curl SSR) untuk kesembilan route, termasuk uji interaktif Scenario Studio dua kali dan production
+      build (`next build`) sukses bersih untuk semua route — tapi ini bukan pengganti suite e2e otomatis.
+- [ ] **6.15** Deploy ke Vercel/Fly.io — **belum dikerjakan**, konsisten dengan status 5.11b: Neon+Upstash
+      (task 0.8) belum diprovisi Aril. Semua verifikasi sesi ini berjalan di Docker lokal
+      (`gali-postgres`:5433, `gali-redis`:6379) + `next build` production build lokal.
 
 **Exit Criteria:** seluruh 8 route hidup di URL publik · scenario slider mengubah angka nyata dari API
 live · e2e hijau di CI · Lighthouse ≥ 85 pada performance & accessibility.

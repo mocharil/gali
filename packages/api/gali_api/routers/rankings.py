@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from typing import Literal, get_args
+
 import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, Query
 from gali_api.cache import get_cached_json, make_cache_key, set_cached_json
 from gali_api.dependencies import get_db, get_published_run_id, get_redis
+from gali_api.derive import data_quality_label
 from gali_api.schemas.rankings import RankingItem, RankingsResponse
 from gali_core.db.models import IdxCompany, IssuerMetrics
 from sqlalchemy import select
@@ -13,12 +16,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/v1/rankings", tags=["Leaderboards & Rankings"])
 
+RankableMetric = Literal[
+    "ground_truth_score",
+    "rli_years",
+    "reserve_backed_value_usd",
+    "cash_cost_per_ton_usd",
+    "license_cliff_3y",
+    "rbv_gap_pct",
+]
+RANKABLE_METRICS = get_args(RankableMetric)
+
 
 @router.get("", response_model=RankingsResponse)
 async def get_metric_rankings(
-    metric: str = Query(
+    metric: RankableMetric = Query(
         "ground_truth_score",
-        description="Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'",
+        description=f"Metric to rank by: one of {RANKABLE_METRICS}. An unlisted value is rejected with 422 "
+        "rather than silently returning an empty list.",
     ),
     db: AsyncSession = Depends(get_db),
     run_id: str = Depends(get_published_run_id),
@@ -49,7 +63,6 @@ async def get_metric_rankings(
     items: list[RankingItem] = []
     for idx, (m, c) in enumerate(valid_rows):
         val = getattr(m, metric)
-        is_partial = m.symbol in ("PTBA", "DSSA")
         conf_pct = (m.confidence or {}).get("effective_weight", 1.0) * 100.0 if m.confidence else 100.0
 
         # Human-readable formatting
@@ -71,7 +84,11 @@ async def get_metric_rankings(
                 rank=idx + 1,
                 symbol=m.symbol,
                 name=c.name if c else m.symbol,
-                data_quality="PARSIAL" if is_partial else "LENGKAP",
+                data_quality=data_quality_label(
+                    rli_years=m.rli_years,
+                    reserve_backed_value_usd=m.reserve_backed_value_usd,
+                    cash_cost_per_ton_usd=m.cash_cost_per_ton_usd,
+                ),
                 metric_value=round(val, 2) if isinstance(val, float) else val,
                 formatted_value=fmt,
                 confidence_pct=round(conf_pct, 1),

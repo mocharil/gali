@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sliders, ChevronDown, ChevronUp, Info, HelpCircle } from "lucide-react";
+import { Sliders, ChevronDown, ChevronUp, Info } from "lucide-react";
 
 export function AssumptionBar() {
   const [expanded, setExpanded] = useState(false);

@@ -11,7 +11,6 @@ import {
   LineChart,
   ShieldCheck,
   BookOpen,
-  Activity,
   Github,
 } from "lucide-react";
 

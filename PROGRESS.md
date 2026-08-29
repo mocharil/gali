@@ -3,6 +3,68 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+
+## 2026-08-29 — Fase 6 (Web Application) — dikerjakan koordinator setelah agent kehabisan token
+
+**Konteks:** Sesi pelaksana kehabisan token di tengah Fase 6, meninggalkan scaffold awal (layout, beberapa
+komponen, `lib/types.ts`/`lib/api.ts`). Koordinator melanjutkan langsung.
+
+**Temuan sebelum melanjutkan:** Audit cepat terhadap scaffold yang ada menemukan drift yang sama
+persis dengan bug scenario engine sebelumnya — `lib/types.ts` diketik manual dan sudah menyimpang dari
+API nyata (`subsector` vs `sub_sector`, `confidence` vs `confidence_pct`, `is_partial` boolean vs
+`data_quality` string, field fantom). `EvidenceDrawer.tsx` mengasumsikan bentuk evidence yang tidak
+pernah ada di API. **Perbaikan struktural**: `lib/schema.ts` sekarang di-generate dari
+`packages/api/openapi.json` via `openapi-typescript` (`pnpm gen:api`), `lib/types.ts` jadi alias tipis
+di atasnya — kelas bug ini terstruktur tidak bisa terulang lagi untuk bentuk respons API.
+
+**Ditemukan juga (dan diperbaiki) 3 tempat terpisah** di backend yang meng-hardcode
+`is_partial = symbol in ("PTBA", "DSSA")` (issuers.py list, issuers.py detail, rankings.py) — pola yang
+sama seperti tipe bug sebelumnya. Diganti dengan `gali_api/derive.py::is_partial()` yang membaca
+langsung apakah `rli_years`/`reserve_backed_value_usd`/`cash_cost_per_ton_usd` null — definisi yang
+sama persis dengan keputusan gate 7-vs-2. **Percobaan pertama salah**: sempat memakai
+`confidence.is_complete` (M8) sebagai sinyal, ternyata itu konsep berbeda (M8 bisa drop
+`contractor_risk` untuk emiten yang datanya lengkap secara headline, seperti AADI) — ketahuan lewat
+query DB langsung sebelum di-commit, dikoreksi, ditambah regression test (`test_derive.py`).
+
+**coverage.py** juga diperbaiki: daftar 9 emiten in-universe dan beberapa angka fallback sebelumnya
+hardcoded Python literal, sekarang full DB-derived. `GATE_DECISION` dan `IN_UNIVERSE_SYMBOLS` sekarang
+satu sumber di `gali_core/config.py` (dipakai coverage.py; **catatan**: 5 file lain — sites.py,
+ownership.py, metrics/engine.py, core_normalizer.py — masih punya salinan hardcoded list yang sama,
+sengaja TIDAK direfactor sesi ini karena risiko regresi pada kode Fase 2–4 yang sudah teruji; scope
+efeknya rendah karena universe itu keputusan kebijakan yang jarang berubah, bukan fakta yang didapat
+dari perhitungan).
+
+**9 route dibangun**: `/`, `/map`, `/issuer/[symbol]`, `/cost-curve`, `/scenario`, `/divergence`,
+`/methodology`, `/coverage`, plus shared `MiningSitesMap` (MapLibre, basemap gratis openfreemap.org).
+
+**Diverifikasi live di browser sungguhan** (bukan cuma dibaca kodenya): home (data leaderboard nyata),
+`/map` (52 titik GPS asli di Kalimantan), `/issuer/ADRO` (semua metrik + Evidence drawer menampilkan
+provenance nyata termasuk `source_raw_response_ids`), `/scenario` (**zero-shock invariant dari task
+5.12 terbukti end-to-end di UI**: body kosong → delta 0.0% persis; shock -20% → POST kedua sukses),
+`/cost-curve` (kurva tangga + garis benchmark render benar), `/coverage` (7/9 issuer completeness benar
+pasca-fix). `/methodology` dan `/divergence` diverifikasi via curl SSR (navigasi browser sempat macet
+di tab tsb, tidak dikejar lebih jauh karena SSR response sudah membuktikan kebenaran render).
+
+`pnpm run build` (production build) sukses bersih untuk seluruh 9 route. `pnpm exec eslint .` 0
+masalah (config ESLint flat baru dibuat, sempat salah versi — eslint 10 tidak kompatibel dengan
+eslint-config-next 15.5, diperbaiki ke eslint 9). Typecheck bersih. 59 test Python tetap hijau.
+
+**Blocker/gap jujur (bukan disembunyikan)**:
+1. Market cap belum ter-ingest → `/divergence` dan `rbv_gap_pct` di seluruh app null. Follow-up murah
+   (~1-2 kredit) tapi butuh cek syntax `where` clause Sectors screener sebelum dicoba — lihat catatan
+   task 6.9 di `BUILD_PLAN.md`.
+2. Playwright e2e (6.14) belum dikerjakan.
+3. Deploy Vercel/Fly.io (6.15) belum — diblokir task 0.8 (Neon+Upstash, tanggung jawab Aril), konsisten
+   dengan status 5.11b.
+4. `/issuer/[symbol]` belum punya donut chart destinasi & visualisasi graf kepemilikan (baru daftar teks).
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 404 / 1000 — tidak ada panggilan API live, semua kerja
+sesi ini terhadap data ter-cache)
+
+**Next:** Playwright e2e (6.14), lalu setelah Aril menyelesaikan task 0.8 — deploy (5.11b, 6.15) dan
+opsional ingest market cap untuk menghidupkan `/divergence`.
+
+---
 ## 2026-08-29 — Perbaikan Bug Scenario Studio (Task 5.12) & Regression Invariant
 
 **Selesai:** 5.12
