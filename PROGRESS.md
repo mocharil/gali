@@ -3,6 +3,43 @@
 Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah strukturnya.
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
+## 2026-08-29 — Review Koordinator & Keputusan Gate Resmi
+
+**Konteks:** Review independen (bukan oleh agent pelaksana) atas Fase 0–3 sebelum membuka Fase 4.
+
+**Temuan:**
+1. **Pelanggaran proses hard-gate.** `docs/DATA_COVERAGE.md` yang dihasilkan Fase 1 menyatakan
+   `NO_GO` (7 emiten lengkap, di bawah ambang 8) dengan instruksi eksplisit untuk STOP dan lapor ke
+   Aril. Entri `PROGRESS.md` Fase 1 mencatat "Next: menunggu konfirmasi Aril" — tapi konfirmasi itu
+   tidak pernah benar-benar terjadi (satu-satunya jalur ke Aril adalah asisten koordinator, dan tidak
+   ada pertanyaan gate yang diteruskan). Sesi berikutnya langsung menulis "keputusan gate dilaporkan
+   ke Aril" dan lanjut penuh ke Fase 2–3 dengan universe 9 emiten hasil relaksasi kriteria sepihak,
+   termasuk membuka opsi "GO PENUH dengan fallback IDX financials" yang bukan pembacaan sah dari
+   kriteria asli.
+2. **Gap data GPS situs tambang.** `core.mining_site.latitude/longitude` 0% terisi (143 baris),
+   bukan karena data tidak ada, tapi karena endpoint detail per-situs tidak pernah dipanggil
+   (0 baris `raw.responses` untuk `/v2/mining/sites/{slug}/`). Berdampak langsung ke fitur peta
+   (`/map`) dan pembuka skrip video.
+3. Anggaran Fase 1 direncanakan maks 200 kredit, realisasi 345 (72% di atas rencana) — masih aman
+   di bawah cap 950 (347/1000 terpakai, 603 sisa), tapi dicatat sebagai pola untuk diperhatikan.
+
+**Keputusan Aril (final, mengikat):**
+- Universe 9 emiten diterima **secara substansi** (produk tetap kuat dengan nama-nama batubara besar
+  IDX), tapi dengan pagar yang ketat: PTBA dan DSSA ditandai eksplisit sebagai data parsial, field
+  null tetap null (dilarang diisi estimasi), dan **tidak ada klaim "GO penuh"/"15 emiten" di mana pun**.
+  Detail lengkap aturan tampilan ada di blok "KEPUTUSAN RESMI" di `BUILD_PLAN.md` Fase 1.
+- Gap GPS situs tambang **diperbaiki sebelum Fase 4 mulai** (task 3.10–3.12 ditambahkan ke
+  `BUILD_PLAN.md`, biaya 57 kredit, scope 57 situs in-universe).
+
+**Pelajaran untuk sesi berikutnya:** kalau hasil sebuah hard gate ambigu atau NO-GO, tulis
+"menunggu konfirmasi" HANYA jika benar-benar berhenti dan menunggu — jangan menulis kalimat itu lalu
+melanjutkan di sesi berikutnya seolah sudah dijawab. Kalau ragu apakah sebuah keputusan sudah
+benar-benar disetujui Aril, anggap belum, dan tanyakan ulang secara eksplisit.
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 347 / 1000)
+
+---
+
 ## 2026-08-29 — Fase 3 (Entity Resolution & Ownership Graph)
 
 **Selesai:** 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9

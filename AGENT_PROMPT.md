@@ -1,5 +1,113 @@
 # Prompt untuk Agent Pelaksana
 
+> **Sesi 3 ada di bawah ini.** Sesi 1 dan 2 diarsipkan di bagian bawah file.
+> Selalu paste blok sesi terbaru.
+
+---
+
+# SESI 3 — Koreksi Gate + Fix GPS (task 3.10–3.12), lalu Fase 4
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, entri paling atas: **"Review Koordinator & Keputusan Gate Resmi"**
+2. `BUILD_PLAN.md`, Fase 1, blok **"KEPUTUSAN RESMI (2026-08-29, dikonfirmasi Aril)"**
+3. `BUILD_PLAN.md`, Fase 3, blok **"Koreksi wajib sebelum Fase 4"** (task 3.10–3.12)
+
+### Konteks — baca ini dengan serius
+
+Fase 0–3 sudah menghasilkan banyak kerja bagus: 30 test lolos, CI hijau, ownership graph teruji
+sampai ke kasus Adaro yang cocok persis dokumentasi resmi. Tapi review independen menemukan **satu
+pelanggaran proses yang serius**: hasil audit Fase 1 sendiri bilang `NO_GO` dengan instruksi STOP,
+tapi sesi kerja berikutnya menulis "keputusan gate dilaporkan ke Aril" dan langsung lanjut ke Fase
+2–3 dengan universe yang direlaksasi sepihak — **padahal konfirmasi itu tidak pernah benar-benar
+terjadi.**
+
+Ini sudah diselesaikan. Aril sudah memberi keputusan final (lihat `BUILD_PLAN.md` Fase 1), dan
+substansi kerja Fase 2–3 tetap dipakai. **Tapi pelajari pola ini:** kalau kamu menulis "menunggu
+konfirmasi X" di `PROGRESS.md`, itu janji untuk benar-benar berhenti. Jangan menulis kalimat itu lalu
+di sesi berikutnya bertindak seolah sudah dijawab. Kalau ragu apakah sesuatu sudah disetujui,
+anggap belum.
+
+### Tugasmu sesi ini, berurutan
+
+**Langkah 1 — task 3.10: backfill GPS situs tambang (57 kredit).**
+Panggil endpoint detail `/v2/mining/sites/{slug}/` (wrapper `mining_site_detail` sudah ada di
+`gali_core/sectors/endpoints.py`) untuk **57 situs** yang terhubung ke 9 emiten in-universe via
+`graph.issuer_mining_link`. Query untuk dapatkan daftar slug-nya:
+
+```sql
+select distinct s.slug
+from core.mining_site s
+join graph.issuer_mining_link l on l.company_slug = s.company_slug
+where l.symbol in ('AADI','ADMR','ADRO','BUMI','BYAN','GEMS','ITMG','PTBA','DSSA');
+```
+
+Buat/lengkapi Dagster asset untuk endpoint ini kalau belum ada, jalankan hanya untuk 57 slug ini
+(**jangan** all 156 situs — di luar scope in-universe, buang-buang kredit). Setelah selesai,
+verifikasi: `core.mining_site.latitude`/`longitude` terisi untuk situs-situs itu.
+
+**Langkah 2 — task 3.11: update `docs/DATA_COVERAGE.md`.**
+Ganti baris "0 dengan koordinat GPS" dengan angka pasca-backfill. Tambahkan catatan singkat bahwa
+keputusan gate final (9 emiten: 7 lengkap + 2 parsial) ditetapkan Aril pada 2026-08-29, dengan
+rujukan ke blok "KEPUTUSAN RESMI" di `BUILD_PLAN.md`.
+
+**Langkah 3 — task 3.12: entri `PROGRESS.md`.**
+Satu entri ringkas: apa yang diperbaiki di 3.10–3.11, kredit yang terpakai backfill, dan konfirmasi
+bahwa aturan tampilan PTBA/DSSA (field null tetap null, badge low-confidence, bobot M8 dinormalisasi
+ulang) sudah kamu pahami dan akan diterapkan mulai Fase 4.
+
+**Langkah 4 — centang 3.10, 3.11, 3.12 di `BUILD_PLAN.md`.**
+
+**Langkah 5 — mulai Fase 4 (Metric Engines, task 4.1–4.14).**
+Implementasikan M1–M9 persis sesuai rumus di `BUILD_PLAN.md` §4.1. Yang WAJIB diperhatikan mengingat
+keputusan gate:
+
+- **M1 (RLI)**: golden test Adaro tetap wajib — `819 / 48.11 = 17.02 tahun` (toleransi 0.05). Untuk
+  **DSSA**, `total_reserves_Mt` null → RLI harus `NULL`, bukan dilewati diam-diam atau diisi 0.
+  Pastikan ada test eksplisit yang menegaskan ini.
+- **M2 (RBV)**: bergantung pada M1 dan `attributable_gross_profit`. Untuk **PTBA** (revenue/cost
+  null) dan **DSSA** (RLI null) → RBV harus `NULL` untuk keduanya. Test eksplisit untuk kedua kasus.
+- **M4 (Cash Cost)**: untuk **PTBA** → `NULL` (revenue/cost null). PTBA tetap boleh muncul di kurva
+  biaya nasional untuk emiten lain, tapi titik PTBA sendiri tidak ada di kurva karena datanya kosong.
+- **M8 (Ground Truth Score)**: ini sudah didesain untuk kasus ini di spec (§4.1 M8: "komponen yang
+  datanya null di-drop dan bobotnya dinormalisasi ulang"). Terapkan persis itu untuk PTBA dan DSSA,
+  dan pastikan `confidence` di `metrics.issuer_metrics` mencatat bobot efektif yang benar-benar
+  dipakai — bukan asumsi bobot penuh.
+- **Evidence (4.10)**: untuk field yang null, `evidence` tetap harus ada dan secara eksplisit
+  menyatakan field mana yang kosong dan kenapa (mis. `"total_reserves_Mt": null, "reason": "not
+  reported by Sectors mining/companies/performance endpoint"`) — bukan `evidence` kosong.
+
+### Definisi selesai untuk sesi ini
+
+1. 3.10–3.12 dicentang, GPS terisi untuk 57 situs, `docs/DATA_COVERAGE.md` ter-update
+2. Fase 4 berjalan sejauh yang bisa diselesaikan dalam sesi ini; task yang belum selesai dibiarkan
+   tidak tercentang dengan jujur
+3. Test baru untuk kasus null PTBA/DSSA di M1/M2/M4 hijau
+4. `ruff check` dan `mypy` bersih
+5. Commit + push; CI hijau
+6. `PROGRESS.md` diupdate
+
+### Kapan berhenti dan bertanya (tegas kali ini)
+
+Kalau kamu menemukan ambiguitas lain yang levelnya sama seperti temuan gate di atas — sesuatu yang
+kalau salah arah akan sia-siakan banyak kerja berikutnya — **berhenti sungguhan**. Tulis pertanyaannya
+di `PROGRESS.md` bagian "Blocker", commit, lalu selesai untuk sesi ini. Jangan menebak jawabannya dan
+melanjutkan.
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 2</b></summary>
+
+# Prompt untuk Agent Pelaksana
+
 > **Sesi 2 ada di bawah ini.** Prompt kickoff Sesi 1 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
@@ -105,6 +213,8 @@ bahwa 0.11 masih terblokir.
 ## ▲ SALIN SAMPAI SINI ▲
 
 ---
+
+</details>
 
 <details>
 <summary><b>Arsip — Prompt Kickoff Sesi 1</b></summary>

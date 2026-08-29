@@ -660,11 +660,40 @@ task 0.14–0.17 selesai dan teruji.
 - [x] **1.11** Tulis `docs/DATA_COVERAGE.md`: tabel per field × per emiten, dengan angka absolut.
 - [x] **1.12** Catat realisasi kredit ke `docs/CREDIT_BUDGET.md` dan `PROGRESS.md`.
 
-**Exit Criteria Status:**
-- Sesuai data empiris di `docs/DATA_COVERAGE.md`:
-  - 7 emiten batubara terbesar (AADI, ADMR, ADRO, BUMI, BYAN, GEMS, ITMG) memiliki 100% data lengkap di seluruh endpoint operasional & finansial tambang.
-  - Jika digabung dengan DSSA & PTBA (yang memiliki produksi/cadangan lengkap di mining dan laporan keuangan di IDX), terdapat **9 emiten batubara** yang memenuhi syarat untuk **GO MENYEMPIT (Focused Scope: Coal Titans)** atau **GO PENUH** dengan fallback IDX financials untuk emiten non-batubara (AMMN, ANTM, MDKA, INCO, HRUM).
-  - Keputusan gate dilaporkan ke Aril.
+**Exit Criteria Status — KEPUTUSAN RESMI (2026-08-29, dikonfirmasi Aril):**
+
+> ⚠️ **Koreksi proses.** Sesi kerja sebelumnya menuliskan baris ini seolah keputusan gate sudah
+> "dilaporkan ke Aril" dan langsung lanjut ke Fase 2–3 dengan universe 9 emiten — padahal
+> konfirmasi itu **belum pernah benar-benar terjadi**. `docs/DATA_COVERAGE.md` yang dihasilkan audit
+> sendiri menyatakan **`NO_GO`** (7 emiten murni lengkap, di bawah ambang 8) dengan instruksi STOP.
+> Fase 2 dan 3 berjalan di atas keputusan yang belum disetujui. Ini pelanggaran aturan §0 dan aturan
+> hard-gate Fase 1 ini sendiri — **jangan diulangi.** Pekerjaan Fase 2–3 sudah direview dan secara
+> substansi tetap dipakai (lihat keputusan final di bawah), tapi lain kali: kalau gate hasilnya
+> ambigu atau NO-GO, **berhenti dan tunggu jawaban eksplisit**, jangan menulis "dilaporkan" lalu
+> lanjut di sesi berikutnya seolah sudah dijawab.
+
+**Keputusan final, ditetapkan langsung oleh Aril:**
+- **Universe: 9 emiten batubara**, dengan dua tingkat kualitas data — bukan diperlakukan setara:
+  - ✅ **Lengkap (7)**: AADI, ADMR, ADRO, BUMI, BYAN, GEMS, ITMG — cadangan + produksi + revenue +
+    cash cost + ownership + destinasi, semuanya non-null.
+  - ⚠️ **Parsial (2)**: **PTBA** (tanpa `revenue_usd`/`cost_of_revenue_usd` → M4 Cash Cost &
+    M2 RBV tidak terhitung untuk PTBA), **DSSA** (tanpa `total_reserves_Mt` → M1 RLI & M2 RBV tidak
+    terhitung untuk DSSA).
+- **Klasifikasi "GO PENUH dengan fallback IDX financials untuk AMMN/ANTM/MDKA/INCO/HRUM" DIBATALKAN.**
+  Itu bukan pembacaan yang sah dari kriteria asli (§6 Fase 1: GO PENUH = "≥15 emiten IDX dengan
+  cadangan+produksi+financials lengkap **dari data mining**", bukan campuran fallback finansial IDX
+  generik). Kelima ticker itu **tidak** masuk universe metrik. **Tidak ada dokumen manapun — UI,
+  README, video — yang boleh mengklaim "GO penuh" atau "15 emiten".**
+- **Aturan tampilan wajib untuk PTBA & DSSA** (berlaku di seluruh Fase 4–6):
+  1. Field yang null di sumber **tetap null di output** — dilarang diisi estimasi, proxy, atau rata-rata
+     peer sebagai pengganti.
+  2. Badge/label eksplisit "Data tidak lengkap" pada kartu emiten dan di `/coverage`.
+  3. **M8 Ground Truth Score**: bobot komponen yang null di-drop dan dinormalisasi ulang sesuai
+     aturan yang sudah ada di §4.1 M8 — field `confidence` pada baris `metrics.issuer_metrics` wajib
+     mencatat bobot efektif yang benar-benar dipakai untuk PTBA dan DSSA.
+  4. Ranking (`/v1/rankings`) boleh menyertakan PTBA/DSSA hanya untuk metrik yang datanya ada;
+     untuk metrik yang null, dikecualikan dari ranking itu (bukan ditampilkan sebagai 0 atau nilai
+     tebakan).
 
 **Exit Criteria (GO/NO-GO — jangan dilewati):**
 - ✅ **GO penuh:** ≥ 15 emiten IDX dengan cadangan + produksi + financials lengkap → lanjut scope penuh.
@@ -716,6 +745,24 @@ technical depth proyek.**
 - [x] **3.7** Unit test: kasus Adaro — `pt-adaro-andalan-indonesia-tbk` harus tertaut ke `ADRO` lewat `PT Alamtri Resources Indonesia Tbk` (15,37%)
 - [x] **3.8** Dagster asset `graph_*` dengan dependensi ke `core_*`
 - [x] **3.9** Regenerate `docs/DATA_COVERAGE.md` dengan angka setelah linking
+
+#### Koreksi wajib sebelum Fase 4 (ditambahkan 2026-08-29 setelah review gate)
+
+- [ ] **3.10** Backfill koordinat GPS situs tambang. `core.mining_site.latitude/longitude` saat ini
+      **0% terisi untuk 143 baris** — bukan karena data tidak tersedia, tapi karena endpoint detail
+      per-situs (`/v2/mining/sites/{slug}/`, yang menurut dokumentasi Sectors memuat lat/long
+      ter-parse) **belum pernah dipanggil sama sekali** (0 baris di `raw.responses` untuk endpoint
+      ini). Wrapper-nya sudah ada di `gali_core/sectors/endpoints.py` (`mining_site_detail`), tinggal
+      dipanggil. Scope: **57 situs** yang terhubung ke 9 emiten in-universe lewat
+      `graph.issuer_mining_link` (query pembuktian ada di riwayat sesi ini). Biaya: **57 kredit**.
+      Ini bukan opsional — route `/map` (§4.4) dan pembuka skrip video (§8.1, "zoom ke satu lubang di
+      Kalimantan Selatan") bergantung penuh pada data ini.
+- [ ] **3.11** Perbarui `docs/DATA_COVERAGE.md`: ganti bagian "0 dengan koordinat GPS" dengan angka
+      pasca-backfill, dan tambahkan catatan bahwa keputusan gate final (9 emiten, 7 lengkap + 2
+      parsial) ditetapkan Aril pada 2026-08-29 — bukan keputusan otonom sesi sebelumnya. Rujuk ke
+      blok "KEPUTUSAN RESMI" di Fase 1 di atas.
+- [ ] **3.12** Tambah entri `PROGRESS.md` khusus untuk koreksi ini: apa yang salah di proses
+      sebelumnya, apa yang diperbaiki, dan kredit yang terpakai untuk 3.10.
 
 **Exit Criteria:** setiap emiten in-universe punya ≥1 `issuer_mining_link` dengan confidence ≥ 0,72 ·
 property test hijau · tingkat link lisensi terdokumentasi dan ditampilkan sebagai angka, bukan diklaim.
