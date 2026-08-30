@@ -15,6 +15,7 @@ from gali_core.config import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from gali_api.dependencies import close_redis_pool, init_redis_pool
+from gali_api.ratelimit import RateLimitMiddleware
 from gali_api.routers import (
     cost_curve,
     coverage,
@@ -71,23 +72,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS Middleware
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3000",
-    "https://gali.fly.dev",
-    "https://mocharil-gali.vercel.app",
-    "*",  # Allowed for hackathon public presentation
-]
+# CORS Middleware — origins come from CORS_ALLOW_ORIGINS (settings.cors_origins), never hardcoded.
+# A wildcard "*" combined with allow_credentials=True lets Starlette reflect ANY request Origin
+# verbatim (it cannot send an actual "*" header when credentials are allowed), which is equivalent
+# to no CORS restriction at all — do not reintroduce "*" here.
+_cors_settings = get_settings()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=_cors_settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Rate Limiting Middleware — Redis sliding-window counter per client IP (anon) or API key (keyed).
+# Limits come from settings.rate_limit_anon_per_min / rate_limit_keyed_per_min.
+# Fail-open: if Redis is down, rate limiting is bypassed rather than blocking all traffic.
+app.add_middleware(RateLimitMiddleware)
 
 
 @app.middleware("http")

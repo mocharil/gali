@@ -97,4 +97,5 @@ jobs:
           ENVIRONMENT: test
           GALI_DRY_RUN: "1"
         run: |
-          pytest packages/core/tests -v --cov=gali_core
+          pytest packages/core/tests packages/api/tests -v --cov=gali_core
+

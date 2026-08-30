@@ -1,0 +1,86 @@
+name: Hot Refresh (Daily Ingest)
+
+# Task 7.1 — hot_refresh schedule replaces the Dagster daemon that cannot run
+# persistently on Vercel serverless. Runs gali ingest --tier hot (market data:
+# market cap screener, commodity prices, foreign flows, free-float, filings,
+# broker summaries). Cron target: 18:30 WIB = 11:30 UTC on weekdays.
+# workflow_dispatch allows manual trigger with optional tier override.
+
+on:
+  schedule:
+    - cron: "30 11 * * 1-5"  # 18:30 WIB (UTC+7), Mon–Fri
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "Ingest tier to run"
+        required: false
+        default: "hot"
+        type: choice
+        options:
+          - hot
+          - warm
+          - cold
+          - all
+      dry_run:
+        description: "Dry run (no API calls, read from cache only)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  ingest:
+    name: "gali ingest --tier ${{ github.event.inputs.tier || 'hot' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "packages/core" -e "packages/pipeline"
+
+      - name: Run hot_refresh ingest
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL_SYNC: ${{ secrets.DATABASE_URL_SYNC }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          SECTORS_API_KEY: ${{ secrets.SECTORS_API_KEY }}
+          SECTORS_CREDIT_HARD_CAP: ${{ secrets.SECTORS_CREDIT_HARD_CAP }}
+          GALI_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          ENVIRONMENT: production
+        run: |
+          TIER="${{ github.event.inputs.tier || 'hot' }}"
+          echo "Running: gali ingest --tier ${TIER}"
+          gali ingest --tier "${TIER}"
+
+      - name: Report credit usage
+        if: always()
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL_SYNC: ${{ secrets.DATABASE_URL_SYNC }}
+          ENVIRONMENT: production
+        run: |
+          echo "=== Credit Ledger Report ==="
+          gali credits report || echo "Credit report unavailable"
+
+      - name: Report coverage
+        if: always()
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL_SYNC: ${{ secrets.DATABASE_URL_SYNC }}
+          ENVIRONMENT: production
+        run: |
+          echo "=== Data Coverage Report ==="
+          gali coverage || echo "Coverage report unavailable"
