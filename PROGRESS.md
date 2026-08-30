@@ -5,6 +5,39 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-08-30 — Task 0.8b: Redis TCP password ditemukan (koordinator)
+
+**Konteks:** Aril bertanya cara mendapatkan password TCP Redis Upstash. Sesi sebelumnya sudah
+mencoba dan gagal mengambilnya lewat otomasi browser, lalu Aril/sesi lain sempat menambahkan baris
+`REDIS_URL` kedua di `.env.production` memakai `UPSTASH_REDIS_REST_TOKEN` sebagai password — tapi
+catatan proyek saat itu menyatakan REST token dan password TCP AUTH adalah dua secret berbeda.
+
+**Temuan:** Klaim itu **diverifikasi langsung dan ternyata salah** untuk database Upstash ini. Tes
+empiris dengan `redis-py` (`PING`/`SET`/`GET` lewat TLS ke `trusty-terrapin-41452.upstash.io:6379`,
+password = nilai `UPSTASH_REDIS_REST_TOKEN`) berhasil sempurna. Jadi di Upstash, REST token dan
+password Redis AUTH **memang satu secret yang sama** — asumsi sebelumnya (bahwa keduanya berbeda)
+tidak pernah benar-benar dites, hanya digeneralisasi dari pengetahuan umum.
+
+**Perbaikan:**
+- Duplikat baris `REDIS_URL=` di `.env.production` dibersihkan jadi satu baris.
+- **Diverifikasi hidup end-to-end**: API dijalankan sungguhan dengan `DATABASE_URL`→Neon dan
+  `REDIS_URL`→Upstash sekaligus. `/ready` → `database:true, redis:true`. `GET /v1/issuers/ADRO` →
+  cache key dikonfirmasi benar-benar tersimpan di Upstash lewat query langsung (`redis.keys('gali:*')`
+  dari luar aplikasi, bukan cuma percaya log). `POST /v1/scenario` body kosong → zero-shock invariant
+  tetap 0.0% terhadap seluruh stack production (Neon + Upstash bersamaan).
+- `BUILD_PLAN.md` task 0.8b ditandai selesai; catatan 5.11b diperbarui (blocker Neon/Upstash sudah
+  hilang, tersisa murni eksekusi `flyctl` yang butuh login Aril).
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 404 / 1000)
+
+**Pelajaran:** jangan menuliskan klaim teknis ("X dan Y adalah secret berbeda") sebagai fakta proyek
+tanpa mengetesnya kalau pengujian itu murah dan cepat dilakukan — koreksi lebih baik didapat lewat
+verifikasi 30 detik daripada membiarkan asumsi salah mengarahkan pekerjaan berikutnya.
+
+**Next:** 5.11b (deploy API ke Fly.io — butuh Aril `fly auth login`), lalu 6.15 (deploy Web ke Vercel).
+
+---
+
 ## 2026-08-30 — Fase 6: Playwright E2E Test Suite (Task 6.14) & Redis Cache Fix
 
 Selesai: 6.14 (Playwright e2e test suite setup dari nol dengan 4 skenario inti)

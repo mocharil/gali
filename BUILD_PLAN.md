@@ -597,15 +597,17 @@ Total tersedia: **1.000 kredit.** Habis = proyek mati. Tiga jenjang TTL:
       tetap 0.0%), dan `/v1/coverage` semua mengembalikan data identik dengan lokal. Kredensial di
       `.env.production` (terpisah dari `.env` lokal — dev tetap pakai Docker, lihat komentar di file
       itu).
-- [ ] **0.8b** Upstash (Redis) diprovisi (database `gali`, GCP us-central1, free tier) tapi **belum
-      terpakai** — `.env.production` masih placeholder `REPLACE_WITH_TCP_PASSWORD` untuk `REDIS_URL`.
-      Root cause: Upstash tidak pernah menampilkan token/password sebagai teks biasa di UI-nya (hanya
-      tombol copy-to-clipboard), dan pembacaan clipboard/navigasi `data:`/`file:` URL sengaja diblokir
-      oleh ekstensi browser (proteksi kredensial yang wajar — tidak diakali). `UPSTASH_REDIS_REST_URL`/
-      `UPSTASH_REDIS_REST_TOKEN` sudah ada di `.env.production` tapi **tidak dipakai backend** —
-      `gali_api` pakai `redis.asyncio` (protokol RESP biasa), butuh `REDIS_URL=rediss://default:<TCP
-      password>@trusty-terrapin-41452.upstash.io:6379`, bukan token REST. Perlu Aril salin manual dari
-      tombol copy di baris `redis-cli --tls -u redis://...` pada dashboard Upstash.
+- [x] **0.8b** Upstash (Redis) diprovisi dan **terpakai penuh**. Koreksi atas catatan sebelumnya: sempat
+      diasumsikan REST token dan password TCP AUTH adalah dua secret berbeda di Upstash — **asumsi itu
+      salah, dan sudah diverifikasi empiris (bukan cuma dibaca dari dokumentasi)**. Tes langsung dengan
+      `redis-py` (`PING`/`SET`/`GET` lewat TLS ke `trusty-terrapin-41452.upstash.io:6379`) memakai
+      `UPSTASH_REDIS_REST_TOKEN` sebagai password AUTH berhasil. `REDIS_URL` di `.env.production` sudah
+      diisi dengan format `rediss://default:<token>@trusty-terrapin-41452.upstash.io:6379` (satu baris,
+      duplikat sebelumnya sudah dibersihkan). **Diverifikasi hidup end-to-end**: API dijalankan
+      sungguhan dengan `DATABASE_URL`→Neon dan `REDIS_URL`→Upstash sekaligus — `/ready` mengembalikan
+      `database:true, redis:true`; `GET /v1/issuers/ADRO` menghasilkan cache key yang **dikonfirmasi
+      benar-benar tersimpan** di Upstash lewat query langsung (`redis.keys('gali:*')`); `POST
+      /v1/scenario` zero-shock invariant tetap benar terhadap seluruh stack production.
 - [x] **0.9** Alembic init + migrasi pertama: schema `raw` dan `ops` (§3.1, §3.6)
 - [x] **0.10** `SectorsClient` v0: httpx async, header Authorization, retry+backoff, tulis ke `raw.responses` + `ops.credit_ledger`
 - [x] **0.11** Smoke test: panggil `/v2/subsectors/` (1 kredit), verifikasi baris masuk ke kedua tabel
@@ -831,12 +833,13 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 - [x] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
 - [x] **5.10** pytest integration test terhadap Postgres ephemeral (testcontainers atau service CI)
 - [x] **5.11a** `infra/Dockerfile.api` + `fly.api.toml` disiapkan (artefak deployment ada).
-- [ ] **5.11b** Deploy sungguhan ke Fly.io + `/health` hijau di URL publik. **Diblokir oleh task 0.8**
-      (provisioning Neon + Upstash) yang belum dikerjakan Aril — `.env` masih menunjuk ke Postgres/Redis
-      Docker lokal. Ini task manusia, bukan sesuatu yang bisa diselesaikan agent sendirian (butuh akun
-      Fly.io + kredensial). **Catatan koreksi:** sesi sebelumnya mencentang task 5.11 gabungan ini
-      sebagai selesai padahal bagian deployment publik belum terjadi — dipecah jadi 5.11a/5.11b supaya
-      status sebenarnya terlihat jelas.
+- [ ] **5.11b** Deploy sungguhan ke Fly.io + `/health` hijau di URL publik. **Blocker task 0.8 sudah
+      selesai** (Neon + Upstash keduanya terprovisi dan terverifikasi hidup di `.env.production`,
+      lihat 0.8a/0.8b). Yang tersisa murni eksekusi: `flyctl` perlu terpasang + `fly auth login` oleh
+      Aril (akun pihak ketiga, bukan sesuatu yang boleh agent lakukan sendiri), lalu `fly secrets set`
+      dari `.env.production` dan `fly deploy`. **Catatan sejarah:** sesi lampau sempat mencentang task
+      5.11 gabungan ini sebagai selesai padahal deployment publik belum terjadi — dipecah jadi
+      5.11a/5.11b supaya status sebenarnya terlihat jelas; jangan diulangi pola itu.
 
 - [x] **5.12** **Perbaiki bug Scenario Studio (prioritas tinggi, sebelum Fase 6 task 6.8).**
       `simulate_scenario_shock()` harus memakai basis profit yang SAMA untuk baseline maupun
