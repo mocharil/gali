@@ -1,9 +1,121 @@
 # Prompt untuk Agent Pelaksana
 
-> **Sesi 4 ada di bawah ini.** Sesi 1-3 diarsipkan di bagian bawah file.
+> **Sesi 5 ada di bawah ini.** Sesi 1-4 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
 ---
+
+# SESI 5 — Deploy Fly.io + Vercel (5.11b, 6.15)
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, dua entri teratas ("Task 0.8b: Redis TCP password ditemukan" dan entri Playwright e2e)
+2. `BUILD_PLAN.md`, task **0.8a**, **0.8b** (keduanya sudah selesai), **5.11b**, **6.15**
+3. `.env.production` di root repo — **jangan pernah commit, print isinya ke log, atau ke PR**
+
+### Konteks
+
+Neon (Postgres) dan Upstash (Redis) **keduanya sudah terprovisi penuh dan terverifikasi hidup**:
+migrasi Alembic sukses, data lokal disalin 100% cocok, dan API sudah dijalankan sungguhan dengan
+`DATABASE_URL`→Neon + `REDIS_URL`→Upstash sekaligus — `/ready` sehat, cache key dikonfirmasi benar-benar
+tersimpan di Upstash lewat query langsung, dan zero-shock invariant Scenario Studio tetap benar
+terhadap seluruh stack production. Playwright e2e juga sudah ada dan lolos (4/4) terhadap stack lokal.
+
+**Yang belum ada di mesin ini: CLI `flyctl` dan `vercel` belum terpasang sama sekali.** Belum pernah
+dicoba `fly auth login` atau `vercel login`.
+
+### Langkah 1 — Pasang CLI (boleh dikerjakan otomatis, ini instalasi tool biasa)
+
+```bash
+# flyctl (Windows/Git Bash)
+powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"
+# vercel CLI (lewat pnpm yang sudah ada)
+pnpm add -g vercel
+```
+
+Verifikasi keduanya: `flyctl version`, `vercel --version`.
+
+### Langkah 2 — STOP, minta Aril login
+
+**Instalasi CLI boleh otomatis, tapi login TIDAK.** `fly auth login` dan `vercel login` membuka OAuth
+browser flow ke akun pihak ketiga milik Aril — ini bukan aksi yang boleh agent lakukan sendiri (sama
+seperti aturan pembuatan akun Neon/Upstash sebelumnya). Setelah CLI terpasang:
+
+1. Minta Aril jalankan `flyctl auth login` dan `vercel login` sendiri di terminal (masing-masing
+   ~30 detik, browser OAuth)
+2. **Tunggu konfirmasi eksplisit dari Aril** bahwa keduanya sudah login sebelum lanjut ke Langkah 3
+3. Verifikasi dengan `flyctl auth whoami` dan `vercel whoami` — jangan asumsikan login berhasil hanya
+   karena Aril bilang "sudah", cek nyata
+
+### Langkah 3 — Deploy API ke Fly.io (task 5.11b)
+
+`infra/Dockerfile.api` dan `infra/fly.api.toml` sudah ada dari Fase 5 (artefak siap pakai, belum pernah
+dipakai deploy sungguhan). Sebelum deploy:
+
+1. Cek `infra/fly.api.toml` — pastikan nama app, region (Singapore/`sin` kalau tersedia, dekat dengan
+   Neon), dan port cocok dengan `Dockerfile.api`
+2. `fly launch` atau `fly apps create` sesuai nama di `fly.api.toml` (jangan buat app baru kalau nama
+   sudah dipakai — cek `fly apps list` dulu)
+3. Set secrets dari `.env.production` **satu per satu via `fly secrets set`, jangan pernah `cat
+   .env.production` ke terminal log yang tersimpan**:
+   ```bash
+   fly secrets set DATABASE_URL="..." DATABASE_URL_SYNC="..." REDIS_URL="..." \
+     SECTORS_API_KEY="..." --app <nama-app>
+   ```
+4. `fly deploy -c infra/fly.api.toml`
+5. **Verifikasi hidup dari URL publik** (`https://<nama-app>.fly.dev`, bukan localhost):
+   `/health`, `/ready` (harus `database:true, redis:true`), `GET /v1/issuers/ADRO`, dan
+   `POST /v1/scenario` body kosong (harus delta 0.0% persis — ulangi pengujian yang sudah dilakukan
+   lokal terhadap Neon+Upstash, sekarang lewat internet publik sungguhan)
+6. Centang 5.11b di `BUILD_PLAN.md` **hanya setelah** langkah 5 nyata terjadi, bukan setelah `fly
+   deploy` selesai tanpa error — belum tentu itu artinya aplikasi benar-benar bisa diakses dan benar
+
+### Langkah 4 — Deploy Web ke Vercel (task 6.15)
+
+1. Update `.env.production`: `NEXT_PUBLIC_API_BASE_URL` diarahkan ke URL Fly.io yang baru live dari
+   Langkah 3 (ganti placeholder `https://gali-api.fly.dev`)
+2. Deploy `packages/web` ke Vercel — root directory project di Vercel harus diset ke `packages/web`
+   (monorepo, bukan root repo)
+3. Set env var yang sama (`NEXT_PUBLIC_API_BASE_URL`) di dashboard/CLI Vercel
+4. Setelah domain Vercel yang sebenarnya diketahui, update `CORS_ALLOW_ORIGINS` di `fly secrets` API
+   (ganti placeholder `https://gali.vercel.app` di `.env.production` kalau domain asli berbeda), lalu
+   `fly deploy` ulang API supaya CORS benar
+5. **Verifikasi hidup dari domain Vercel publik**: buka di browser, cek `/`, `/map`, `/issuer/ADRO`,
+   dan `/scenario` — jalankan skenario sungguhan, cek network tab bahwa request benar-benar ke
+   `<nama-app>.fly.dev`, bukan localhost atau gagal karena CORS
+
+### Definisi selesai sesi ini
+
+1. `flyctl`/`vercel` CLI terpasang, Aril sudah login (diverifikasi via `whoami`, bukan diasumsikan)
+2. API live di Fly.io, **diverifikasi dari URL publik** dengan urutan tes yang sama seperti yang
+   sudah dilakukan berkali-kali sepanjang proyek ini terhadap localhost — jangan lewati verifikasi
+   hanya karena sudah pernah dites secara lokal
+3. Web live di Vercel, **diverifikasi dari domain publik**, termasuk bahwa ia benar-benar memanggil
+   API Fly.io (bukan API lokal yang kebetulan masih jalan di mesin dev)
+4. CORS benar (domain Vercel asli ada di `CORS_ALLOW_ORIGINS` API)
+5. `BUILD_PLAN.md` dan `PROGRESS.md` diupdate jujur sesuai apa yang benar-benar diverifikasi publik
+6. Commit + push, CI hijau
+
+### Kapan berhenti dan bertanya
+
+- CLI login (Langkah 2) — **selalu berhenti**, tidak ada pengecualian
+- Kalau nama app Fly.io sudah dipakai orang lain (nama global unik) — tanya Aril nama alternatif,
+  jangan menimpa/menebak
+- Kalau CORS/domain Vercel butuh keputusan (custom domain vs `*.vercel.app` default) — tanya Aril
+- Kalau menemukan bug sekelas bug scenario engine (dua bagian sistem menghitung hal yang sama dengan
+  cara berbeda) saat verifikasi publik — perbaiki di sumbernya, tambah regression test, laporkan
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 4</b></summary>
 
 # SESI 4 — Selesaikan Redis, lalu Deploy (5.11b, 6.14, 6.15)
 
