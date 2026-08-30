@@ -918,9 +918,13 @@ p95 < 400 ms pada load test.
       (divergence). **Belum:** global `error.tsx` boundary, audit a11y sistematis, uji responsif mobile
       yang menyeluruh.
 - [x] **6.13** Footer disclaimer investasi tampil di semua halaman (lewat root layout) dan di `README.md`.
-- [ ] **6.14** Playwright e2e — **belum dikerjakan** sesi ini. Verifikasi dilakukan manual live (browser +
-      curl SSR) untuk kesembilan route, termasuk uji interaktif Scenario Studio dua kali dan production
-      build (`next build`) sukses bersih untuk semua route — tapi ini bukan pengganti suite e2e otomatis.
+- [x] **6.14** Playwright e2e — **selesai dan terverifikasi 100% hijau** (`packages/web/e2e/gali.spec.ts`).
+      Mencakup 4 skenario inti:
+      1. Home page render headline stats & 9-emiten leaderboard.
+      2. Navigasi click-through ke `/issuer/ADRO` & verifikasi pembukaan modal Evidence & Provenance.
+      3. Scenario Studio zero-shock regression invariant (`delta_rbv_pct == 0.0%` untuk semua emiten lengkap)
+         dan interaktivitas live slider shock komoditas (-20.0%).
+      4. Truth Audit & Coverage page menampilkan data nyata DB (52/57 GPS situs tambang = 91.2%, ledger 404/1000 kredit).
 - [ ] **6.15** Deploy ke Vercel/Fly.io — **belum dikerjakan**, konsisten dengan status 5.11b: Neon+Upstash
       (task 0.8) belum diprovisi Aril. Semua verifikasi sesi ini berjalan di Docker lokal
       (`gali-postgres`:5433, `gali-redis`:6379) + `next build` production build lokal.

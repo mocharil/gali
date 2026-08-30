@@ -45,6 +45,14 @@ async def set_cached_json(
     try:
         if isinstance(payload, BaseModel):
             data = payload.model_dump_json()
+        elif isinstance(payload, list):
+            serialized = [item.model_dump(mode="json") if isinstance(item, BaseModel) else item for item in payload]
+            data = json.dumps(serialized)
+        elif isinstance(payload, dict):
+            serialized_dict = {
+                k: v.model_dump(mode="json") if isinstance(v, BaseModel) else v for k, v in payload.items()
+            }
+            data = json.dumps(serialized_dict, default=str)
         else:
             data = json.dumps(payload, default=str)
         await redis.setex(key, ttl_seconds, data)

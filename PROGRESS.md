@@ -5,7 +5,22 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
-## 2026-08-29/30 — Task 0.8: Provisioning Neon + Upstash (koordinator)
+## 2026-08-30 — Fase 6: Playwright E2E Test Suite (Task 6.14) & Redis Cache Fix
+
+Selesai: 6.14 (Playwright e2e test suite setup dari nol dengan 4 skenario inti)
+Blocker: task 0.8b (Upstash TCP password pending di `.env.production` untuk live cloud deploy)
+Kredit terpakai sesi ini: 0 (kumulatif: 404 / 1000)
+Keputusan yang diambil:
+- Menyiapkan Playwright end-to-end test suite di `packages/web/e2e/gali.spec.ts` dan `packages/web/playwright.config.ts` yang mengotomasi booting FastAPI server (:8000) dan Next.js App (:3000).
+- Memverifikasi 4 skenario e2e secara otomatis:
+  1. `Home page renders headline stats and 9-issuer leaderboard` (ok)
+  2. `Click-through navigation from Home to Issuer Detail (/issuer/ADRO)` dan membuka modal Evidence & Provenance (ok)
+  3. `Scenario Studio zero-shock regression invariant` (`delta_rbv_pct == 0.0%` untuk semua emiten lengkap) serta shock dinamis -20% (ok)
+  4. `Truth Audit & Coverage Page displays data coverage and credit ledger` (52/57 GPS situs tambang = 91.2%, ledger 404/1000 kredit) (ok)
+- Memperbaiki bug serialisasi Pydantic pada Redis cache helper (`packages/api/gali_api/cache.py`): `set_cached_json` kini mengekstrak model dictionary (`model_dump(mode='json')`) saat menyimpan `list[BaseModel]` atau `dict[str, BaseModel]` ke Redis agar tidak tersimpan sebagai raw string `symbol='...'`.
+Next: task 0.8b (isi TCP password Upstash di `.env.production`), 5.11b (deploy API ke Fly.io), 6.15 (deploy Web ke Vercel).
+
+
 
 **Konteks:** Aril diminta menyelesaikan task 0.8 (provisioning Neon + Upstash, satu-satunya task manusia
 yang tersisa untuk membuka deploy). Aril meminta koordinator melakukannya langsung.

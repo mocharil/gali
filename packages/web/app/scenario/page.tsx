@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { Play, TrendingDown, TrendingUp, Minus } from "lucide-react";
@@ -28,6 +28,14 @@ export default function ScenarioStudioPage() {
       variable_cost_share: 0.65,
     });
   }
+
+  // Auto-run simulation on mount and debounced on parameter changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      runScenario();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [priceShockPct, countryShocks, licenseCliffShock]);
 
   const impacts = mutation.data?.impacts ?? [];
   const sorted = [...impacts].sort((a, b) => (a.post_shock_rank ?? 99) - (b.post_shock_rank ?? 99));
