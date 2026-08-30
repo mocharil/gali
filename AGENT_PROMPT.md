@@ -1,5 +1,123 @@
 # Prompt untuk Agent Pelaksana
 
+> **Sesi 4 ada di bawah ini.** Sesi 1-3 diarsipkan di bagian bawah file.
+> Selalu paste blok sesi terbaru.
+
+---
+
+# SESI 4 — Selesaikan Redis, lalu Deploy (5.11b, 6.14, 6.15)
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, entri "Task 0.8: Provisioning Neon + Upstash (koordinator)"
+2. `BUILD_PLAN.md`, task **0.8a** (selesai) dan **0.8b** (terblokir)
+3. File `.env.production` di root repo (jangan pernah commit ini)
+
+### Konteks
+
+Neon Postgres sudah diprovisi penuh dan **terverifikasi hidup**: migrasi Alembic sukses, seluruh data
+lokal disalin ke sana (0 kredit, row count cocok 100%), dan API sudah dijalankan sungguhan terhadap
+Neon — `/ready`, `/v1/issuers/ADRO`, `POST /v1/scenario` (zero-shock invariant tetap benar),
+`/v1/coverage` semua mengembalikan data identik dengan lokal.
+
+Upstash Redis databasenya sudah dibuat, tapi `REDIS_URL` di `.env.production` masih placeholder
+`REPLACE_WITH_TCP_PASSWORD` — password TCP-nya tidak bisa diambil lewat otomasi browser (Upstash
+tidak pernah menampilkan token sebagai teks biasa, cuma tombol copy; pembacaan clipboard/`data:`/
+`file:` URL sengaja diblokir ekstensi — **jangan coba akali ini**). Aril diminta menyalinnya manual
+dari tombol copy pada baris `redis-cli --tls -u redis://...` di dashboard Upstash (tab Details database
+`gali`).
+
+### Langkah 1 — Cek apakah `REDIS_URL` sudah terisi
+
+```bash
+grep '^REDIS_URL=' .env.production
+```
+
+**Kalau masih `REPLACE_WITH_TCP_PASSWORD`**: jangan blokir seluruh sesi karena ini. Kerjakan task
+6.14 (Playwright e2e, lihat Langkah 2) dan siapkan konfigurasi deploy (Langkah 3) sambil menunggu.
+Jangan mencoba mengambil password itu sendiri dengan cara lain — kalau Aril belum kasih, tanya lagi
+di akhir sesi, jangan tebak atau kosongkan diam-diam.
+
+**Kalau sudah terisi**: verifikasi hidup sebelum lanjut — boot API dengan `REDIS_URL` dari
+`.env.production`, cek `/ready` (harus `"redis": true`), lalu cek Redis benar-benar dipakai (mis.
+panggil satu endpoint dua kali, response kedua harus dari cache — bisa dicek lewat waktu respons atau
+log). Jangan asumsikan config benar hanya karena tidak error saat boot.
+
+### Langkah 2 — Playwright e2e (task 6.14)
+
+Belum ada infrastruktur e2e sama sekali. Setup dari nol:
+- `pnpm add -D @playwright/test` di `packages/web`
+- Skenario minimum yang WAJIB ada (sesuai spec asli §6.14 + apa yang sudah diverifikasi manual sesi
+  lalu, sekarang otomatiskan):
+  1. Home (`/`) → render leaderboard nyata dari API
+  2. Klik salah satu emiten → `/issuer/[symbol]` → metrik headline tampil (bukan skeleton selamanya)
+  3. `/scenario` → isi body kosong secara efektif (default semua nol) → jalankan → **assert delta 0.0%
+     persis untuk semua emiten LENGKAP** (ini regression test paling penting di seluruh proyek — bug
+     task 5.12 pernah lolos ke production sebelum ketahuan manual, jangan sampai lolos lagi tanpa test)
+  4. `/coverage` → assert angka 7/9 (atau apa pun yang live saat itu) ter-render, bukan placeholder
+- Jalankan terhadap API lokal (docker postgres+redis, bukan Neon — e2e tidak perlu network eksternal)
+- Tambahkan script `test:e2e` di `package.json`, dan masukkan ke CI (`.github/workflows/ci.yml`) kalau
+  waktu memungkinkan — kalau tidak sempat, minimal pastikan jalan bersih secara lokal dan didokumentasikan
+  cara menjalankannya di README
+
+### Langkah 3 — Deploy API ke Fly.io (task 5.11b)
+
+`infra/Dockerfile.api` dan `infra/fly.api.toml` sudah ada dari Fase 5 (artefak, belum pernah dipakai
+deploy sungguhan). Sebelum deploy:
+- Cek `flyctl` terpasang (`fly version`); kalau tidak ada, **minta Aril install & `fly auth login`**
+  sendiri (autentikasi ke pihak ketiga, bukan sesuatu yang boleh agent lakukan atas nama user)
+- Set secrets Fly.io dari `.env.production` (JANGAN commit file itu, JANGAN print isinya ke log/PR):
+  `fly secrets set DATABASE_URL=... DATABASE_URL_SYNC=... REDIS_URL=... SECTORS_API_KEY=... --app <nama-app>`
+- Deploy, lalu **verifikasi hidup dari URL publik** (bukan localhost): `/health`, `/ready`,
+  `/v1/issuers/ADRO`, dan `POST /v1/scenario` zero-shock invariant — ulangi verifikasi yang sudah
+  dilakukan terhadap Neon secara lokal, tapi sekarang lewat internet publik
+- Update task 5.11b di `BUILD_PLAN.md` jadi selesai HANYA setelah verifikasi publik ini nyata terjadi
+
+### Langkah 4 — Deploy Web ke Vercel (task 6.15)
+
+- `NEXT_PUBLIC_API_BASE_URL` di `.env.production` arahkan ke URL Fly.io yang baru live dari Langkah 3
+- Deploy `packages/web` ke Vercel (root directory `packages/web` di project settings Vercel)
+- Set env var yang sama di dashboard Vercel
+- Verifikasi CORS: `CORS_ALLOW_ORIGINS` di API harus memuat domain Vercel yang sebenarnya (ganti dari
+  placeholder `https://gali.vercel.app` di `.env.production` kalau domain asli berbeda), lalu redeploy
+  API kalau perlu
+- **Verifikasi hidup dari URL publik**: buka domain Vercel di browser, cek `/`, `/map`, `/issuer/ADRO`,
+  `/scenario` (jalankan skenario sungguhan, cek network tab bahwa request benar-benar ke Fly.io API,
+  bukan localhost)
+
+### Definisi selesai sesi ini
+
+1. `REDIS_URL` terisi dan terverifikasi (atau jelas didokumentasikan masih menunggu Aril)
+2. Playwright e2e ada, mencakup minimal 4 skenario di atas, lolos lokal
+3. **Kalau Redis sudah beres**: API live di Fly.io, Web live di Vercel, keduanya diverifikasi dari
+   URL publik dengan cara yang sama seperti verifikasi lokal sepanjang proyek ini — jangan anggap
+   selesai hanya karena `fly deploy`/`vercel deploy` tidak error
+4. `BUILD_PLAN.md` dan `PROGRESS.md` diupdate jujur — kalau sesuatu belum benar-benar diverifikasi
+   publik, jangan dicentang selesai
+5. Commit + push, CI hijau
+
+### Kapan berhenti dan bertanya
+
+- Kalau `REDIS_URL` masih placeholder di akhir sesi — laporkan, jangan deploy API dengan Redis rusak
+  tanpa bilang eksplisit ke Aril bahwa caching/rate-limit tidak berfungsi.
+- Kalau `flyctl`/`vercel` CLI butuh login pihak ketiga — minta Aril, jangan coba OAuth otomatis.
+- Kalau menemukan bug sekelas bug scenario engine (dua bagian sistem menghitung hal yang sama dengan
+  cara berbeda) — perbaiki di sumbernya, tambah regression test, laporkan sebagai temuan.
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 3</b></summary>
+
+# Prompt untuk Agent Pelaksana
+
 > **Sesi 3 ada di bawah ini.** Sesi 1 dan 2 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
@@ -213,6 +331,8 @@ bahwa 0.11 masih terblokir.
 ## ▲ SALIN SAMPAI SINI ▲
 
 ---
+
+</details>
 
 </details>
 
