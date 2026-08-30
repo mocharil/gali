@@ -832,14 +832,42 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 - [x] **5.8** structlog + request-id + integrasi Sentry
 - [x] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
 - [x] **5.10** pytest integration test terhadap Postgres ephemeral (testcontainers atau service CI)
-- [x] **5.11a** `infra/Dockerfile.api` + `fly.api.toml` disiapkan (artefak deployment ada).
-- [ ] **5.11b** Deploy sungguhan ke Fly.io + `/health` hijau di URL publik. **Blocker task 0.8 sudah
-      selesai** (Neon + Upstash keduanya terprovisi dan terverifikasi hidup di `.env.production`,
-      lihat 0.8a/0.8b). Yang tersisa murni eksekusi: `flyctl` perlu terpasang + `fly auth login` oleh
-      Aril (akun pihak ketiga, bukan sesuatu yang boleh agent lakukan sendiri), lalu `fly secrets set`
-      dari `.env.production` dan `fly deploy`. **Catatan sejarah:** sesi lampau sempat mencentang task
-      5.11 gabungan ini sebagai selesai padahal deployment publik belum terjadi — dipecah jadi
-      5.11a/5.11b supaya status sebenarnya terlihat jelas; jangan diulangi pola itu.
+- [x] **5.11a** `infra/Dockerfile.api` + `fly.api.toml` disiapkan (artefak deployment ada). **Tidak
+      dipakai untuk deploy final** — lihat 5.11b, dipertahankan di repo sebagai artefak Docker yang
+      valid (build lokal sukses) untuk pilihan hosting lain di masa depan.
+- [x] **5.11b** **Deploy sungguhan — pivot dari Fly.io ke Vercel Python Functions.** Fly.io dan
+      Render keduanya mewajibkan kartu kredit (Fly.io saat `fly deploy` pertama; Render saat membuat
+      web service berbayar sekalipun), yang tidak dimiliki Aril. Koyeb dicoba tapi produknya dalam
+      transisi pasca-akuisisi dan dashboard-nya tidak fungsional. **Vercel Python Functions dipilih**
+      karena tidak butuh kartu kredit sama sekali untuk compute serverless gratis.
+      Live di **`https://gali-api.vercel.app`**, diverifikasi nyata: `/health`, `/ready`
+      (`database: true, redis: true`), `/v1/issuers/ADRO` mengembalikan data lengkap dengan angka
+      benar, dan yang terpenting **invariant zero-shock `POST /v1/scenario` (task 5.12) diverifikasi
+      persis 0.0% di produksi** untuk seluruh 7 emiten lengkap.
+      **Temuan konfigurasi Vercel yang wajib diingat** (didokumentasikan supaya sesi berikutnya tidak
+      mengulang ~10 percobaan deploy gagal):
+      - `vercel.json` di root **wajib** `"framework": "fastapi"` eksplisit — tanpa ini Vercel
+        mendeteksi `package.json` root (workspace pnpm) sebagai proyek Next.js, bukan Python.
+      - `[tool.vercel] entrypoint` di `pyproject.toml` root harus berupa **path file fisik** dengan
+        titik sebagai pemisah direktori (`"packages.api.gali_api.main:app"`), bukan path import Python.
+      - Dengan `framework: "fastapi"`, Vercel memakai `uv` dan **hanya membaca dependency dari
+        `[project.dependencies]` di `pyproject.toml`** — `requirements.txt` diabaikan total (sempat
+        dicoba lalu dihapus karena tidak terpakai).
+      - Package lokal monorepo (`gali_core`, `gali_api`) dirujuk lewat `[tool.uv.sources]` dengan
+        `path` + `editable = true`.
+      - `pyproject.toml` root butuh `[tool.hatch.build.targets.wheel] bypass-selection = true` karena
+        tidak punya source code sendiri — tanpa ini hatchling bingung auto-discover paket di antara
+        `infra/`, `packages/`, `node_modules/`.
+      - Config `functions` di `vercel.json` (untuk `maxDuration` dll) hanya cocok untuk path di bawah
+        direktori `api/` literal — tidak berlaku untuk entrypoint FastAPI kustom di luar itu.
+      - Preview deployment punya Deployment Protection default (HTTP 302) — verifikasi pakai
+        `vercel curl <url>` (auto-generate bypass token). **Production** (`vercel deploy --prod`)
+        TIDAK terproteksi secara default — bisa langsung di-curl publik.
+      - `packages/web/vercel.json` dengan `{"framework": "nextjs"}` diperlukan juga di proyek web
+        (`gali-web`) untuk masalah ambiguitas root directory yang sama (root `package.json` workspace
+        pnpm membingungkan deteksi framework Next.js-nya sendiri).
+      - Alias produksi stabil auto-assigned: `<nama-proyek>.vercel.app`.
+      File baru: `pyproject.toml` (root), `vercel.json` (root), `packages/web/vercel.json`.
 
 - [x] **5.12** **Perbaiki bug Scenario Studio (prioritas tinggi, sebelum Fase 6 task 6.8).**
       `simulate_scenario_shock()` harus memakai basis profit yang SAMA untuk baseline maupun
@@ -928,12 +956,25 @@ p95 < 400 ms pada load test.
       3. Scenario Studio zero-shock regression invariant (`delta_rbv_pct == 0.0%` untuk semua emiten lengkap)
          dan interaktivitas live slider shock komoditas (-20.0%).
       4. Truth Audit & Coverage page menampilkan data nyata DB (52/57 GPS situs tambang = 91.2%, ledger 404/1000 kredit).
-- [ ] **6.15** Deploy ke Vercel/Fly.io — **belum dikerjakan**, konsisten dengan status 5.11b: Neon+Upstash
-      (task 0.8) belum diprovisi Aril. Semua verifikasi sesi ini berjalan di Docker lokal
-      (`gali-postgres`:5433, `gali-redis`:6379) + `next build` production build lokal.
+- [x] **6.15** **Deploy ke Vercel — selesai.** Live di **`https://gali-web.vercel.app`** (proyek
+      `gali-web`), rewrite proxy Next.js ke `https://gali-api.vercel.app` (env var server-side `API_URL`,
+      **bukan** `NEXT_PUBLIC_API_BASE_URL` — nama itu tidak pernah dibaca kode manapun, ditemukan dan
+      diperbaiki di `.env.production` sesi ini). `CORS_ALLOW_ORIGINS` di proyek `gali-api` diperbaiki
+      dari placeholder basi `https://gali.vercel.app` ke domain sebenarnya `https://gali-web.vercel.app`,
+      API di-redeploy, header `access-control-allow-origin` diverifikasi benar via curl.
+      **Seluruh 8 route diverifikasi live via browser sungguhan** (bukan cuma curl 200): `/` (3 angka
+      headline benar: RBV $50.6B, RLI 23.9 thn, GEMS 100% license cliff), `/issuer/ADRO` (data lengkap,
+      Ground Truth Score 47.4, Evidence drawer ada), `/scenario` (**zero-shock invariant persis 0.0% di
+      produksi** + slider -5% memicu POST live ke API dan menghasilkan delta -5.0% yang benar di semua
+      emiten — bukti compute server-side nyata, bukan angka statis), `/cost-curve` (step chart + garis
+      benchmark $103/t + tabel detail), `/map` (52 situs GPS nyata di MapLibre, warna/ukuran benar),
+      `/divergence` (empty-state jujur untuk market cap yang memang belum ter-ingest, konsisten dengan
+      6.9), `/coverage` (angka DB-derived: 52/57 situs 91.2%, 404/1000 kredit). Tidak ada error console
+      selain satu warning kosmetik MapLibre sprite icon di peta compact halaman home.
 
-**Exit Criteria:** seluruh 8 route hidup di URL publik · scenario slider mengubah angka nyata dari API
-live · e2e hijau di CI · Lighthouse ≥ 85 pada performance & accessibility.
+**Exit Criteria:** seluruh 8 route hidup di URL publik ✅ · scenario slider mengubah angka nyata dari API
+live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada performance & accessibility —
+**belum diukur di produksi**, follow-up.
 
 ---
 

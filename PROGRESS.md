@@ -5,6 +5,82 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-08-30 — Task 5.11b & 6.15: Deploy produksi ke Vercel (API + Web), tanpa kartu kredit
+
+**Konteks:** Blocker deploy sejak beberapa sesi lalu adalah Aril tidak punya kartu kredit. Fly.io
+mewajibkan kartu saat `fly deploy` pertama meski masih dalam free allowance; Render mewajibkan kartu
+saat membuat web service sekalipun gratis; Koyeb dicoba tapi produknya tampak dalam transisi
+pasca-akuisisi dengan dashboard tidak fungsional. **Vercel Python Functions** dipilih sebagai jalur
+tanpa kartu — dikonfirmasi Aril login dengan email, koordinator melanjutkan seluruh setup teknis
+sendiri (pola "bisa kamu tolong setup sendiri?" yang sudah berlaku untuk Neon/Upstash sebelumnya).
+
+**Perjalanan debugging deploy API (`gali-api`) — ~10 percobaan gagal, tiap kegagalan didiagnosis
+tuntas sebelum lanjut** (detail lengkap dan alasan tiap konfigurasi ada di `BUILD_PLAN.md` task
+5.11b, tidak diulang di sini supaya `PROGRESS.md` tetap ringkas):
+1. Auto-terdeteksi sebagai Next.js karena `package.json` root workspace pnpm → fix: `vercel.json`
+   eksplisit `"framework": "fastapi"`.
+2. Config `functions` di `vercel.json` tidak match path kustom → dihapus, memang hanya berlaku untuk
+   direktori `api/` literal.
+3. `externally-managed-environment` (PEP 668) saat instalasi custom → jalur ini ditinggalkan total,
+   diganti mekanisme resmi `framework: "fastapi"` + `uv`.
+4. `entrypoint` di `[tool.vercel]` ditolak sampai memakai path file fisik dengan titik
+   (`packages.api.gali_api.main:app`), bukan path import Python biasa.
+5. `ModuleNotFoundError: fastapi` di runtime → ternyata `framework: "fastapi"` mengabaikan
+   `requirements.txt` total, hanya baca `[project.dependencies]` di `pyproject.toml` root (file baru,
+   dibuat sesi ini) + `[tool.uv.sources]` untuk `gali-core`/`gali-api` sebagai path lokal editable.
+6. `uv pip install .` lokal gagal "Multiple top-level packages discovered" → fix dengan
+   `[tool.hatch.build.targets.wheel] bypass-selection = true`.
+7. `vercel link --yes` tanpa nama proyek eksplisit gagal (nama auto-derive dari folder tidak valid,
+   ada spasi/kapital) → fix: `vercel project add gali-api` dulu, baru link ke nama itu.
+8. Loop bash `while read line < file` untuk set banyak env var rusak setelah iterasi pertama (stdin
+   kebagi dengan `vercel env add`) → fix pakai `mapfile` + `< /dev/null` di tiap panggilan `vercel env`.
+9. URL preview 302 (Deployment Protection default) → verifikasi pakai `vercel curl` (auto bypass
+   token); **production tidak terproteksi**, langsung bisa di-curl publik.
+10. `vercel curl -X POST -d '{}'` (bug parsing argumen tool, URL rusak) → workaround: `curl` biasa +
+    header `x-vercel-protection-bypass` yang diambil dari output debug `vercel curl`.
+
+**Deploy Web (`gali-web`):** Root directory ambiguity yang sama (root `package.json` workspace pnpm)
+sempat bikin build sukses tapi "No Output Directory named public" → fix dengan
+`packages/web/vercel.json` `{"framework": "nextjs"}`. Sempat set env var salah nama
+(`NEXT_PUBLIC_API_BASE_URL`) — dikoreksi setelah membaca langsung source `next.config.ts`/`lib/api.ts`
+dan menemukan kode sebenarnya baca `API_URL` (server-side, dipakai di `rewrites()`, tidak pernah
+`NEXT_PUBLIC_*`). Env var salah dihapus, yang benar di-set, `.env.production` diperbaiki juga supaya
+tidak terulang.
+
+**CORS:** `CORS_ALLOW_ORIGINS` di proyek `gali-api` masih placeholder basi `https://gali.vercel.app`
+dari draft awal — diperbaiki ke domain sebenarnya `https://gali-web.vercel.app`, API di-redeploy,
+header `access-control-allow-origin` diverifikasi benar via curl langsung ke production.
+
+**Verifikasi end-to-end nyata (bukan cuma "deploy sukses"), semua 8 route dicek via browser
+sungguhan:**
+- `/` — 3 angka headline benar: RBV $50.6B, RLI rata-rata 23.9 thn, license cliff tertinggi GEMS 100%.
+- `/issuer/ADRO` — laporan lengkap, Ground Truth Score 47.4, badge LENGKAP, Evidence drawer ada.
+- `/scenario` — **invariant zero-shock diverifikasi persis 0.0% di infrastruktur produksi**
+  (Neon+Upstash+Vercel sekaligus, bukan Docker lokal); lalu slider shock harga -5% digeser via
+  automasi browser sungguhan → memicu `POST` live ke `gali-api.vercel.app` → delta RBV berubah
+  persis -5.0% di semua 7 emiten lengkap secara serentak. Ini bukti compute server-side nyata jalan
+  di produksi, bukan angka yang di-precompute/statis.
+- `/cost-curve`, `/map` (52 situs GPS nyata ter-plot benar di Kalimantan/Sumatra), `/divergence`
+  (empty-state jujur, konsisten dengan keputusan 6.9), `/coverage` (52/57 GPS 91.2%, 404/1000 kredit)
+  — semua diverifikasi render data nyata dari DB produksi, bukan placeholder.
+- Console browser bersih; satu-satunya warning adalah kosmetik (ikon sprite MapLibre di peta compact
+  halaman home).
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 404 / 1000) — seluruh kerja sesi ini murni deployment
+infra, tidak menyentuh Sectors API.
+
+**Keputusan yang diambil:** pivot permanen dari Fly.io (rencana awal §2.3) ke Vercel Python Functions
+untuk API karena kendala kartu kredit adalah constraint keras yang tidak bisa diakali — bukan pivot
+teknis, murni akses. Artefak Fly.io (`infra/Dockerfile.api`, `fly.api.toml`) dipertahankan di repo,
+bukan dihapus, karena masih valid sebagai jalur alternatif kalau suatu saat ada kartu kredit atau
+akun hosting lain.
+
+**Next:** Fase 7 (Production Hardening) — load test, Sentry live-error verification, disaster-recovery
+rebuild-from-raw test, `gitleaks` audit. Commit seluruh file baru (`pyproject.toml`, `vercel.json` ×2)
+ke git.
+
+---
+
 ## 2026-08-30 — Task 0.8b: Redis TCP password ditemukan (koordinator)
 
 **Konteks:** Aril bertanya cara mendapatkan password TCP Redis Upstash. Sesi sebelumnya sudah

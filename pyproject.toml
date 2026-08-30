@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# This project has no source code of its own -- it exists purely to declare
+# dependencies + [tool.vercel]/[tool.uv.sources] config for the Vercel build.
+# Without this, hatchling/setuptools try to auto-discover a package at repo
+# root and get confused by infra/, packages/, node_modules/ sitting alongside.
+bypass-selection = true
+
+[project]
+name = "gali-vercel-deploy"
+version = "0.1.0"
+description = "Vercel-only marker file: points Vercel's Python builder at gali_api.main:app."
+requires-python = ">=3.11"
+# Vercel's zero-config FastAPI builder uses `uv` and resolves dependencies
+# from [project.dependencies] here -- it does NOT read requirements.txt.
+# gali-core/gali-api resolve to local monorepo paths via [tool.uv.sources]
+# below; each package's own transitive dependencies come from its own
+# pyproject.toml (packages/core, packages/api) via normal metadata
+# resolution, so nothing is duplicated here.
+dependencies = [
+  "gali-core",
+  "gali-api",
+]
+
+# This file exists ONLY for Vercel's Python Functions deployment (see
+# BUILD_PLAN.md task 5.11b for the full config rationale). It is not part of local dev, which installs
+# packages/{core,api} editable into .venv directly (see README.md), and it is
+# not used by pytest/ruff/mypy, which all run against packages/*/pyproject.toml.
+[tool.vercel]
+entrypoint = "packages.api.gali_api.main:app"
+
+[tool.uv.sources]
+gali-core = { path = "packages/core", editable = true }
+gali-api = { path = "packages/api", editable = true }
