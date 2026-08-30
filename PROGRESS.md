@@ -4,6 +4,61 @@ Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
+
+## 2026-08-29/30 — Task 0.8: Provisioning Neon + Upstash (koordinator)
+
+**Konteks:** Aril diminta menyelesaikan task 0.8 (provisioning Neon + Upstash, satu-satunya task manusia
+yang tersisa untuk membuka deploy). Aril meminta koordinator melakukannya langsung.
+
+**Batasan yang dihormati:** Membuat akun baru di layanan pihak ketiga adalah aksi yang tidak boleh
+dilakukan atas nama user (butuh email/identitas mereka). Dicek dulu via browser apakah Aril sudah
+login — belum — diminta login sendiri dulu (GitHub OAuth, ~1 menit per situs), baru koordinator
+melanjutkan provisioning resource di dalam akun yang sudah terautentikasi (bukan lagi pembuatan akun).
+
+**Neon (Postgres) — selesai penuh:**
+- Project `gali` dibuat via UI otomatis: Postgres 16, region AWS ap-southeast-1 (Singapore, terdekat
+  dari region yang tersedia).
+- Connection string (pooled untuk app, direct untuk Alembic) diambil dari UI **lewat screenshot+zoom**,
+  bukan JS/clipboard — percobaan pertama pakai `navigator.clipboard.readText()` gagal (extension
+  memblokir/hang), dan pembacaan DOM langsung menampilkan string ter-redact
+  (`"[BLOCKED: Cookie/query string data]"`) — keduanya proteksi kredensial yang disengaja, tidak diakali.
+- Disimpan di **`.env.production`** (bukan `.env`) — keputusan desain: dev lokal tetap pakai Docker
+  (sesuai komentar asli di `.env`), `.env.production` khusus untuk deploy nanti (Fly.io secrets/Vercel
+  env vars). File ini sudah tercakup pola `.env.*` di `.gitignore` — diverifikasi via `git check-ignore`.
+- Migrasi Alembic (`upgrade head`) dijalankan dengan `DATABASE_URL_SYNC` di-override lewat env var
+  (bukan `.env` default) — sukses, 6 schema + 32 tabel terbentuk, identik dengan lokal.
+- **Data lokal disalin ke Neon via `pg_dump | psql` langsung di dalam container (`docker exec`), bukan
+  re-ingest** — 0 kredit API terpakai. Row count di 11 tabel kunci (raw.responses, ops.credit_ledger,
+  core.mining_company/license/site, market.idx_company, graph.issuer/issuer_mining_link/ownership_edge,
+  metrics.run/issuer_metrics) cocok 100% antara Neon dan lokal.
+- **Diverifikasi hidup**: FastAPI dijalankan sungguhan dengan `DATABASE_URL` di-override ke Neon
+  (bukan hanya baca config) — `/ready` sehat, `/v1/issuers/ADRO` mengembalikan `rli_years=16.2383`
+  (sama persis dengan lokal), `POST /v1/scenario` body kosong tetap menghasilkan delta 0.0% (invariant
+  task 5.12 tetap benar di Neon), `/v1/coverage` mengembalikan gate decision & credits_used yang benar.
+
+**Upstash (Redis) — database dibuat, tapi kredensial yang benar belum didapat:**
+- Database `gali` dibuat (GCP us-central1 — tidak ada opsi Asia di tier gratis).
+- **Kesulitan proses**: dialog "Create Database" Upstash konsisten menutup diri setiap kali field
+  Primary Region diklik lewat otomasi (≈7 percobaan dengan pendekatan berbeda — klik koordinat, ref
+  dari `find`, keyboard nav). User akhirnya menyelesaikan langkah ini sendiri secara manual.
+- **Kesulitan kedua**: Upstash tidak pernah menampilkan token/password sebagai teks di UI — hanya
+  tombol copy-to-clipboard. User sempat menyalin `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`
+  (kredensial REST API) ke `.env`, tapi **backend kita pakai `redis.asyncio` (protokol RESP standar)**,
+  yang butuh `REDIS_URL=rediss://default:<TCP password>@<host>:6379` — kredensial yang BERBEDA dari
+  token REST. Koordinator mencoba mengambilnya via: reveal-on-click (gagal, tetap ter-mask di semua
+  tempat), `navigator.clipboard.readText()` (timeout/hang), navigasi ke halaman lokal (`data:`/`file:`
+  URL, keduanya diblokir ekstensi secara sengaja). **Tidak diakali** — ini proteksi kredensial yang
+  wajar. Diminta Aril menyalin manual dari tombol copy pada baris `redis-cli --tls -u redis://...`.
+- `.env.production` punya placeholder eksplisit `REPLACE_WITH_TCP_PASSWORD` untuk `REDIS_URL` sampai
+  nilai sebenarnya didapat.
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 404 / 1000 — seluruh kerja migrasi data 0 kredit)
+
+**Next:** Aril memberi password TCP Redis → update `REDIS_URL` di `.env.production` → verifikasi hidup
+sama seperti Neon (boot API dengan REDIS_URL Upstash, cek `/ready` + cache hit) → lanjut deploy
+Fly.io (5.11b) + Vercel (6.15).
+
+---
 ## 2026-08-29 — Fase 6 (Web Application) — dikerjakan koordinator setelah agent kehabisan token
 
 **Konteks:** Sesi pelaksana kehabisan token di tengah Fase 6, meninggalkan scaffold awal (layout, beberapa

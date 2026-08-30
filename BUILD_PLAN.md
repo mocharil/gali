@@ -589,7 +589,23 @@ Total tersedia: **1.000 kredit.** Habis = proyek mati. Tiga jenjang TTL:
       First commit harus hari ini (≥19 Ags ✓). Lisensi MIT sudah ada.
 - [x] **0.6** Scaffold monorepo sesuai §2.4 (pnpm workspaces + `uv`/`pip` untuk paket Python)
 - [x] **0.7** `docker-compose.yml`: postgres:16 (dengan `pg_trgm`+`btree_gin`) di host port **5433**, redis:7 di 6379 — `docker compose up -d postgres redis` harus healthy
-- [ ] **0.8** Provision Neon (Postgres) + Upstash (Redis); simpan connection string di `.env`
+- [x] **0.8a** Neon (Postgres) diprovisi: project `gali`, Postgres 16, region AWS ap-southeast-1
+      (Singapore). Alembic `upgrade head` sukses (6 schema, 32 tabel). Seluruh data lokal disalin via
+      `pg_dump | psql` langsung (0 kredit — bukan re-ingest); row count Neon vs lokal cocok 100% di
+      11 tabel yang diperiksa. Diverifikasi hidup: API dijalankan sungguhan terhadap Neon
+      (`DATABASE_URL` override), `/ready`, `/v1/issuers/ADRO`, `POST /v1/scenario` (zero-shock invariant
+      tetap 0.0%), dan `/v1/coverage` semua mengembalikan data identik dengan lokal. Kredensial di
+      `.env.production` (terpisah dari `.env` lokal — dev tetap pakai Docker, lihat komentar di file
+      itu).
+- [ ] **0.8b** Upstash (Redis) diprovisi (database `gali`, GCP us-central1, free tier) tapi **belum
+      terpakai** — `.env.production` masih placeholder `REPLACE_WITH_TCP_PASSWORD` untuk `REDIS_URL`.
+      Root cause: Upstash tidak pernah menampilkan token/password sebagai teks biasa di UI-nya (hanya
+      tombol copy-to-clipboard), dan pembacaan clipboard/navigasi `data:`/`file:` URL sengaja diblokir
+      oleh ekstensi browser (proteksi kredensial yang wajar — tidak diakali). `UPSTASH_REDIS_REST_URL`/
+      `UPSTASH_REDIS_REST_TOKEN` sudah ada di `.env.production` tapi **tidak dipakai backend** —
+      `gali_api` pakai `redis.asyncio` (protokol RESP biasa), butuh `REDIS_URL=rediss://default:<TCP
+      password>@trusty-terrapin-41452.upstash.io:6379`, bukan token REST. Perlu Aril salin manual dari
+      tombol copy di baris `redis-cli --tls -u redis://...` pada dashboard Upstash.
 - [x] **0.9** Alembic init + migrasi pertama: schema `raw` dan `ops` (§3.1, §3.6)
 - [x] **0.10** `SectorsClient` v0: httpx async, header Authorization, retry+backoff, tulis ke `raw.responses` + `ops.credit_ledger`
 - [x] **0.11** Smoke test: panggil `/v2/subsectors/` (1 kredit), verifikasi baris masuk ke kedua tabel
