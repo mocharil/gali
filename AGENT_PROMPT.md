@@ -1,11 +1,229 @@
 # Prompt untuk Agent Pelaksana
 
-> **Sesi 5 ada di bawah ini.** Sesi 1-4 diarsipkan di bagian bawah file.
+> **Sesi 6 ada di bawah ini.** Sesi 1-5 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
 ---
 
-# SESI 5 — Deploy Fly.io + Vercel (5.11b, 6.15)
+# SESI 6 — Production Hardening (Fase 7: 7.1–7.9) + 2 bug keamanan ditemukan saat review
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, entri teratas ("Task 5.11b & 6.15: Deploy produksi ke Vercel")
+2. `BUILD_PLAN.md` Fase 7 (task 7.1–7.9) dan task 5.6 (rate limiting — **status checkbox tidak bisa
+   dipercaya**, lihat di bawah)
+3. `.env.production` di root repo — **jangan pernah commit, print isinya ke log, atau ke PR**
+
+### Konteks
+
+API dan Web sudah live dan **diverifikasi end-to-end sungguhan**:
+- API: `https://gali-api.vercel.app`
+- Web: `https://gali-web.vercel.app`
+
+Semua 8 route web diverifikasi via browser sungguhan, termasuk Scenario Studio yang memicu compute
+live (slider -5% → delta -5.0% real-time dari API), dan invariant zero-shock `POST /v1/scenario`
+persis 0.0% di infrastruktur produksi (Neon + Upstash + Vercel sekaligus).
+
+**Dua bug keamanan nyata ditemukan saat review akhir sebelum sesi ini dimulai:**
+
+**Bug 1 — CORS sebenarnya tidak pernah terkunci (sudah diperbaiki lokal, BELUM commit/deploy).**
+`packages/api/gali_api/main.py` ternyata memakai daftar origin **hardcoded** berisi `"*"`
+dikombinasikan dengan `allow_credentials=True` — bukan `settings.cors_origins` (dibaca dari env var
+`CORS_ALLOW_ORIGINS`) sama sekali. Starlette, ketika `"*"` ada di `allow_origins` DAN
+`allow_credentials=True`, tidak bisa mengirim header `Access-Control-Allow-Origin: *` (dilarang spec
+untuk request ber-credential) — sebagai gantinya ia me-refleksikan Origin request APAPUN secara
+verbatim. Efeknya: CORS **tidak pernah membatasi apa pun**, walaupun `CORS_ALLOW_ORIGINS` sempat
+"diperbaiki" ke `https://gali-web.vercel.app` di env var Vercel sesi lalu — env var itu tidak pernah
+benar-benar dibaca kode yang jalan. Pola ini persis sama seperti bug `NEXT_PUBLIC_API_BASE_URL` di
+sesi sebelumnya (env var yang di-set tapi tidak pernah dibaca kode).
+Sudah diedit lokal di working tree (belum commit): `main.py` sekarang memakai
+`get_settings().cors_origins`, hardcoded list + `"*"` dihapus. `ruff check` sudah hijau untuk file
+ini. **Belum diverifikasi dengan origin yang TIDAK di-allowlist** — verifikasi sesi lalu cuma menguji
+origin yang memang diizinkan, makanya bug wildcard-refleksi ini lolos tidak terlihat.
+
+**Bug 2 — Rate limiting tidak pernah diimplementasikan (task 5.6 checkbox salah, bukan cuma belum
+diverifikasi).** Pencarian menyeluruh (`grep -rn "limiter\|Limiter\|429\|slowapi" packages/api`) tidak
+menemukan satu baris kode pun. `RATE_LIMIT_ANON_PER_MIN`/`RATE_LIMIT_KEYED_PER_MIN` sudah ada sebagai
+`Settings` field (`packages/core/gali_core/config.py`) dan terisi di `.env.production` (60/600), tapi
+tidak ada middleware/dependency manapun yang membacanya. API publik saat ini bisa di-hit tanpa batas.
+
+### Keputusan arsitektur yang berlaku (jangan didiskusikan ulang, langsung ikuti)
+
+**Dagster daemon tidak akan dideploy sebagai proses persisten.** Fly.io permanen tidak tersedia (Aril
+tidak punya kartu kredit — pendorong pivot ke Vercel di sesi lalu). Vercel Python Functions itu
+serverless/stateless — tidak bisa menjalankan scheduler Dagster yang perlu proses hidup terus-menerus.
+Jadi task 7.1 (jadwal `hot_refresh` harian + bukti ≥2 run tak berawak) dikerjakan lewat **GitHub
+Actions scheduled workflow** yang memanggil CLI `gali ingest --tier hot` yang sudah ada dan sudah
+teruji (`packages/core/gali_core/cli.py`, command `ingest`) — ini persis fallback yang sudah disetujui
+di `BUILD_PLAN.md` §8 tabel risiko ("kalau macet [dengan Dagster], jalankan asset lewat CLI + GitHub
+Actions cron sambil tetap mempertahankan struktur asset"). Asset graph Dagster tetap ada di kode dan
+tetap bisa didemokan lewat `dagster dev` lokal untuk video (Fase 8) — yang berubah cuma mekanisme yang
+menjalankan refresh harian di produksi.
+
+`gh` CLI sudah terautentikasi di mesin ini sebagai akun `mocharil` (scope termasuk `workflow`) — boleh
+dipakai langsung untuk push workflow file dan `gh secret set`, tidak perlu minta Aril login ulang
+(beda dengan Fly.io/Vercel yang butuh OAuth browser interaktif).
+
+### Langkah 1 — Selesaikan & deploy fix CORS (Bug 1, kerjakan duluan)
+
+1. Baca `packages/api/gali_api/main.py`, konfirmasi editan lokal (`get_settings().cors_origins`, tanpa
+   `"*"`) masih ada dan masuk akal
+2. Tambah regression test di `packages/api/tests/`: dengan `CORS_ALLOW_ORIGINS` di-set ke satu origin
+   tertentu, request dengan header `Origin` yang **berbeda** dari itu TIDAK BOLEH mendapat header
+   `Access-Control-Allow-Origin` yang cocok dengan origin request tersebut. Ini mencegah bug
+   wildcard-refleksi ini kambuh diam-diam.
+3. `pytest`, `ruff check`, `mypy` hijau semua
+4. Commit, push, tunggu CI hijau
+5. Redeploy `gali-api` ke production (`vercel deploy --prod --yes` dari root repo — `.vercel/project.json`
+   sudah link ke project `gali-api`)
+6. **Verifikasi nyata dengan DUA test, bukan satu:**
+   ```bash
+   # (a) origin yang diizinkan -> harus reflect balik origin itu
+   curl -s -i -H "Origin: https://gali-web.vercel.app" https://gali-api.vercel.app/health | grep -i access-control-allow-origin
+   # (b) origin BUKAN yang diizinkan -> header ini TIDAK BOLEH muncul/cocok
+   curl -s -i -H "Origin: https://evil-example.com" https://gali-api.vercel.app/health | grep -i access-control-allow-origin
+   ```
+   Kalau test (b) masih mengembalikan `https://evil-example.com`, fix belum benar — jangan tandai selesai.
+7. Update `BUILD_PLAN.md` task 5.6 (perbaiki deskripsi CORS, jangan hapus histori) dan `PROGRESS.md`
+   dengan entri jujur soal bug ini: kapan ditemukan, kenapa lolos sebelumnya, cara verifikasi yang benar.
+
+### Langkah 2 — Implementasikan rate limiting sungguhan (Bug 2 / bagian dari task 7.5)
+
+1. Redis sudah tersedia lewat `gali_api.dependencies` (`_redis_client`, `init_redis_pool`) — pakai
+   itu, jangan tambah dependency/infra baru (mis. `slowapi` dengan backend terpisah).
+2. Implementasikan middleware/dependency FastAPI: sliding-window atau fixed-window counter per IP
+   (atau per API key kalau `X-API-Key` valid ada di `ops.api_key`) di Redis, dengan limit dari
+   `settings.rate_limit_anon_per_min` (60) untuk anon dan `settings.rate_limit_keyed_per_min` (600)
+   untuk key valid — field-field ini sudah ada, tinggal dipakai.
+3. Response saat limit terlampaui: HTTP 429 dengan body error konsisten dengan
+   `global_exception_handler` yang sudah ada di `main.py`.
+4. Test: request beruntun melebihi limit anon di test lokal (boleh mock waktu/pakai limit kecil khusus
+   test) → pastikan request ke-N+1 dapat 429.
+5. Deploy ulang, verifikasi nyata di production: skrip kecil hit `/health` >60x dalam <1 menit,
+   konfirmasi ada respons 429 di suatu titik.
+6. Update `BUILD_PLAN.md` 5.6 dan 7.5.
+
+### Langkah 3 — Jadwal `hot_refresh` via GitHub Actions (task 7.1)
+
+1. Buat `.github/workflows/refresh.yml`: `on.schedule.cron: "30 11 * * 1-5"` (18:30 WIB Senin–Jumat,
+   sama seperti `hot_schedule` di `packages/pipeline/gali_pipeline/schedules.py`) + `workflow_dispatch`
+   supaya bisa dipicu manual untuk verifikasi.
+2. Job: checkout, setup Python 3.13 (samakan dengan `ci.yml`), install `packages/core` editable,
+   jalankan `gali ingest --tier hot`.
+3. Set repo secrets via `gh secret set` (satu-satu, dari nilai `.env.production` — **jangan `cat` file
+   itu ke terminal log tersimpan**): `DATABASE_URL`, `DATABASE_URL_SYNC`, `REDIS_URL`,
+   `SECTORS_API_KEY`, `SECTORS_CREDIT_HARD_CAP`.
+4. Trigger manual run (`gh workflow run refresh.yml`), cek hijau, cek `ops.credit_ledger` bertambah
+   wajar (query langsung ke Neon, jangan asumsi dari log doang).
+5. Trigger sekali lagi (manual atau tunggu jadwal) supaya ada **≥2 run tak berawak** dengan timestamp
+   — screenshot GitHub Actions run history untuk bukti (dipakai lagi nanti di video Fase 8).
+6. Centang 7.1 di `BUILD_PLAN.md` **hanya setelah** ≥2 run nyata ada di run history, dengan link run.
+
+### Langkah 4 — Sentry live (task 7.2) — **STOP sebelum mulai, minta Aril**
+
+Sentry SDK sudah ter-init di `main.py` (`sentry_sdk.init(...)` kalau `settings.sentry_dsn` terisi),
+tapi `SENTRY_DSN` di `.env.production` masih kosong. **Membuat akun Sentry adalah aksi akun pihak
+ketiga — minta Aril bikin akun sendiri** (sama seperti aturan Neon/Upstash/Fly/Vercel sebelumnya) dan
+kirimkan DSN-nya. Setelah dapat DSN:
+1. Set `SENTRY_DSN` di Vercel env vars project `gali-api` (production + preview).
+2. Redeploy, picu satu error uji (endpoint sementara atau exception sengaja, lalu dihapus lagi).
+3. Konfirmasi error itu benar-benar masuk ke dashboard Sentry (screenshot/link event id).
+4. Web (`packages/web`) tidak punya Sentry SDK terpasang sama sekali (`@sentry/nextjs` tidak ada di
+   `package.json`) — task 7.2 di `BUILD_PLAN.md` menyebut "API + web" tapi implementasi nyata baru
+   API. Kalau mau web juga, itu penambahan scope — tanya Aril dulu, jangan asumsi otomatis in-scope.
+
+### Langkah 5 — Load test (task 7.3)
+
+1. `k6` atau `locust` (pilih salah satu) — install lokal.
+2. Target `https://gali-api.vercel.app/v1/rankings` dan `POST .../v1/scenario` (body kosong `{}`
+   supaya hasilnya deterministik), 50 rps, durasi wajar (1-2 menit).
+3. **Perhatikan rate limiter dari Langkah 2** — 50 rps akan kena 429 kalau limiter aktif di-set
+   60/menit per-IP. Ini realistis (membuktikan limiter bekerja), tapi kalau tujuannya murni mengukur
+   p50/p95/p99 tanpa gangguan 429, gunakan API key valid (limit 600/menit) di load test, atau jalankan
+   load test SEBELUM Langkah 2 — putuskan sendiri urutan mana yang lebih jujur untuk didokumentasikan,
+   catat alasannya.
+4. Catat p50/p95/p99 di `docs/ARCHITECTURE.md` (buat kalau belum ada — lihat Langkah 8).
+
+### Langkah 6 — Disaster recovery: rebuild dari `raw` (task 7.4)
+
+1. **Kerjakan di database Neon production langsung**, bukan cuma Docker lokal — ini yang mau
+   dibuktikan: produksi bisa dipulihkan tanpa kredit.
+2. `DROP`/kosongkan seluruh isi schema `core`, `market`, `graph`, `metrics` (via Alembic downgrade
+   terarah atau `TRUNCATE`/`DROP SCHEMA ... CASCADE` + migrate ulang — pilih yang lebih aman dan
+   reversibel; **backup dulu** kalau ragu, lihat Langkah 8 soal snapshot Neon).
+3. Jalankan ulang pipeline dari `raw.responses` yang sudah ada (`GALI_DRY_RUN=1` atau materialize
+   Dagster asset `core_*`/`graph_*`/`metric_*` dari cache) sampai `metrics.published_pointer` terisi
+   lagi dengan run baru.
+4. Query `ops.credit_ledger` sebelum dan sesudah — buktikan **selisihnya 0**.
+5. Verifikasi API/web tetap benar setelah rebuild (spot-check `/v1/issuers/ADRO`, zero-shock invariant).
+6. Dokumentasikan langkah persis + hasil query ledger di `docs/CREDIT_BUDGET.md` atau
+   `docs/ARCHITECTURE.md`.
+
+### Langkah 7 — Audit keamanan (task 7.5)
+
+Rate limiting dan CORS sudah ditangani Langkah 1-2. Sisanya:
+1. `gitleaks detect --source . -v` — 0 temuan wajib.
+2. Cek error handler global (`main.py`, `global_exception_handler`) tidak membocorkan stack
+   trace/internal detail ke response — sudah terlihat aman (pesan generik saja) tapi verifikasi ulang
+   dengan memicu error sungguhan dan lihat response body persis.
+
+### Langkah 8 — Dokumentasi & housekeeping (task 7.6–7.9)
+
+1. `docs/ARCHITECTURE.md`: tulis final, sertakan diagram (boleh Mermaid), catat p50/p95/p99 dari
+   Langkah 5 dan hasil rebuild-from-raw dari Langkah 6, dan **catat pivot Fly.io→Vercel + alasan kartu
+   kredit** sebagai keputusan arsitektur permanen (bukan sementara).
+2. `README.md`: quickstart yang **benar-benar dijalankan dari nol** (clone baru di direktori
+   sementara, ikuti langkah persis apa adanya, catat kalau ada langkah yang tidak akurat) + badge CI
+   (`![CI](https://github.com/mocharil/gali/actions/workflows/ci.yml/badge.svg)`).
+3. Cek dashboard Neon apakah backup/point-in-time-recovery otomatis aktif di free tier (biasanya ya,
+   retensi terbatas) — dokumentasikan prosedur restore di `docs/ARCHITECTURE.md`; tidak perlu benar-benar
+   mengeksekusi restore destruktif di production untuk membuktikannya.
+4. Migrasi Alembic maju-mundur: `alembic upgrade head` → `alembic downgrade -1` → `upgrade head` lagi
+   di database **bersih/lokal** (bukan Neon production — ini destruktif ke schema), pastikan tidak error.
+5. Pastikan CI (`ci.yml`) tetap hijau setelah semua perubahan sesi ini.
+
+### Definisi selesai sesi ini
+
+1. Bug CORS (Bug 1) diperbaiki, di-deploy, **diverifikasi dengan origin yang ditolak, bukan cuma yang
+   diizinkan**
+2. Rate limiting (Bug 2) benar-benar terimplementasi, di-deploy, diverifikasi 429 muncul nyata di
+   production
+3. `.github/workflows/refresh.yml` ada dan sudah punya ≥2 run tak berawak nyata di history
+4. Sentry live dengan DSN dari Aril, ATAU eksplisit diblok menunggu Aril (jangan skip diam-diam)
+5. Load test selesai, angka p50/p95/p99 tercatat
+6. Rebuild-from-raw dibuktikan di Neon production, 0 kredit terpakai
+7. `gitleaks` bersih
+8. `docs/ARCHITECTURE.md`, `README.md` (+ badge), `BUILD_PLAN.md`, `PROGRESS.md` semua terupdate jujur
+9. Commit + push per langkah (jangan satu commit raksasa di akhir), CI hijau di tiap push
+
+### Kapan berhenti dan bertanya
+
+- Pembuatan akun Sentry (Langkah 4) — **selalu berhenti**, minta Aril buat sendiri dan kirim DSN
+- Load test (Langkah 5) urutan vs rate limiter — putuskan sendiri dengan alasan jelas, tidak perlu
+  tanya, tapi WAJIB didokumentasikan alasannya
+- `DROP`/`TRUNCATE` schema production (Langkah 6) — ini destruktif terhadap Neon production;
+  **konfirmasi dulu ke Aril sebelum eksekusi**, walau hasil akhirnya bisa dipulihkan dari `raw` —
+  risikonya tinggi kalau ada asumsi salah di tengah jalan
+- Kalau `gitleaks` menemukan sesuatu — laporkan ke Aril sebelum memutuskan cara menghapusnya dari
+  histori git (rewrite history perlu izin eksplisit, aksi destruktif/ireversibel di repo publik)
+- Kalau ditemukan bug lain sekelas Bug 1/Bug 2 (checkbox `BUILD_PLAN.md` bilang selesai tapi kode
+  sebenarnya tidak melakukannya) — perbaiki di sumbernya, tambah regression test, laporkan jujur di
+  `PROGRESS.md` persis seperti pola Bug 1/Bug 2 di sesi ini, jangan diam-diam dibiarkan
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 5</b></summary>
+
+# SESI 5 — Deploy Fly.io + Vercel (5.11b, 6.15) — **selesai, dikerjakan koordinator langsung
+(pivot ke Vercel karena Aril tidak punya kartu kredit; lihat PROGRESS.md 2026-08-30)**
 
 ## ▼ SALIN MULAI DARI SINI ▼
 
@@ -111,6 +329,8 @@ dipakai deploy sungguhan). Sebelum deploy:
   cara berbeda) saat verifikasi publik — perbaiki di sumbernya, tambah regression test, laporkan
 
 ## ▲ SALIN SAMPAI SINI ▲
+
+</details>
 
 ---
 
