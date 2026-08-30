@@ -20,7 +20,7 @@ Keputusan yang diambil:
 - Memperbaiki bug serialisasi Pydantic pada Redis cache helper (`packages/api/gali_api/cache.py`): `set_cached_json` kini mengekstrak model dictionary (`model_dump(mode='json')`) saat menyimpan `list[BaseModel]` atau `dict[str, BaseModel]` ke Redis agar tidak tersimpan sebagai raw string `symbol='...'`.
 Next: task 0.8b (isi TCP password Upstash di `.env.production`), 5.11b (deploy API ke Fly.io), 6.15 (deploy Web ke Vercel).
 
-
+---
 
 **Konteks:** Aril diminta menyelesaikan task 0.8 (provisioning Neon + Upstash, satu-satunya task manusia
 yang tersisa untuk membuka deploy). Aril meminta koordinator melakukannya langsung.
