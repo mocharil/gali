@@ -729,9 +729,22 @@ task 0.14–0.17 selesai dan teruji.
 - [x] **2.2** `SectorsClient` v1: tiered TTL cache, `CreditBudget` hard cap, rate limiter, mode `GALI_DRY_RUN`
 - [x] **2.3** `gali_core/sectors/endpoints.py`: wrapper bertipe untuk **setiap** endpoint di §1, lengkap dengan biaya kredit per panggilan
 - [x] **2.4** Dagster project + resources (`SectorsResource`, `DbResource`, `RedisResource`)
-- [x] **2.5** Asset `raw_*` (satu per endpoint) → tulis ke `raw.responses`, ditandai tier
+- [~] **2.5** Asset `raw_*` (satu per endpoint) → tulis ke `raw.responses`, ditandai tier. **Koreksi
+      2026-08-31 (ditemukan koordinator saat verifikasi task 7.1):** checkbox ini SALAH dicentang penuh.
+      Hanya 4 raw asset nyata ada (`raw_mining_companies`, `raw_mining_sites`, `raw_mining_contracts`,
+      `raw_mining_commodities` — yang terakhir cuma fetch daftar komoditas, BUKAN time-series harga)
+      — semuanya cold tier. **Tidak ada raw asset untuk endpoint warm tier** (performance, financials,
+      ownership, sales-destination per company) **maupun hot tier** (harga komoditas time-series,
+      `/v2/companies/` screener market cap, foreign-flow, broker, filings) walau metadata endpoint-nya
+      sudah lengkap di `gali_core/sectors/endpoints.py`. Data warm/hot yang ada di `raw.responses`
+      sekarang murni hasil seed manual satu-kali Fase 1, bukan dari asset yang bisa dijadwalkan ulang.
+      Lihat prompt Sesi 7 di `AGENT_PROMPT.md` untuk task perbaikannya.
 - [x] **2.6** Asset `core_*`: normalizer jsonb → tabel `core` (upsert idempoten dengan natural key)
-- [x] **2.7** Asset `market_*`: idx_company, daily_close, foreign_flow, broker_registry, broker_summary_top, free_float, filing, corporate_action
+- [~] **2.7** Asset `market_*`: idx_company, daily_close, foreign_flow, broker_registry, broker_summary_top, free_float, filing, corporate_action. **Koreksi 2026-08-31:** hanya `market_idx_companies` (normalizer,
+      bukan fetcher) yang nyata ada. `daily_close`, `foreign_flow`, `broker_registry`,
+      `broker_summary_top`, `free_float`, `filing`, `corporate_action` tidak pernah diimplementasikan
+      — konsisten dengan `/divergence` (task 6.9) yang menampilkan "belum ter-ingest" jujur untuk semua
+      field ini di seluruh 9 emiten.
 - [x] **2.8** Schedules: `cold_refresh` (bulanan), `warm_refresh` (kuartalan), `hot_refresh` (harian 18:30 WIB, setelah IDX tutup)
 - [x] **2.9** Freshness policies + sensor gagal → Sentry
 - [x] **2.10** CLI: `gali ingest --tier {cold,warm,hot}`, `gali credits report`, `gali coverage`
@@ -994,14 +1007,21 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
 ### FASE 7 — Production Hardening · *24 – 26 Sep*
 **Tujuan:** benar-benar siap produksi, bukan sekadar demo.
 
-- [x] **7.1** **Aktifkan schedule `hot_refresh` harian (2026-08-30).** Dagster daemon tidak bisa
-      dideploy persisten (Fly.io gugur karena kartu kredit, Vercel serverless tidak bisa host
-      scheduler). Pengganti: **GitHub Actions `.github/workflows/refresh.yml`** — cron
-      `30 11 * * 1-5` (18:30 WIB, Senin–Jumat) + `workflow_dispatch` (trigger manual dengan pilihan
-      tier dan dry_run). Secrets DATABASE_URL, DATABASE_URL_SYNC, REDIS_URL, SECTORS_API_KEY,
-      SECTORS_CREDIT_HARD_CAP di-set via `gh secret set`. Run pertama (dry_run=true) sudah
-      di-trigger — lihat run history untuk bukti timestamp. Jalankan ≥1 run lagi (dry_run=false)
-      untuk membuktikan ingest real.
+- [~] **7.1** **Jadwal `hot_refresh` harian — mekanisme jadwal ADA dan jalan hijau, tapi TIDAK
+      fetch data live sama sekali. Jangan dicentang penuh sampai gap ini ditutup.** Dagster daemon
+      tidak bisa dideploy persisten (Fly.io gugur karena kartu kredit, Vercel serverless tidak bisa
+      host scheduler) → diganti **GitHub Actions `.github/workflows/refresh.yml`** (cron
+      `30 11 * * 1-5` 18:30 WIB + `workflow_dispatch`). Secrets di-set via `gh secret set` — sempat dua
+      kali gagal (`.env.production` kosong lalu BOM di secret GitHub-nya sendiri), diperbaiki
+      2026-08-31, run `33351554887` sukses hijau end-to-end.
+      **Tapi run "sukses" itu ternyata 0-credit no-op**: `gali ingest --tier hot` (satu-satunya
+      langkah workflow) cuma me-normalize ulang `raw.responses` yang sudah ada — ia tidak pernah
+      memanggil Sectors API. Ditelusuri ke `packages/pipeline/gali_pipeline/assets/raw.py`: **tidak
+      ada raw asset yang benar-benar fetch harga komoditas time-series atau `/v2/companies/` market
+      cap screener** (lihat koreksi task 2.5 di atas). Jadi jadwalnya jalan tapi tidak pernah membawa
+      data baru — perlu raw asset baru + `hot_job` selection diperbaiki di `schedules.py` sebelum task
+      ini bisa dicentang jujur. Detail lengkap: `PROGRESS.md` 2026-08-31 (entri kedua) dan prompt
+      Sesi 7 di `AGENT_PROMPT.md`.
 - [ ] **7.2** Sentry aktif di API + web; picu satu error uji, konfirmasi masuk
 - [ ] **7.3** Load test (k6/Locust): 50 rps pada `/v1/rankings` dan `/v1/scenario`; catat p50/p95/p99 di `docs/ARCHITECTURE.md`
 - [ ] **7.4** Uji pemulihan bencana: `DROP` seluruh schema turunan → rebuild dari `raw` → **0 kredit terpakai** (buktikan lewat ledger)

@@ -5,6 +5,51 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-08-31 — Fase 7 lanjutan: secrets diperbaiki, TAPI hot_refresh ternyata tidak fetch data live sama sekali (koordinator)
+
+**Konteks:** Melanjutkan sesi Fase 7 di atas. `SECTORS_API_KEY` kosong di `.env.production` diisi
+dari nilai yang sama dengan `.env` lokal (bukan credential baru — sudah dipakai sepanjang proyek ini),
+lalu di-propagate ke GitHub secret. Ditemukan juga `SECTORS_CREDIT_HARD_CAP`, `DATABASE_URL`,
+`DATABASE_URL_SYNC`, `REDIS_URL` di GitHub Actions **masih membawa BOM** dari sesi sebelum fix BOM di
+file — kelimanya di-`gh secret set` ulang bersih. Workflow `refresh.yml` dipicu ulang dua kali:
+percobaan pertama masih gagal (`SECTORS_CREDIT_HARD_CAP` BOM di secret, bukan di file), percobaan
+kedua (run `33351554887`) **sukses hijau end-to-end**.
+
+**Temuan kritis — task 7.1 belum benar-benar selesai, walau run-nya hijau:**
+Log run sukses itu menunjukkan `"[OK] Ingestion completed successfully from local raw cache!"` dan
+`"0 Credits Spent"`. Ditelusuri ke `gali_core/cli.py::ingest_command` — command ini **cuma
+me-re-normalize baris `raw.responses` yang SUDAH ADA** ke tabel `core.*`/`market.*`; ia tidak pernah
+memanggil Sectors API sama sekali (ini benar sebagai fitur, bukan bug — persis mekanisme
+"rebuild-from-raw 0-kredit" yang dibutuhkan task 7.4). **Yang jadi masalah:** GitHub Actions
+`refresh.yml` memanggil `gali ingest --tier hot` sebagai satu-satunya langkah — tidak ada langkah lain
+yang benar-benar fetch data baru dari Sectors API. Ditelusuri lebih lanjut ke
+`packages/pipeline/gali_pipeline/assets/raw.py` (assets Dagster yang benar-benar `compute_kind=
+"sectors_api"`, satu-satunya kode yang memanggil `SectorsClient.get()` untuk data live): **hanya ada 4
+raw asset** (`raw_mining_companies`, `raw_mining_sites`, `raw_mining_contracts`,
+`raw_mining_commodities` — dan yang terakhir ini cuma fetch daftar komoditas `/v2/mining/commodities/`,
+BUKAN time-series harga `/v2/mining/commodities/{name}/price/`). **Tidak ada satu pun raw asset** untuk:
+company performance/financials/ownership/sales-destination (warm tier), harga komoditas time-series,
+atau `/v2/companies/` screener market cap (hot tier) — walau metadata endpoint-nya (`EndpointMeta`)
+sudah lengkap terdaftar di `gali_core/sectors/endpoints.py`. Data warm/hot yang ada di `raw.responses`
+sekarang murni hasil seed manual satu-kali sewaktu Fase 1 (Data Truth Audit), bukan dari pipeline
+terjadwal yang berulang. Task Fase 2 yang dulu dicentang selesai ("Dagster asset graph mengisi seluruh
+layer core+market") **ternyata cuma benar untuk cold tier** — pola persis sama seperti Bug 1/Bug 2:
+checkbox bilang selesai, kode sebenarnya tidak melakukannya.
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 404 / 1000)
+
+**Keputusan:** tidak diperbaiki sesi ini (di luar scope permintaan Aril untuk sesi ini) — didaftar
+sebagai prioritas #1 di prompt Sesi 7 (`AGENT_PROMPT.md`). File yang berubah sesi ini hanya
+`.env.production` (SECTORS_API_KEY terisi) dan GitHub secrets — tidak ada perubahan kode, tidak
+di-commit (secrets tidak masuk git).
+
+**Next:** Sesi 7 — bangun raw asset yang hilang (commodity price time-series + market cap screener
+minimal, prioritas tertinggi karena ini yang membuat task 7.1 dan 6.9/divergence page nyata jalan),
+perbaiki `hot_job` selection di `schedules.py` supaya benar-benar include raw fetch asset, baru lanjut
+7.2–7.9.
+
+---
+
 ## 2026-08-31 — Fase 7: Bug 1 (CORS), Bug 2 (Rate Limiting), Task 7.1 (hot_refresh)
 
 **Selesai:** Bug 1 (CORS bypass), Bug 2 (rate limiting kosong), task 7.1 partial (GitHub Actions terkonfigurasi, run pertama gagal karena `SECTORS_API_KEY` kosong di `.env.production`)
