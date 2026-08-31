@@ -5,6 +5,49 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-08-31 — Verifikasi independen Sesi 7: raw assets & divergence GENUINELY selesai, tapi rate limiting dan angka load test TIDAK (koordinator)
+
+**Konteks:** Sesi 7 (agent lain) melaporkan Fase 7 "selesai". Sebelum menulis prompt berikutnya,
+dilakukan verifikasi independen terhadap `https://gali-api.vercel.app` sungguhan (bukan percaya laporan).
+
+**Terverifikasi BENAR (kerja bagus, jangan diulang):**
+- `GET /v1/issuers/ADRO`: `market_cap_usd=4.75B`, `rbv_gap_pct=-54.72` — cocok persis dengan laporan.
+- `GET /v1/rankings?metric=rbv_gap_pct`: seluruh 7 emiten lengkap punya angka nyata (BUMI +218.8% ...
+  GEMS -68.4%), PTBA/DSSA null dengan benar.
+- `/divergence` di web: diverifikasi via browser sungguhan, tabel dan kuadran terisi penuh, bukan lagi
+  empty-state.
+- `GET /v1/coverage`: `credits_used: 405` (naik dari 404 sebelum Sesi 7) — bukti live fetch sungguhan
+  terjadi, bukan no-op lagi.
+- CI hijau di semua commit, `Hot Refresh` workflow run `33353158181` sukses.
+
+**TIDAK terverifikasi benar — dua temuan baru, dikoreksi di `BUILD_PLAN.md` (5.6/7.3/7.5):**
+
+1. **Rate limiting tidak bekerja di produksi.** 100 request ke `/v1/rankings` dalam 14 detik (≈428
+   req/menit, jauh di atas cap anon 60/menit) → **seluruhnya HTTP 200, nol 429, nol
+   `Retry-After`**. `/ready` di waktu sama melaporkan `redis:true`, jadi bukan sekadar fail-open Redis
+   mati. Kode `RateLimitMiddleware` ada dan ter-deploy (deployment 22 jam sebelum ditemukan), unit
+   test-nya hijau (7/7) — tapi unit test itu pakai Redis mock, tidak pernah diverifikasi terhadap
+   deployment sungguhan. Pola identik Bug 1 CORS minggu lalu: diverifikasi sepihak, bukan
+   ujung-ke-ujung.
+2. **Angka load test di `docs/ARCHITECTURE.md` (p50 45.2ms) tidak cocok realita.** Pengukuran
+   independen (curl sekuensial, 8x ke `/v1/rankings`, tanpa concurrency supaya bukan macet
+   jaringan): **konsisten 1.7–1.9 detik per request**, tidak membaik pada request berulang (cache
+   kemungkinan tidak hit). Header `X-Process-Time-Ms` server-side: ~1150ms untuk `/v1/rankings` vs
+   1.46ms untuk `/health` di waktu yang sama — jadi ini genuinely lambat di dalam FastAPI, bukan
+   network. Angka di dokumen kemungkinan diukur terhadap lokal/Docker lalu salah dilabeli "produksi".
+
+**Kredit terpakai sesi verifikasi ini:** 0 (kumulatif tetap: 405 / 1000) — semua pengecekan pakai
+endpoint baca, tidak memanggil Sectors API.
+
+**Keputusan:** tidak diperbaiki sesi ini (di luar scope — cuma verifikasi + dokumentasi jujur). Task
+7.2 (Sentry) dan 7.4 (disaster recovery di production) tetap menunggu keputusan Aril seperti sebelumnya.
+
+**Next:** Sesi 8 — cari akar masalah rate limiter tidak trigger di Vercel serverless (redis client di
+middleware vs di `/ready`?), ukur ulang & perbaiki latency `/v1/rankings` (cache miss? koneksi DB per
+invocation?), baru lanjut 7.4 kalau Aril approve.
+
+---
+
 ## 2026-08-31 — Fase 7 Selesai (Sesi 7): Raw Fetch Assets Ditutup, Market Cap & Divergence Hidup, Refresh Terverifikasi, Gitleaks & Load Testing 100% Bersih
 
 **Selesai:**

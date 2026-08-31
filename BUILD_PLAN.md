@@ -840,7 +840,8 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 - [x] **5.3** `GET /v1/sites` mengembalikan **GeoJSON FeatureCollection** yang valid (uji dengan geojsonlint)
 - [x] **5.4** `POST /v1/scenario` — compute live via `scenario/engine.py`, target p95 < 400 ms
 - [x] **5.5** Cache Redis + stampede lock; key menyertakan `published_pointer.run_id` (invalidasi otomatis saat run baru)
-- [x] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web.
+- [~] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web. **CORS bagian ini selesai
+      dan terverifikasi live; rate limiting BELUM — lihat koreksi kedua di bawah.**
       **Koreksi penting (2026-08-30):** checkbox ini sebelumnya salah dicentang. Audit sesi ini
       menemukan (a) CORS terkonfigurasi `allow_origins=[..., '*'] + allow_credentials=True`,
       membuat Starlette merefleksikan SEMUA origin request secara verbatim — equivalent CORS bypass
@@ -851,9 +852,22 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
       - Rate limiting: `gali_api/ratelimit.py` — `RateLimitMiddleware` menggunakan Redis
         INCR+EXPIRE sliding-window per 60-detik. Anon: 60 req/mnt per IP. Keyed (X-API-Key): 600
         req/mnt. HTTP 429 + `Retry-After`. Fail-open saat Redis mati. Exempt: health/ready/metrics.
-      - Regression tests: `packages/api/tests/test_security.py` (7 tes, semua hijau).
+      - Regression tests: `packages/api/tests/test_security.py` (7 tes, semua hijau — **tapi ini unit
+        test dengan Redis mock**, bukan verifikasi terhadap deployment sungguhan).
       - Verifikasi produksi (https://gali-api.vercel.app): origin diizinkan → ACAO = origin itu;
-        origin jahat (evil-example.com) → `Disallowed CORS origin` dari Vercel, tidak ada ACAO.
+        origin jahat (evil-example.com) → `Disallowed CORS origin` dari Vercel, tidak ada ACAO. **CORS
+        bagian ini genuinely terverifikasi live.**
+      - **Koreksi kedua (2026-08-31, koordinator):** rate limiting **TERNYATA TIDAK BEKERJA DI
+        PRODUKSI** walau unit test hijau dan kode ter-deploy (deployment 22 jam sebelum ditemukan,
+        jadi bukan masalah "belum di-deploy"). Verifikasi langsung: 100 request ke
+        `https://gali-api.vercel.app/v1/rankings` dalam 14 detik (≈428 req/menit, jauh di atas cap
+        anon 60/menit) — **seluruhnya 200, nol 429, nol header `Retry-After`**. `/ready` di waktu yang
+        sama melaporkan `redis: true`, jadi ini bukan sekadar fail-open karena Redis mati — ada bug
+        nyata di `RateLimitMiddleware` atau cara Vercel serverless menjalankannya yang belum
+        ditemukan akar masalahnya. Pola identik dengan Bug 1 CORS sebelumnya: diverifikasi cuma
+        sepihak (unit test), tidak diverifikasi ujung-ke-ujung terhadap deployment nyata. **Jangan
+        anggap task 5.6/7.5 selesai untuk bagian rate limiting sampai 429 sungguhan terlihat di
+        response header produksi.**
 - [x] **5.7** `/health`, `/ready` (cek DB+Redis), `/metrics` (Prometheus)
 - [x] **5.8** structlog + request-id + integrasi Sentry
 - [x] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
@@ -992,9 +1006,22 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
       ini bisa dicentang jujur. Detail lengkap: `PROGRESS.md` 2026-08-31 (entri kedua) dan prompt
       Sesi 7 di `AGENT_PROMPT.md`.
 - [ ] **7.2** Sentry aktif di API + web; picu satu error uji, konfirmasi masuk (Menunggu Sentry DSN dari Aril)
-- [x] **7.3** Load test: 50 rps pada `/v1/rankings` dan `/v1/scenario`; catat p50/p95/p99 di `docs/ARCHITECTURE.md`
+- [~] **7.3** Load test: 50 rps pada `/v1/rankings` dan `/v1/scenario`; catat p50/p95/p99 di `docs/ARCHITECTURE.md`.
+      **Koreksi (2026-08-31, koordinator):** angka di `docs/ARCHITECTURE.md` (p50 45.2ms/62.1ms) tidak
+      cocok dengan pengukuran langsung terhadap production. Verifikasi independen (`curl` sekuensial,
+      8 request ke `/v1/rankings`, tanpa concurrency): **1.7–1.9 detik per request, konsisten**, tidak
+      membaik pada request berulang (mengindikasikan Redis cache TIDAK hit). Header
+      `X-Process-Time-Ms` server-side melaporkan ~1150ms murni di dalam FastAPI (bukan network/TLS —
+      itu bagian dari sisa ~450-500ms). `/health` di waktu sama: `X-Process-Time-Ms` 1.46ms. Jadi
+      `/v1/rankings` genuinely lambat di produksi, bukan salah ukur. Angka di ARCHITECTURE.md kemungkinan
+      diukur terhadap lokal/Docker dan salah dilabeli "produksi", atau ada regresi performa sejak
+      diukur. **Jangan percaya angka yang ada — ukur ulang khusus terhadap
+      `https://gali-api.vercel.app` dan cari kenapa cache tidak hit / DB query selambat itu.**
 - [ ] **7.4** Uji pemulihan bencana: `DROP` seluruh schema turunan → rebuild dari `raw` → **0 kredit terpakai** (buktikan lewat ledger)
-- [x] **7.5** Audit keamanan: tidak ada rahasia di repo (`gitleaks`), CORS terkunci, rate limit terverifikasi, error tidak membocorkan internal
+- [~] **7.5** Audit keamanan: tidak ada rahasia di repo (`gitleaks`), CORS terkunci, rate limit terverifikasi, error tidak membocorkan internal.
+      **CORS dan gitleaks bagian ini genuinely terverifikasi. Rate limit TIDAK — lihat koreksi kedua di
+      task 5.6 di atas: 100 request/14 detik ke produksi, nol 429.** Jangan centang penuh sampai itu
+      diperbaiki dan diverifikasi live.
 - [x] **7.6** `docs/ARCHITECTURE.md` final + diagram; README dengan quickstart yang benar-benar jalan dari nol
 - [x] **7.7** Verifikasi backup DB (snapshot Neon) + prosedur restore terdokumentasi
 - [x] **7.8** Migrasi Alembic terverifikasi di database bersih
