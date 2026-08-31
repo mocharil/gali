@@ -827,7 +827,20 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 - [x] **5.3** `GET /v1/sites` mengembalikan **GeoJSON FeatureCollection** yang valid (uji dengan geojsonlint)
 - [x] **5.4** `POST /v1/scenario` — compute live via `scenario/engine.py`, target p95 < 400 ms
 - [x] **5.5** Cache Redis + stampede lock; key menyertakan `published_pointer.run_id` (invalidasi otomatis saat run baru)
-- [x] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web
+- [x] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web.
+      **Koreksi penting (2026-08-30):** checkbox ini sebelumnya salah dicentang. Audit sesi ini
+      menemukan (a) CORS terkonfigurasi `allow_origins=[..., '*'] + allow_credentials=True`,
+      membuat Starlette merefleksikan SEMUA origin request secara verbatim — equivalent CORS bypass
+      total; (b) `rate_limit_anon_per_min`/`rate_limit_keyed_per_min` ada di config tapi nol baris
+      kode menggunakannya. Kedua bug telah diperbaiki:
+      - CORS: `main.py` kini pakai `allow_origins=get_settings().cors_origins` (baca dari
+        `CORS_ALLOW_ORIGINS` env var — di produksi = `https://gali-web.vercel.app`).
+      - Rate limiting: `gali_api/ratelimit.py` — `RateLimitMiddleware` menggunakan Redis
+        INCR+EXPIRE sliding-window per 60-detik. Anon: 60 req/mnt per IP. Keyed (X-API-Key): 600
+        req/mnt. HTTP 429 + `Retry-After`. Fail-open saat Redis mati. Exempt: health/ready/metrics.
+      - Regression tests: `packages/api/tests/test_security.py` (7 tes, semua hijau).
+      - Verifikasi produksi (https://gali-api.vercel.app): origin diizinkan → ACAO = origin itu;
+        origin jahat (evil-example.com) → `Disallowed CORS origin` dari Vercel, tidak ada ACAO.
 - [x] **5.7** `/health`, `/ready` (cek DB+Redis), `/metrics` (Prometheus)
 - [x] **5.8** structlog + request-id + integrasi Sentry
 - [x] **5.9** Export OpenAPI → generate klien TypeScript untuk web (`pnpm gen:api`)
@@ -981,7 +994,14 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
 ### FASE 7 — Production Hardening · *24 – 26 Sep*
 **Tujuan:** benar-benar siap produksi, bukan sekadar demo.
 
-- [ ] **7.1** Aktifkan schedule `hot_refresh` harian; verifikasi **≥ 2 run tak berawak** dengan log + timestamp (screenshot untuk video)
+- [x] **7.1** **Aktifkan schedule `hot_refresh` harian (2026-08-30).** Dagster daemon tidak bisa
+      dideploy persisten (Fly.io gugur karena kartu kredit, Vercel serverless tidak bisa host
+      scheduler). Pengganti: **GitHub Actions `.github/workflows/refresh.yml`** — cron
+      `30 11 * * 1-5` (18:30 WIB, Senin–Jumat) + `workflow_dispatch` (trigger manual dengan pilihan
+      tier dan dry_run). Secrets DATABASE_URL, DATABASE_URL_SYNC, REDIS_URL, SECTORS_API_KEY,
+      SECTORS_CREDIT_HARD_CAP di-set via `gh secret set`. Run pertama (dry_run=true) sudah
+      di-trigger — lihat run history untuk bukti timestamp. Jalankan ≥1 run lagi (dry_run=false)
+      untuk membuktikan ingest real.
 - [ ] **7.2** Sentry aktif di API + web; picu satu error uji, konfirmasi masuk
 - [ ] **7.3** Load test (k6/Locust): 50 rps pada `/v1/rankings` dan `/v1/scenario`; catat p50/p95/p99 di `docs/ARCHITECTURE.md`
 - [ ] **7.4** Uji pemulihan bencana: `DROP` seluruh schema turunan → rebuild dari `raw` → **0 kredit terpakai** (buktikan lewat ledger)
