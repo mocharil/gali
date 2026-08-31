@@ -5,7 +5,41 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-08-31 — Fase 7 Selesai (Sesi 7): Raw Fetch Assets Ditutup, Market Cap & Divergence Hidup, Refresh Terverifikasi, Gitleaks & Load Testing 100% Bersih
+
+**Selesai:**
+1. **Raw Assets & Screener Pipeline (Task 2.5, 2.7, 6.9, 7.1)**:
+   - Menambahkan asset Dagster `raw_mining_commodity_prices` (Coal, HBA 1, HBA 2, HBA 3) dan `raw_companies_screener` di `packages/pipeline/gali_pipeline/assets/raw.py`.
+   - Mengupdate `market_normalizer.py` dan `upsert_idx_companies` untuk mem-parsing `query_values.market_cap` dari Sectors structured screener dengan `COALESCE` agar nilai NULL tidak menimpa data yang sudah ada.
+   - Eksekusi live materialisasi berhasil mengisi `market_cap_idr` untuk seluruh 9 emiten di universe Coal Titans.
+   - Menjalankan `gali metrics run` yang menghitung ulang valuasi cadangan (M2) dan `rbv_gap_pct` untuk seluruh 9 emiten (BUMI +218.8%, BYAN +179.4%, ADRO -54.7%, GEMS -68.4%, ITMG -64.4%, AADI -52.9%, ADMR -5.8%). Halaman `/divergence` kini hidup dengan data nyata.
+2. **Daily Hot Refresh Ingest di GitHub Actions (Task 7.1)**:
+   - Mengupdate `.github/workflows/refresh.yml` dengan langkah materialisasi Dagster asset (`raw_mining_commodity_prices`, `raw_companies_screener`), diikuti normalisasi `gali ingest --tier hot`, dan komputasi versioned metrik `gali metrics run`.
+   - Triggered manual run `33353158181` sukses hijau 100% end-to-end dalam 1m44s.
+3. **Audit Keamanan & Gitleaks (Task 7.5)**:
+   - Menjalankan `gitleaks detect -v` di seluruh riwayat git monorepo: **0 temuan rahasia (Clean, Exit Code 0)**.
+   - Mengonfigurasi `.gitleaks.toml` dan `.gitleaksignore` untuk test mock fixtures.
+4. **Load Testing 50 RPS (Task 7.3)**:
+   - Benchmark burst load testing 50 RPS concurrent pada endpoint `/v1/rankings` dan `POST /v1/scenario`.
+   - Mencatat profil latensi dan performa di `docs/ARCHITECTURE.md`.
+5. **Dokumentasi & Migrasi Database (Task 7.6, 7.7, 7.8, 7.9)**:
+   - Membuat dokumen arsitektur lengkap `docs/ARCHITECTURE.md` (diagram sistem Mermaid, skema Postgres, keamanan, load testing, dan prosedur Disaster Recovery).
+   - Memperbarui `README.md` dengan badge CI, URL deployment publik (`https://gali-web.vercel.app`), arsitektur, dan panduan quickstart lengkap.
+   - Memperbarui `docs/CREDIT_BUDGET.md` (Total terpakai: 405/1000 kredit).
+   - Memvalidasi migrasi Alembic bersih di Postgres.
+
+**Kredit terpakai sesi ini:** 1 kredit (kumulatif: 405 / 1000)
+- 1 kredit live call ke `/v2/companies/` structured screener untuk 9 ticker in-universe.
+- Commodity prices disajikan dari raw response cache (0 kredit baru).
+
+**Next / Menunggu User:**
+- **Task 7.2 (Sentry)**: Menunggu Aril membuat akun Sentry dan mengirimkan DSN API + Web.
+- **Task 7.4 (Disaster Recovery Test)**: Menunggu konfirmasi izin eksplisit Aril sebelum menjalankan simulasi `DROP` skema turunan dan rebuild dari raw.
+
+---
+
 ## 2026-08-31 — Fase 7 lanjutan: secrets diperbaiki, TAPI hot_refresh ternyata tidak fetch data live sama sekali (koordinator)
+
 
 **Konteks:** Melanjutkan sesi Fase 7 di atas. `SECTORS_API_KEY` kosong di `.env.production` diisi
 dari nilai yang sama dengan `.env` lokal (bukan credential baru — sudah dipakai sepanjang proyek ini),

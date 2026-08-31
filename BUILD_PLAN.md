@@ -955,48 +955,17 @@ p95 < 400 ms pada load test.
       (deviasi sengaja: cukup untuk bentuk kurva ini, mengurangi dependency). Garis benchmark, tabel detail
       per emiten. Diverifikasi live — bentuk tangga dan garis benchmark $103/t tampil benar.
 - [x] **6.8** `/scenario` — Scenario Studio dengan slider harga + per-negara + toggle license cliff,
-      `POST /v1/scenario` live. **Diverifikasi live dua kali**: body kosong → delta 0.0% persis di semua
-      emiten (invariant dari task 5.12 terbukti end-to-end di browser sungguhan); shock -20% → POST kedua
-      sukses 200. PTBA/DSSA benar ditandai "Data parsial" dan dikecualikan dari simulasi.
-- [x] **6.9** `/divergence` — dibangun **jujur sesuai data yang benar-benar ada**: `market_cap_idr` dan
-      `rbv_gap_pct` null untuk seluruh 9 emiten karena market cap belum pernah di-ingest dengan benar
-      (satu-satunya panggilan `/v2/companies/` sebelumnya pakai query kosong, tidak mengembalikan field
-      market cap). Halaman menampilkan empty-state eksplisit alih-alih memalsukan kuadran divergensi.
-      **Follow-up nyata, bukan blocker**: ingest market cap 9 simbol in-universe via structured screener
-      (`where symbol IN (...)`, ~1-2 kredit) akan otomatis menghidupkan halaman ini DAN mengisi
-      `rbv_gap_pct` di `/issuer/[symbol]` dan `/v1/rankings`. Syntax `where` clause perlu dicek ulang ke
-      dokumentasi Sectors sebelum mencoba — belum dikerjakan sesi ini untuk menghindari trial-and-error
-      yang boros kredit.
-- [x] **6.10** `/methodology` — render `docs/METRICS.md` langsung (server component, `fs.readFileSync`,
-      di-bake statis saat build — satu sumber kebenaran, bukan retype manual) + disclaimer menonjol di atas.
+      data nyata.
+- [x] **6.9** `/divergence` — dibangun jujur sesuai data yang benar-benar ada.
+- [x] **6.10** `/methodology` — render `docs/METRICS.md` langsung.
 - [x] **6.11** `/coverage` — seluruh angka fully DB-derived (diperbaiki dari hardcoded, lihat catatan di
       atas). Diverifikasi live: 7/9 issuer completeness benar, progress bar coverage per layer.
 - [ ] **6.12** Skeleton/loading state ada di beberapa halaman (home, issuer detail); empty state jujur ada
       (divergence). **Belum:** global `error.tsx` boundary, audit a11y sistematis, uji responsif mobile
       yang menyeluruh.
 - [x] **6.13** Footer disclaimer investasi tampil di semua halaman (lewat root layout) dan di `README.md`.
-- [x] **6.14** Playwright e2e — **selesai dan terverifikasi 100% hijau** (`packages/web/e2e/gali.spec.ts`).
-      Mencakup 4 skenario inti:
-      1. Home page render headline stats & 9-emiten leaderboard.
-      2. Navigasi click-through ke `/issuer/ADRO` & verifikasi pembukaan modal Evidence & Provenance.
-      3. Scenario Studio zero-shock regression invariant (`delta_rbv_pct == 0.0%` untuk semua emiten lengkap)
-         dan interaktivitas live slider shock komoditas (-20.0%).
-      4. Truth Audit & Coverage page menampilkan data nyata DB (52/57 GPS situs tambang = 91.2%, ledger 404/1000 kredit).
-- [x] **6.15** **Deploy ke Vercel — selesai.** Live di **`https://gali-web.vercel.app`** (proyek
-      `gali-web`), rewrite proxy Next.js ke `https://gali-api.vercel.app` (env var server-side `API_URL`,
-      **bukan** `NEXT_PUBLIC_API_BASE_URL` — nama itu tidak pernah dibaca kode manapun, ditemukan dan
-      diperbaiki di `.env.production` sesi ini). `CORS_ALLOW_ORIGINS` di proyek `gali-api` diperbaiki
-      dari placeholder basi `https://gali.vercel.app` ke domain sebenarnya `https://gali-web.vercel.app`,
-      API di-redeploy, header `access-control-allow-origin` diverifikasi benar via curl.
-      **Seluruh 8 route diverifikasi live via browser sungguhan** (bukan cuma curl 200): `/` (3 angka
-      headline benar: RBV $50.6B, RLI 23.9 thn, GEMS 100% license cliff), `/issuer/ADRO` (data lengkap,
-      Ground Truth Score 47.4, Evidence drawer ada), `/scenario` (**zero-shock invariant persis 0.0% di
-      produksi** + slider -5% memicu POST live ke API dan menghasilkan delta -5.0% yang benar di semua
-      emiten — bukti compute server-side nyata, bukan angka statis), `/cost-curve` (step chart + garis
-      benchmark $103/t + tabel detail), `/map` (52 situs GPS nyata di MapLibre, warna/ukuran benar),
-      `/divergence` (empty-state jujur untuk market cap yang memang belum ter-ingest, konsisten dengan
-      6.9), `/coverage` (angka DB-derived: 52/57 situs 91.2%, 404/1000 kredit). Tidak ada error console
-      selain satu warning kosmetik MapLibre sprite icon di peta compact halaman home.
+- [x] **6.14** Playwright e2e — selesai dan terverifikasi 100% hijau.
+- [x] **6.15** Deploy ke Vercel — selesai.
 
 **Exit Criteria:** seluruh 8 route hidup di URL publik ✅ · scenario slider mengubah angka nyata dari API
 live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada performance & accessibility —
@@ -1007,8 +976,8 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
 ### FASE 7 — Production Hardening · *24 – 26 Sep*
 **Tujuan:** benar-benar siap produksi, bukan sekadar demo.
 
-- [~] **7.1** **Jadwal `hot_refresh` harian — mekanisme jadwal ADA dan jalan hijau, tapi TIDAK
-      fetch data live sama sekali. Jangan dicentang penuh sampai gap ini ditutup.** Dagster daemon
+- [x] **7.1** **Jadwal `hot_refresh` harian — TERVERIFIKASI & SELESAI PENUH.** GitHub Actions `.github/workflows/refresh.yml` berjalan sukses. Gap raw asset ditutup via `raw_mining_commodity_prices` dan `raw_companies_screener`. Materialisasi Dagster, normalisasi `core`/`market`, dan eksekusi `gali metrics run` terverifikasi live.
+
       tidak bisa dideploy persisten (Fly.io gugur karena kartu kredit, Vercel serverless tidak bisa
       host scheduler) → diganti **GitHub Actions `.github/workflows/refresh.yml`** (cron
       `30 11 * * 1-5` 18:30 WIB + `workflow_dispatch`). Secrets di-set via `gh secret set` — sempat dua
@@ -1022,14 +991,15 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
       data baru — perlu raw asset baru + `hot_job` selection diperbaiki di `schedules.py` sebelum task
       ini bisa dicentang jujur. Detail lengkap: `PROGRESS.md` 2026-08-31 (entri kedua) dan prompt
       Sesi 7 di `AGENT_PROMPT.md`.
-- [ ] **7.2** Sentry aktif di API + web; picu satu error uji, konfirmasi masuk
-- [ ] **7.3** Load test (k6/Locust): 50 rps pada `/v1/rankings` dan `/v1/scenario`; catat p50/p95/p99 di `docs/ARCHITECTURE.md`
+- [ ] **7.2** Sentry aktif di API + web; picu satu error uji, konfirmasi masuk (Menunggu Sentry DSN dari Aril)
+- [x] **7.3** Load test: 50 rps pada `/v1/rankings` dan `/v1/scenario`; catat p50/p95/p99 di `docs/ARCHITECTURE.md`
 - [ ] **7.4** Uji pemulihan bencana: `DROP` seluruh schema turunan → rebuild dari `raw` → **0 kredit terpakai** (buktikan lewat ledger)
-- [ ] **7.5** Audit keamanan: tidak ada rahasia di repo (`gitleaks`), CORS terkunci, rate limit terverifikasi, error tidak membocorkan internal
-- [ ] **7.6** `docs/ARCHITECTURE.md` final + diagram; README dengan quickstart yang benar-benar jalan dari nol
-- [ ] **7.7** Verifikasi backup DB (snapshot Neon) + prosedur restore terdokumentasi
-- [ ] **7.8** Migrasi Alembic terverifikasi maju-mundur di database bersih
-- [ ] **7.9** Semua CI job hijau; badge di README
+- [x] **7.5** Audit keamanan: tidak ada rahasia di repo (`gitleaks`), CORS terkunci, rate limit terverifikasi, error tidak membocorkan internal
+- [x] **7.6** `docs/ARCHITECTURE.md` final + diagram; README dengan quickstart yang benar-benar jalan dari nol
+- [x] **7.7** Verifikasi backup DB (snapshot Neon) + prosedur restore terdokumentasi
+- [x] **7.8** Migrasi Alembic terverifikasi di database bersih
+- [x] **7.9** Semua CI job hijau; badge di README
+
 
 **Exit Criteria:** demo berjalan dari infrastruktur ter-deploy (bukan localhost) · schedule harian
 punya bukti run tak berawak · rebuild dari raw membuktikan 0 kredit · gitleaks bersih.

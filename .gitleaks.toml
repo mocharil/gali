@@ -1,0 +1,10 @@
+[allowlist]
+description = "Ignore mock test keys in test files"
+paths = [
+    '''packages/api/tests/test_security\.py''',
+    '''packages/core/tests/test_models\.py'''
+]
+regexes = [
+    '''test-key-abc123''',
+    '''gali_live_testkey_1234567890'''
+]
