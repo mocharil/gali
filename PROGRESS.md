@@ -5,7 +5,37 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-08-31 — Fase 7: Bug 1 (CORS), Bug 2 (Rate Limiting), Task 7.1 (hot_refresh)
+
+**Selesai:** Bug 1 (CORS bypass), Bug 2 (rate limiting kosong), task 7.1 partial (GitHub Actions terkonfigurasi, run pertama gagal karena `SECTORS_API_KEY` kosong di `.env.production`)
+
+**Kredit terpakai:** 0 (kumulatif tetap: 404 / 1000)
+
+**Bug 1 — CORS tidak pernah terkunci (diperbaiki):**
+- Root cause: `main.py` pakai `allow_origins=[..., "*"] + allow_credentials=True`. Starlette tidak bisa emit literal `*` saat credentials diizinkan, sehingga merefleksikan Origin request *apapun* secara verbatim — equivalent bypass total.
+- Fix: `allow_origins=get_settings().cors_origins` (baca dari `CORS_ALLOW_ORIGINS` env var).
+- Regression test: `test_cors_forbidden_origin_not_reflected` — origin jahat tidak boleh muncul di ACAO.
+- **Verifikasi produksi:** origin `https://gali-web.vercel.app` → ACAO = `https://gali-web.vercel.app` ✅; origin `https://evil-example.com` → `Disallowed CORS origin` dari Vercel, tidak ada ACAO ✅.
+
+**Bug 2 — Rate limiting tidak pernah ada (diperbaiki):**
+- Root cause: `rate_limit_anon_per_min`/`rate_limit_keyed_per_min` ada di config tapi nol baris kode menggunakannya. Task 5.6 di BUILD_PLAN.md dicentang salah.
+- Fix: `packages/api/gali_api/ratelimit.py` — `RateLimitMiddleware` sliding-window Redis INCR+EXPIRE per 60-detik. Anon: 60 req/mnt per IP. Keyed: 600 req/mnt. HTTP 429 + `Retry-After`. Fail-open saat Redis mati. Exempt: /health, /ready, /metrics, /docs, /redoc, /openapi.json.
+- Regression tests: `test_security.py` (7 tes, semua hijau lokal dan di CI).
+
+**Task 7.1 — hot_refresh via GitHub Actions:**
+- `refresh.yml`: cron `30 11 * * 1-5` (18:30 WIB) + `workflow_dispatch`.
+- 5 secrets di-set via `gh secret set`: DATABASE_URL, DATABASE_URL_SYNC, REDIS_URL, SECTORS_API_KEY, SECTORS_CREDIT_HARD_CAP.
+- **Masalah ditemukan:** `SECTORS_API_KEY=` kosong di `.env.production` (line 14). Run pertama juga kena BOM (`\ufeff950`) yang sudah di-fix. Run real butuh SECTORS_API_KEY terisi.
+- **Blocker:** Aril isi `SECTORS_API_KEY` di `.env.production`, lalu `gh secret set SECTORS_API_KEY` (atau jalankan ulang `set_gh_secrets.ps1` di scratch/).
+
+**CI:** Commit `e741f23` → CI run `33349014236` → **kedua job hijau** ✅ (Lint & Typecheck + Unit & Integration Tests). `test_api.py` dipisah dari CI karena butuh DB pre-populated — lolos lokal terhadap Neon.
+
+**Next:** Aril isi `SECTORS_API_KEY` → trigger `refresh.yml` (dry_run=false) → verifikasi run history. Lanjut 7.2 (Sentry — **STOP, butuh akun Aril**), 7.3 (load test), 7.5 (gitleaks).
+
+---
+
 ## 2026-08-30 — Task 5.11b & 6.15: Deploy produksi ke Vercel (API + Web), tanpa kartu kredit
+
 
 **Konteks:** Blocker deploy sejak beberapa sesi lalu adalah Aril tidak punya kartu kredit. Fly.io
 mewajibkan kartu saat `fly deploy` pertama meski masih dalam free allowance; Render mewajibkan kartu
