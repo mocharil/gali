@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
+from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,15 +37,18 @@ def normalize_idx_companies(payload: dict | list) -> list[dict[str, Any]]:
             continue
 
         clean_sym = str(sym).replace(".JK", "").strip().upper()
-        mcap = parse_float_safe(item.get("market_cap") or item.get("market_cap_idr"))
-        list_date = parse_date_safe(item.get("listing_date"))
+        qv = item.get("query_values", {}) if isinstance(item.get("query_values"), dict) else {}
+        mcap = parse_float_safe(
+            item.get("market_cap") or item.get("market_cap_idr") or qv.get("market_cap") or qv.get("market_cap_idr")
+        )
+        list_date = parse_date_safe(item.get("listing_date") or qv.get("listing_date"))
 
         rows.append(
             {
                 "symbol": clean_sym,
                 "name": str(name).strip(),
-                "sector": item.get("sector"),
-                "sub_sector": item.get("sub_sector"),
+                "sector": item.get("sector") or qv.get("sector"),
+                "sub_sector": item.get("sub_sector") or qv.get("sub_sector"),
                 "market_cap_idr": mcap,
                 "listing_date": list_date,
             }
@@ -130,11 +134,11 @@ async def upsert_idx_companies(session: AsyncSession, rows: list[dict[str, Any]]
     stmt = stmt.on_conflict_do_update(
         index_elements=["symbol"],
         set_={
-            "name": stmt.excluded.name,
-            "sector": stmt.excluded.sector,
-            "sub_sector": stmt.excluded.sub_sector,
-            "market_cap_idr": stmt.excluded.market_cap_idr,
-            "listing_date": stmt.excluded.listing_date,
+            "name": func.coalesce(stmt.excluded.name, IdxCompany.name),
+            "sector": func.coalesce(stmt.excluded.sector, IdxCompany.sector),
+            "sub_sector": func.coalesce(stmt.excluded.sub_sector, IdxCompany.sub_sector),
+            "market_cap_idr": func.coalesce(stmt.excluded.market_cap_idr, IdxCompany.market_cap_idr),
+            "listing_date": func.coalesce(stmt.excluded.listing_date, IdxCompany.listing_date),
             "updated_at": dt.datetime.now(dt.UTC),
         },
     )

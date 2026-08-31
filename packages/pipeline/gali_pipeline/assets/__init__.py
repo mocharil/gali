@@ -16,7 +16,9 @@ from gali_pipeline.assets.graph import (
 from gali_pipeline.assets.market import market_idx_companies
 from gali_pipeline.assets.metrics import metric_run_all
 from gali_pipeline.assets.raw import (
+    raw_companies_screener,
     raw_mining_commodities,
+    raw_mining_commodity_prices,
     raw_mining_companies,
     raw_mining_contracts,
     raw_mining_sites,
@@ -27,7 +29,10 @@ RAW_ASSETS = [
     raw_mining_sites,
     raw_mining_contracts,
     raw_mining_commodities,
+    raw_mining_commodity_prices,
+    raw_companies_screener,
 ]
+
 
 CORE_ASSETS = [
     core_mining_companies,

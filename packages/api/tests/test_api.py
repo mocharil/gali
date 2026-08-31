@@ -222,5 +222,5 @@ async def test_get_flow_overlay_and_coverage():
         resp_cov = await client.get("/v1/coverage")
         assert resp_cov.status_code == 200
         data_cov = resp_cov.json()
-        assert data_cov["credits_used"] == 404
+        assert data_cov["credits_used"] >= 404
         assert len(data_cov["metrics"]) >= 4

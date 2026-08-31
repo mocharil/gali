@@ -204,7 +204,7 @@ def core_sales_destinations(context: AssetExecutionContext, db: DbResource) -> M
     return MaterializeResult(metadata={"upserted_rows": count})
 
 
-@asset(group_name="core", compute_kind="sql_upsert", deps=["raw_mining_commodities"])
+@asset(group_name="core", compute_kind="sql_upsert", deps=["raw_mining_commodity_prices"])
 def core_commodity_prices(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize and upsert raw commodity prices to core.commodity_price."""
 

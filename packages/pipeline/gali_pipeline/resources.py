@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from dagster import ConfigurableResource
 from gali_core.config import get_settings
 from gali_core.db.base import async_session
 from gali_core.sectors.client import SectorsClient
 from pydantic import Field
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class DbResource(ConfigurableResource):
     """Provides async database sessions for pipeline execution."""
 
-    def get_session(self) -> AsyncSession:
+    def get_session(self) -> Any:
         return async_session()
 
 
@@ -23,9 +24,7 @@ class SectorsResource(ConfigurableResource):
     dry_run: bool = Field(default=False, description="Whether to run in offline dry-run mode.")
 
     def get_client(self) -> SectorsClient:
-        settings = get_settings()
-        if self.dry_run:
-            settings = settings.model_copy(update={"gali_dry_run": True})
+        settings = get_settings().model_copy(update={"gali_dry_run": self.dry_run})
         return SectorsClient(settings=settings)
 
 

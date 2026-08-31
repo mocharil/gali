@@ -8,15 +8,15 @@
 ## 1. Ringkasan Realisasi Anggaran
 
 - **Total Kredit Hibah**: 1000 kredit
-- **Total Terpakai**: **404 kredit**
+- **Total Terpakai**: **405 kredit**
 - **Plafon Batas Keras**: 950 kredit
-- **Sisa Saldo Aman**: **596 kredit** (546 kredit di bawah batas keras 950)
+- **Sisa Saldo Aman**: **595 kredit** (545 kredit di bawah batas keras 950)
 
 | Tier | Realisasi (Kredit) | Porsi Realisasi |
 |---|---|---|
-| **cold** | 105 | 26.0% |
-| **warm** | 280 | 69.3% |
-| **hot** | 19 | 4.7% |
+| **cold** | 105 | 25.9% |
+| **warm** | 280 | 69.1% |
+| **hot** | 20 | 4.9% |
 
 ---
 
@@ -28,7 +28,8 @@
 | /v2/mining/companies/ | cold | 13 | 13 |
 | /v2/mining/sites/ | cold | 6 | 6 |
 | /v2/subsectors/ | cold | 2 | 2 |
-| /v2/companies/ | hot | 1 | 1 |
+| /v2/companies/ | hot | 2 | 2 |
+
 | /v2/mining/commodities/ | cold | 1 | 1 |
 | /v2/mining/commodities/Aluminum/price/ | hot | 1 | 1 |
 | /v2/mining/commodities/Chromium/price/ | hot | 1 | 1 |

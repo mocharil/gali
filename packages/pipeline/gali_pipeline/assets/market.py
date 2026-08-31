@@ -8,12 +8,12 @@ from gali_core.normalize.market_normalizer import (
     normalize_idx_companies,
     upsert_idx_companies,
 )
-from sqlalchemy import desc, select
+from sqlalchemy import select
 
 from gali_pipeline.resources import DbResource
 
 
-@asset(group_name="market", compute_kind="sql_upsert")
+@asset(group_name="market", compute_kind="sql_upsert", deps=["raw_companies_screener"])
 def market_idx_companies(context: AssetExecutionContext, db: DbResource) -> MaterializeResult:
     """Normalize raw company screener responses into market.idx_company."""
 
@@ -26,8 +26,9 @@ def market_idx_companies(context: AssetExecutionContext, db: DbResource) -> Mate
                     RawResponse.endpoint == "/v2/companies/",
                     RawResponse.status_code == 200,
                 )
-                .order_by(desc(RawResponse.fetched_at))
+                .order_by(RawResponse.fetched_at.asc())
             )
+
             raw_rows = res.scalars().all()
             for raw in raw_rows:
                 if raw.payload:

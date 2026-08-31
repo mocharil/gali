@@ -373,8 +373,9 @@ def ingest_command(
                     res = await session.execute(
                         select(RawResponse)
                         .where(RawResponse.endpoint == "/v2/companies/", RawResponse.status_code == 200)
-                        .order_by(desc(RawResponse.fetched_at))
+                        .order_by(RawResponse.fetched_at.asc())
                     )
+
                     idx_count = 0
                     for raw in res.scalars().all():
                         if raw.payload:

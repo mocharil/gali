@@ -62,8 +62,19 @@ jobs:
           ENVIRONMENT: production
         run: |
           TIER="${{ github.event.inputs.tier || 'hot' }}"
-          echo "Running: gali ingest --tier ${TIER}"
+          echo "Step 1: Materializing raw fetch assets via Dagster..."
+          if [ "${TIER}" = "hot" ] || [ "${TIER}" = "all" ]; then
+            dagster asset materialize -f packages/pipeline/gali_pipeline/definitions.py --select 'raw_mining_commodity_prices,raw_companies_screener'
+          elif [ "${TIER}" = "cold" ]; then
+            dagster asset materialize -f packages/pipeline/gali_pipeline/definitions.py --select 'raw_mining_companies,raw_mining_sites,raw_mining_contracts,raw_mining_commodities'
+          fi
+
+          echo "Step 2: Normalizing to core/market layers..."
           gali ingest --tier "${TIER}"
+
+          echo "Step 3: Calculating and publishing updated Ground Truth metrics..."
+          gali metrics run
+
 
       - name: Report credit usage
         if: always()
