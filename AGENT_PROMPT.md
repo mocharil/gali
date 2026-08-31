@@ -1,11 +1,180 @@
 # Prompt untuk Agent Pelaksana
 
-> **Sesi 6 ada di bawah ini.** Sesi 1-5 diarsipkan di bagian bawah file.
+> **Sesi 7 ada di bawah ini.** Sesi 1-6 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
 ---
 
-# SESI 6 — Production Hardening (Fase 7: 7.1–7.9) + 2 bug keamanan ditemukan saat review
+# SESI 7 — Raw asset yang hilang (blocker task 7.1/6.9), lalu lanjut Fase 7 (7.2–7.9)
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, dua entri teratas (tanggal 2026-08-31, keduanya)
+2. `BUILD_PLAN.md` task **2.5**, **2.7** (baru dikoreksi, dulu salah dicentang penuh), **7.1**
+   (juga baru dikoreksi), dan 7.2–7.9
+3. `.env.production` — **jangan pernah commit, print isinya ke log, atau ke PR**. `SECTORS_API_KEY`
+   sudah terisi di sana dan sudah di-set sebagai GitHub secret — jangan diprint ulang untuk verifikasi,
+   cukup cek panjangnya (`wc -c` atau `.Length`) kalau perlu.
+
+### Konteks
+
+Sesi lalu (Sesi 6) berhasil memperbaiki dua bug keamanan nyata (CORS wildcard-refleksi, rate limiting
+yang tidak pernah ada) dan sudah live-deploy + verified di production. Sesi setelahnya (koordinator)
+memperbaiki `SECTORS_API_KEY` yang kosong dan beberapa GitHub secret yang kena BOM (`\ufeff`), sampai
+`refresh.yml` (workflow task 7.1) akhirnya jalan **hijau** (`run 33351554887`).
+
+**Tapi run hijau itu ternyata 0-credit no-op — bukan bukti task 7.1 selesai.** `gali ingest --tier
+hot` (satu-satunya langkah di `refresh.yml`) cuma me-normalize ulang baris `raw.responses` yang SUDAH
+ADA ke tabel `core.*`/`market.*` — ia **tidak pernah memanggil Sectors API sama sekali**. Ini fitur
+yang benar untuk task 7.4 (rebuild-from-raw 0-kredit), tapi salah dipakai sebagai satu-satunya langkah
+"refresh data harian".
+
+**Akar masalah, ditelusuri ke `packages/pipeline/gali_pipeline/assets/raw.py`:** ini satu-satunya kode
+yang benar-benar memanggil `SectorsClient.get()` untuk data live (asset dengan
+`compute_kind="sectors_api"`). **Hanya ada 4 raw asset, semuanya cold tier:**
+`raw_mining_companies`, `raw_mining_sites`, `raw_mining_contracts`, `raw_mining_commodities` (yang
+terakhir ini cuma fetch `/v2/mining/commodities/` — daftar nama komoditas — BUKAN time-series harga
+`/v2/mining/commodities/{name}/price/`).
+
+**Yang tidak pernah dibangun sama sekali** (walau metadata endpoint-nya sudah lengkap terdaftar di
+`gali_core/sectors/endpoints.py`, dan walau task 2.5/2.7 di `BUILD_PLAN.md` sempat dicentang penuh
+seolah sudah ada):
+- Raw asset untuk endpoint **warm tier**: performance, financials, ownership, sales-destination per
+  company (`/v2/mining/companies/{performance,financials,ownership}/{slug}/`,
+  `/v2/mining/sales-destination/{slug}/`)
+- Raw asset untuk endpoint **hot tier**: harga komoditas time-series
+  (`/v2/mining/commodities/{name}/price/`), `/v2/companies/` screener untuk market cap
+  (`companies_screener_structured` di `endpoints.py`), foreign-flow, broker, filings
+
+Data warm/hot yang sekarang ada di `raw.responses` murni hasil seed manual satu-kali sewaktu Fase 1
+(Data Truth Audit) — bukan dari pipeline yang bisa dijadwalkan ulang. Ini juga akar penyebab
+`/divergence` (task 6.9) menampilkan "market cap belum ter-ingest" untuk semua 9 emiten — bukan
+keterbatasan data Sectors, tapi memang belum pernah dicoba fetch lewat mekanisme yang benar.
+
+### Prioritas sesi ini: TUTUP GAP INI DULU (Langkah 1–3), baru lanjut sisa Fase 7 (Langkah 4–9)
+
+### Langkah 1 — Raw asset harga komoditas time-series (paling murah, paling langsung dibutuhkan 7.1)
+
+1. Di `packages/pipeline/gali_pipeline/assets/raw.py`, tambah asset baru mengikuti pola persis
+   `raw_mining_commodities` yang sudah ada — pakai `client.get(endpoint="/v2/mining/commodities/{name}/price/",
+   tier="hot", credit_cost=1, run_id="dagster_ingest")` untuk komoditas yang relevan dengan universe
+   (batubara/"Coal" minimal — cek nama persis yang diterima endpoint dari data `raw.responses` yang
+   sudah ada hasil seed Fase 1, `SELECT DISTINCT endpoint FROM raw.responses WHERE endpoint LIKE
+   '/v2/mining/commodities/%/price/'` untuk tahu nama komoditas yang pernah dicoba)
+2. Daftarkan asset baru ini di `packages/pipeline/gali_pipeline/assets/__init__.py` (masuk
+   `RAW_ASSETS`/`ALL_ASSETS`)
+3. Perbaiki `hot_job` di `packages/pipeline/gali_pipeline/schedules.py` — selection-nya sekarang
+   `AssetSelection.groups("market") | AssetSelection.assets("core_commodity_prices")`, yang cuma
+   normalizer. Tambahkan asset raw yang baru ke selection ini (dan/atau pakai `.upstream()` yang
+   tepat) supaya materialize `hot_job` benar-benar memicu fetch live, bukan cuma re-normalize.
+
+### Langkah 2 — Raw asset market cap screener (butuh hati-hati, biaya kredit + syntax belum pasti)
+
+`BUILD_PLAN.md` task 6.9 sudah mencatat peringatan ini dari sesi lampau — **jangan diabaikan**:
+"Syntax `where` clause perlu dicek ulang ke dokumentasi Sectors sebelum mencoba — belum dikerjakan
+sesi ini untuk menghindari trial-and-error yang boros kredit."
+1. Cek dokumentasi Sectors API (`docs.sectors.app`) untuk syntax query `/v2/companies/` structured
+   screener (`companies_screener_structured` di `endpoints.py`, `where`/`order_by` params) — pastikan
+   filter `symbol IN (...)` untuk 9 simbol in-universe (lihat `IN_UNIVERSE_SYMBOLS` di
+   `gali_core/config.py`) benar-benar valid sebelum memanggil API sungguhan
+2. Test dulu dengan **1 simbol** untuk konfirmasi shape response dan biaya kredit aktual sebelum
+   memanggil untuk semua 9 — `credit_cost=1` di metadata mungkin per-call, bukan per-simbol, tapi
+   verifikasi nyata lebih murah daripada asumsi salah
+3. Tambah raw asset baru (pola sama seperti Langkah 1) untuk endpoint ini, daftarkan di `__init__.py`
+4. `market_idx_companies` (normalizer yang sudah ada) akan otomatis mengisi `market_cap_idr` begitu
+   raw response market cap tersedia — verifikasi dengan query langsung ke `market.idx_company` setelah
+   materialize, lalu cek `/divergence` di web (lokal dulu, baru production) benar-benar terisi
+5. **Ini akan menghabiskan kredit sungguhan** (kecil, tapi nyata) — catat di `ops.credit_ledger` dan
+   `docs/CREDIT_BUDGET.md` seperti biasa. Total masih jauh di bawah 950, tidak perlu izin Aril untuk
+   jumlah sekecil ini, tapi **dokumentasikan angka pastinya**
+
+### Langkah 3 — Perbaiki `refresh.yml` supaya benar-benar fetch, verifikasi ulang task 7.1
+
+1. `.github/workflows/refresh.yml` yang sudah ada (dari Sesi 6) perlu langkah tambahan **sebelum**
+   `gali ingest --tier hot`: materialize asset Dagster yang baru dibuat (mis.
+   `dagster asset materialize -f packages/pipeline/gali_pipeline/definitions.py --select
+   'raw_mining_commodity_prices,raw_companies_screener'` — sesuaikan nama asset persis yang dipakai di
+   Langkah 1–2), baru diikuti `gali ingest --tier hot` untuk normalize hasilnya ke `core`/`market`
+2. Install `packages/pipeline` (bukan cuma `packages/core`) di job step "Install dependencies" kalau
+   belum — perlu `dagster` terpasang untuk `dagster asset materialize`
+3. Trigger manual (`gh workflow run refresh.yml -f tier=hot -f dry_run=false`), **verifikasi ledger
+   kredit sungguhan bertambah** (bandingkan `ops.credit_ledger` sebelum/sesudah — 404 sebelumnya,
+   harus lebih besar sesudah run ini kalau berhasil fetch live)
+4. Trigger ≥2 run tak berawak (manual atau tunggu jadwal), screenshot run history sebagai bukti untuk
+   video Fase 8
+5. **Baru sekarang** centang task 7.1 penuh di `BUILD_PLAN.md`, dengan bukti kredit bertambah — bukan
+   cuma run hijau
+
+### Langkah 4 — Sentry (7.2) — **STOP, minta Aril bikin akun & kirim DSN**
+Sama seperti prompt Sesi 6: Sentry SDK sudah ter-init di `main.py`, `SENTRY_DSN` masih kosong. Minta
+Aril buat akun sendiri, kirim DSN, baru lanjut set env var + redeploy + uji error + verifikasi masuk
+dashboard.
+
+### Langkah 5 — Load test (7.3)
+k6/locust, 50 rps ke `/v1/rankings` dan `POST /v1/scenario` (body kosong). Rate limiter (Sesi 6) akan
+kena di 50 rps kalau anon (60/menit) — putuskan sendiri strategi (API key valid, atau load test
+sebelum rate limit terpasang secara logis tidak relevan lagi karena sudah terpasang; jalankan dengan
+API key 600/menit atau turunkan rps target) dan dokumentasikan alasannya. Catat p50/p95/p99 di
+`docs/ARCHITECTURE.md`.
+
+### Langkah 6 — Disaster recovery (7.4) — **konfirmasi ke Aril sebelum eksekusi (destruktif)**
+`DROP`/kosongkan schema `core`/`market`/`graph`/`metrics` di Neon **production**, rebuild dari `raw`
+(sekarang raw sudah lebih lengkap berkat Langkah 1–2), buktikan `ops.credit_ledger` selisih 0 untuk
+langkah rebuild ini spesifik (bukan untuk seluruh sesi — fetch di Langkah 1–2 tetap menghabiskan
+kredit, itu memang tujuannya).
+
+### Langkah 7 — Audit keamanan (7.5)
+CORS dan rate limiting sudah beres dari Sesi 6. Sisanya: `gitleaks detect -v` (0 temuan wajib, laporkan
+dulu ke Aril kalau ada temuan sebelum rewrite history), verifikasi error handler tidak bocor internal
+detail.
+
+### Langkah 8 — Dokumentasi (7.6–7.9)
+`docs/ARCHITECTURE.md` final + diagram + catat gap raw asset yang baru ditutup sesi ini sebagai bagian
+sejarah arsitektur (bukan disembunyikan). `README.md` quickstart teruji dari nol + badge CI. Snapshot
+Neon didokumentasikan. Alembic upgrade/downgrade/upgrade di DB bersih/lokal. CI tetap hijau.
+
+### Definisi selesai sesi ini
+
+1. Raw asset harga komoditas + market cap screener ada, terdaftar, dan **terbukti memanggil Sectors
+   API sungguhan** (kredit bertambah di ledger, bukan 0)
+2. `hot_job`/`refresh.yml` diperbaiki, ≥2 run tak berawak nyata dengan kredit terpakai > 0 tercatat
+3. `/divergence` di web (production) menampilkan market cap dan RBV gap yang terisi, bukan lagi
+   empty-state — verifikasi live di browser
+4. Task 7.1, 2.5, 2.7 di `BUILD_PLAN.md` dicentang ulang dengan jujur berdasarkan bukti di atas
+5. Sentry live (atau eksplisit diblok menunggu Aril)
+6. Load test selesai, p50/p95/p99 tercatat
+7. Rebuild-from-raw dibuktikan 0 kredit tambahan
+8. `gitleaks` bersih
+9. `docs/ARCHITECTURE.md`, `README.md` (+ badge), `PROGRESS.md` terupdate jujur
+10. Commit + push per langkah, CI hijau tiap push
+
+### Kapan berhenti dan bertanya
+
+- Akun Sentry (Langkah 4) — selalu berhenti
+- Syntax query `/v2/companies/` screener (Langkah 2) belum pernah divalidasi terhadap API sungguhan di
+  proyek ini — kalau hasil test 1-simbol tidak sesuai ekspektasi (shape aneh, kredit lebih mahal dari
+  perkiraan), **berhenti dan laporkan sebelum lanjut ke 9 simbol**, jangan trial-and-error boros kredit
+- `DROP`/`TRUNCATE` schema production (Langkah 6) — konfirmasi dulu ke Aril
+- Temuan `gitleaks` — laporkan dulu sebelum rewrite history
+- Kalau ditemukan checkbox palsu lain sekelas 2.5/2.7/7.1 — perbaiki di sumbernya kalau scope-nya
+  kecil, atau catat jujur di `PROGRESS.md` + `BUILD_PLAN.md` kalau scope-nya besar (seperti sesi ini),
+  jangan dibiarkan diam-diam
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 6</b></summary>
+
+# SESI 6 — Production Hardening (Fase 7: 7.1–7.9) + 2 bug keamanan ditemukan saat review — **Bug 1
+(CORS) dan Bug 2 (rate limiting) selesai & deployed; task 7.1 dieksekusi tapi ternyata 0-credit no-op,
+lihat Sesi 7**
 
 ## ▼ SALIN MULAI DARI SINI ▼
 
@@ -216,6 +385,8 @@ Rate limiting dan CORS sudah ditangani Langkah 1-2. Sisanya:
   `PROGRESS.md` persis seperti pola Bug 1/Bug 2 di sesi ini, jangan diam-diam dibiarkan
 
 ## ▲ SALIN SAMPAI SINI ▲
+
+</details>
 
 ---
 
