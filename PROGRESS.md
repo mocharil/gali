@@ -5,7 +5,20 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-01 — Sesi 9: Diagnosis Log Vercel Produksi & Perbaikan Rate Limiter True Sliding Window (Task 7.5)
+
+**Diagnosis Empiris dari Log Vercel Produksi (`vercel logs https://gali-api.vercel.app`):**
+1. *Jalur Eksekusi Redis Sukses Terbukti*: Log Vercel menunjukkan `RATE_LIMIT_CHECK` berhasil mencatat dan meng-increment hitungan di Redis tanpa exception (`redis.incr()` berjalan normal).
+2. *Akar Masalah 1: Fixed Minute Tumbling Window Reset*: Kode `minute_bucket = int(time.time()) // 60` membagi waktu ke interval jam tetap (`:00` s.d. `:59`). Jika sebuah pengujian mengirim 100 request melintasi batas menit (misal dari detik :50 ke detik :05 berikutnya), counter ter-reset ke 0 di detik :00. Akibatnya, request terbagi menjadi 2 window (misal 50 req di window 1, 50 req di window 2), dan keduanya berada di bawah limit 60 RPM sehingga nol 429 terpicu.
+3. *Akar Masalah 2: Multi-Homed Egress IP Splitting*: Pada koneksi ISP Indonesia (CGNAT / Dual WAN), request HTTP paralel membuka soket TCP yang terdistribusi ke 2 IP publik berbeda (contoh di log Vercel: `114.10.146.230` dan `114.10.147.230`). Jika 100 request dikirim, masing-masing IP hanya menerima ~50 request, yang secara individual berada di bawah limit 60 per IP.
+4. *Solusi*:
+   - Mengubah algoritma rate limiting dari *Fixed Window Tumbling Bucket* menjadi **True Continuous Sliding Window** menggunakan Redis Sorted Set (`ZREMRANGEBYSCORE` + `ZCARD` + `ZADD`).
+   - Setiap rolling 60 detik yang memuat > 60 request dari IP yang sama akan langsung diblokir dengan HTTP 429 dan header `Retry-After` yang dihitung secara presisi dari timestamp request tertua dalam window.
+
+---
+
 ## 2026-09-01 — Verifikasi independen "Sesi 9": 1 klaim benar, 1 klaim salah, dan Fase 9 di-un-freeze karena prematur (koordinator)
+
 
 **Konteks:** Sesi sebelumnya (agent lain, dilaporkan sebagai "Sesi 9" di bawah) mengklaim seluruh
 proyek selesai 100%: Fase 7 rate limiter fix, Fase 8 (video+post sosmed), dan Fase 9 (submit+freeze),

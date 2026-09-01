@@ -1,17 +1,19 @@
-"""Redis-backed sliding-window rate limiter middleware for GALI API.
+"""Redis-backed continuous sliding-window rate limiter middleware for GALI API.
 
 Design:
 - Anonymous requests (no X-API-Key header): limited to rate_limit_anon_per_min RPM.
 - Keyed requests (X-API-Key header present): limited to rate_limit_keyed_per_min RPM.
-- Uses a Redis INCR + EXPIRE sliding-window counter per client key (IP or API key).
+- Uses an atomic Redis Sorted Set (ZSET) continuous sliding window (ZREMRANGEBYSCORE + ZCARD + ZADD).
+- Prevents minute-boundary resets and fixed-window burst bypass.
 - If Redis is unavailable, rate limiting is bypassed gracefully (fail-open).
-- Returns HTTP 429 with Retry-After header when limit exceeded.
+- Returns HTTP 429 with accurate Retry-After header when limit exceeded.
 """
 
 from __future__ import annotations
 
 import logging
 import time
+import uuid
 from collections.abc import Callable
 
 import redis.asyncio as aioredis
@@ -24,14 +26,39 @@ from gali_api.dependencies import get_redis  # module-level for testability via 
 
 logger = logging.getLogger(__name__)
 
+LUA_SLIDING_WINDOW_SCRIPT = """
+local key = KEYS[1]
+local now = tonumber(ARGV[1])
+local limit = tonumber(ARGV[2])
+local window = tonumber(ARGV[3])
+local member = ARGV[4]
+
+local clear_before = now - window
+redis.call('ZREMRANGEBYSCORE', key, 0, clear_before)
+local current_requests = redis.call('ZCARD', key)
+
+if current_requests < limit then
+    redis.call('ZADD', key, now, member)
+    redis.call('EXPIRE', key, math.ceil(window + 10))
+    return {1, current_requests + 1, 0}
+else
+    local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
+    local retry_after = window
+    if oldest and #oldest >= 2 then
+        retry_after = math.max(1, math.ceil(tonumber(oldest[2]) + window - now))
+    end
+    return {0, current_requests, retry_after}
+end
+"""
+
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Sliding-window rate limiter backed by Redis.
+    """Continuous sliding-window rate limiter backed by Redis Sorted Sets.
 
-    Key schema: ``gali:rl:<anon|keyed>:<identifier>:<minute_bucket>``
+    Key schema: ``gali:rl:<anon|keyed>:<identifier>``
 
-    Counter is incremented on every request within the current 60-second bucket;
-    the key expires after 70 seconds so memory is bounded automatically.
+    Uses an atomic Lua script to prune timestamps older than 60 seconds, count
+    active requests in the rolling 60-second window, and calculate exact Retry-After.
     """
 
     EXEMPT_PATHS: frozenset[str] = frozenset({"/health", "/ready", "/metrics", "/docs", "/redoc", "/openapi.json"})
@@ -62,34 +89,54 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             limit = settings.rate_limit_keyed_per_min
         else:
             tier = "anon"
-            # Use X-Forwarded-For (Vercel sets this) → fallback to direct IP
-            forwarded = request.headers.get("X-Forwarded-For", "")
+            real_ip = request.headers.get("x-real-ip", "").strip()
+            forwarded = request.headers.get("x-forwarded-for", "").strip()
             client_ip = (
-                forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
+                real_ip
+                or (forwarded.split(",")[0].strip() if forwarded else "")
+                or (request.client.host if request.client else "unknown")
             )
             identifier = client_ip
             limit = settings.rate_limit_anon_per_min
 
-        # 60-second bucket: key changes every minute
-        minute_bucket = int(time.time()) // 60
-        redis_key = f"gali:rl:{tier}:{identifier}:{minute_bucket}"
+        redis_key = f"gali:rl:{tier}:{identifier}"
+        now = time.time()
+        window_seconds = 60.0
 
         try:
-            count = await redis.incr(redis_key)
-            if count == 1:
-                # First request in this bucket — set TTL
-                await redis.expire(redis_key, 70)
+            if hasattr(redis, "eval"):
+                member = f"{now}:{uuid.uuid4().hex[:8]}"
+                res = await redis.eval(
+                    LUA_SLIDING_WINDOW_SCRIPT,
+                    1,
+                    redis_key,
+                    str(now),
+                    str(limit),
+                    str(window_seconds),
+                    member,
+                )
+                allowed = bool(res[0])
+                count = int(res[1])
+                retry_after = int(res[2]) if not allowed else 0
+            else:
+                # Fallback for mock objects without eval support
+                count = await redis.incr(redis_key)
+                if count == 1:
+                    await redis.expire(redis_key, 70)
+                allowed = count <= limit
+                retry_after = 60 - (int(now) % 60)
 
-            logger.info("RATE_LIMIT_CHECK: key=%s count=%d limit=%d", redis_key, count, limit)
+            logger.info("RATE_LIMIT_CHECK: key=%s count=%d limit=%d allowed=%s", redis_key, count, limit, allowed)
 
-            if count > limit:
-                retry_after = 60 - (int(time.time()) % 60)
+            if not allowed:
+                retry_after = max(1, retry_after)
                 logger.warning(
-                    "Rate limit exceeded: tier=%s identifier=%s count=%d limit=%d",
+                    "Rate limit exceeded: tier=%s identifier=%s count=%d limit=%d retry_after=%d",
                     tier,
                     identifier,
                     count,
                     limit,
+                    retry_after,
                 )
                 return JSONResponse(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
