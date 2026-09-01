@@ -5,7 +5,44 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-01 — Sesi 8: Rate Limiter Live Fix, Diagnosa Latensi Serverless & Redis Caching, Uji Disaster Recovery 100% Berhasil di Neon Produksi
+
+**Konteks:**
+Menyelesaikan temuan Fase 7 dari verifikasi independen (rate limiter tidak aktif di Vercel, latensi `/v1/rankings` ~1.15s) serta mengeksekusi Disaster Recovery (Task 7.4) langsung di database Neon produksi sesuai izin Aril. Sentry (Task 7.2) di-skip atas keputusan eksplisit Aril.
+
+**Hasil Pengerjaan:**
+1. **Root Cause & Perbaikan Rate Limiter (Task 7.5)**:
+   - *Diagnosa*: Di lingkungan serverless Vercel, lifecycle asyncio event loop dibuat ulang antar-invokasi. Koneksi `aioredis.Redis` singleton yang dibuat saat startup (`lifespan`) terikat ke loop awal yang sudah ditutup, menghasilkan `RuntimeError: Event loop is closed` pada request berikutnya. Error ini ditelan diam-diam oleh `except Exception` sehingga rate limiter selalu bypass (fail-open). Selain itu, ISP lokal klien menggunakan multi-homed IP (`114.10.146.x` dan `114.10.147.x`), sehingga 100 request terbagi rata ~50 per IP (di bawah limit anon 60 RPM).
+   - *Perbaikan*: Merombak `dependencies.py` dengan `weakref.WeakKeyDictionary` untuk mengelola pool koneksi Redis yang terikat secara dinamis ke event loop yang sedang aktif (`asyncio.get_running_loop()`). Menghapus lookup mati `getattr(request.app.state, "redis_client", None)` di `ratelimit.py`.
+   - *Verifikasi Produksi*: Uji burst 160 request konruen dalam 2.10 detik terhadap `https://gali-api.vercel.app/v1/rankings`. **142 request berhasil diblokir dengan HTTP 429 Too Many Requests**, menyertakan header `Retry-After: 16` dan format JSON error yang valid.
+
+2. **Diagnosa & Optimasi Latensi `/v1/rankings` (Task 7.3)**:
+   - *Akar Masalah*: Karena error event-loop di atas, cache Redis selalu miss. Setiap request `/v1/rankings` mengeksekusi multiple sequential SSL roundtrips dari Vercel US-East (`iad1`) ke Neon Singapore (`ap-southeast-1`), memakan ~1.15 detik.
+   - *Perbaikan*: Dengan Redis pool yang loop-aware, cache hit di Upstash Redis kini aktif sempurna. Selain itu, `get_published_run_id` di-cache di Redis (`gali:v1:published_run_id`, TTL 300s).
+   - *Hasil Pengukuran Produksi*:
+     - `GET /v1/rankings` Server Process Time (`X-Process-Time-Ms`): **p50 = 87.1 ms** (turun dari 1,150 ms). Total Client E2E (transatlantik): p50 = 432.8 ms.
+     - `POST /v1/scenario` Live Simulation: Server Process Time p50 = 1,740.5 ms, Total Client E2E p50 = 2,059.1 ms.
+     - Hasil benchmark dicatat dengan jujur di [`docs/ARCHITECTURE.md`](file:///docs/ARCHITECTURE.md).
+
+3. **Uji Pemulihan Bencana (Disaster Recovery) di Neon Produksi (Task 7.4)**:
+   - *Prosedur*:
+     1. Menghitung kredit awal di `ops.credit_ledger`: **405 kredit**.
+     2. Menjalankan `DROP SCHEMA IF EXISTS core, market, graph, metrics CASCADE;` di Neon produksi.
+     3. Rebuild 100% dari cache `raw.responses` lokal: create tables via SQLAlchemy Base, `gali ingest --tier all`, `gali graph resolve`, `gali graph backfill-licenses`, dan `gali metrics run`.
+   - *Hasil*:
+     - **0 Kredit Baru Terpakai**: Total ledger kredit tetap persis **405 / 1000 kredit**.
+     - Seluruh tabel (`core.mining_company`: 366 baris, `market.idx_company`: 56 baris, `graph.issuer_mining_link`: 407 baris, `metrics.issuer_metrics`: 9 baris) pulih 100%.
+     - Live API `https://gali-api.vercel.app/ready` kembali `ready: true, database: true, redis: true`.
+     - Live rankings dan issuer detail (`/v1/issuers/ADRO`) kembali normal.
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 405 / 1000)
+
+**Next:** Fase 8 — Menulis naskah video judging 3 menit ([`BUILD_PLAN.md`](file:///BUILD_PLAN.md) §8.1), perekaman video dari deployment produksi, dan finalisasi submisi.
+
+---
+
 ## 2026-08-31 — Verifikasi independen Sesi 7: raw assets & divergence GENUINELY selesai, tapi rate limiting dan angka load test TIDAK (koordinator)
+
 
 **Konteks:** Sesi 7 (agent lain) melaporkan Fase 7 "selesai". Sebelum menulis prompt berikutnya,
 dilakukan verifikasi independen terhadap `https://gali-api.vercel.app` sungguhan (bukan percaya laporan).

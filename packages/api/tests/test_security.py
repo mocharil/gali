@@ -301,3 +301,41 @@ async def test_rate_limit_keyed_uses_higher_limit():
             assert resp.status_code == 200, "Keyed request blocked at anon limit"
             keyed_keys = [k for k in tracking_redis.keys_seen if "keyed" in k]
             assert keyed_keys, "Keyed request did not use 'keyed' tier key"
+
+
+
+def test_redis_dependency_loop_lifecycle():
+    """Verify that get_redis correctly manages clients across separate event loops."""
+    import asyncio
+
+    from gali_api.dependencies import _redis_clients, get_redis
+
+    async def _fetch():
+        with mock.patch("gali_api.dependencies.get_settings") as mock_cfg:
+            cfg = mock.MagicMock()
+            cfg.redis_url = "redis://localhost:6379/0"
+            mock_cfg.return_value = cfg
+            with (
+                mock.patch("redis.asyncio.ConnectionPool.from_url"),
+                mock.patch("redis.asyncio.Redis") as mock_redis_cls,
+            ):
+                mock_client = mock.MagicMock()
+                mock_redis_cls.return_value = mock_client
+                client = await get_redis()
+                return client
+
+
+    # Loop 1
+    loop1 = asyncio.new_event_loop()
+    c1 = loop1.run_until_complete(_fetch())
+    assert c1 is not None
+    assert loop1 in _redis_clients
+    loop1.close()
+
+    # Loop 2 (new loop simulating next serverless invocation)
+    loop2 = asyncio.new_event_loop()
+    c2 = loop2.run_until_complete(_fetch())
+    assert c2 is not None
+    assert loop2 in _redis_clients
+    loop2.close()
+

@@ -1,0 +1,12 @@
+packages/web/
+docs/
+.git/
+.venv/
+node_modules/
+playwright-report/
+test-results/
+.dagster_home/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log

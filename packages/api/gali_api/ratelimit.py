@@ -41,16 +41,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if request.url.path in self.EXEMPT_PATHS:
             return await call_next(request)
 
-        redis: aioredis.Redis | None = getattr(request.app.state, "redis_client", None)
-        if redis is None:
-            try:
-                redis = await get_redis()
-            except Exception:
-                redis = None
+        redis: aioredis.Redis | None = None
+        try:
+            redis = await get_redis()
+        except Exception as exc:
+            logger.warning("RateLimitMiddleware get_redis failed: %s", exc)
+            redis = None
 
         if redis is None:
             # Fail-open: no Redis → bypass rate limiting
-            logger.debug("Rate limiting bypassed (Redis unavailable)")
+            logger.warning("Rate limiting bypassed (Redis unavailable) for path=%s", request.url.path)
             return await call_next(request)
 
         settings = get_settings()
@@ -80,6 +80,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 # First request in this bucket — set TTL
                 await redis.expire(redis_key, 70)
 
+            logger.info("RATE_LIMIT_CHECK: key=%s count=%d limit=%d", redis_key, count, limit)
+
             if count > limit:
                 retry_after = 60 - (int(time.time()) % 60)
                 logger.warning(
@@ -105,5 +107,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         except Exception as exc:
             # Fail-open: Redis error → let request through
             logger.warning("Rate limiter Redis error (bypassing): %s", exc)
+
 
         return await call_next(request)
