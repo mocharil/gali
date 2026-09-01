@@ -6,6 +6,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { LandingNavbar } from "./LandingNavbar";
 import { Footer } from "./Footer";
+import { TerminalStatusBar } from "./TerminalStatusBar";
 import { CommandPalette } from "./CommandPalette";
 
 interface AppShellProps {
@@ -149,8 +150,8 @@ export function AppShell({ children }: AppShellProps) {
         {/* Page Content */}
         <main className="flex-1 bg-ambient-radial">{children}</main>
 
-        {/* Footer */}
-        <Footer />
+        {/* Minimal Terminal Status Bar (No landing footer) */}
+        <TerminalStatusBar apiOnline={apiOnline} />
       </div>
 
       {/* ── Universal Fast Command Palette ── */}
