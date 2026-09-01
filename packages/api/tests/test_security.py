@@ -303,7 +303,6 @@ async def test_rate_limit_keyed_uses_higher_limit():
             assert keyed_keys, "Keyed request did not use 'keyed' tier key"
 
 
-
 def test_redis_dependency_loop_lifecycle():
     """Verify that get_redis correctly manages clients across separate event loops."""
     import asyncio
@@ -324,7 +323,6 @@ def test_redis_dependency_loop_lifecycle():
                 client = await get_redis()
                 return client
 
-
     # Loop 1
     loop1 = asyncio.new_event_loop()
     c1 = loop1.run_until_complete(_fetch())
@@ -338,4 +336,3 @@ def test_redis_dependency_loop_lifecycle():
     assert c2 is not None
     assert loop2 in _redis_clients
     loop2.close()
-

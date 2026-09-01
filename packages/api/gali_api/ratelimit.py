@@ -108,5 +108,4 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Fail-open: Redis error → let request through
             logger.warning("Rate limiter Redis error (bypassing): %s", exc)
 
-
         return await call_next(request)
