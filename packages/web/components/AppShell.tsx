@@ -14,8 +14,33 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
+
+  // Restore sidebar collapsed preference from localStorage safely after mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("gali_sidebar_collapsed");
+      if (saved !== null) {
+        setIsCollapsed(saved === "true");
+      }
+    } catch {
+      // ignore localStorage errors in private mode
+    }
+  }, []);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("gali_sidebar_collapsed", String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   // Check API health status
   useEffect(() => {
@@ -27,12 +52,18 @@ export function AppShell({ children }: AppShellProps) {
       .catch(() => setApiOnline(false));
   }, []);
 
-  // Global hotkey: Ctrl/Cmd+K or "/" to open Command Palette
+  // Global hotkeys:
+  // - Ctrl/Cmd+K or "/" to open Command Palette
+  // - Ctrl/Cmd+B to toggle sidebar folding
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setSearchOpen((v) => !v);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        toggleCollapse();
       }
       if (
         e.key === "/" &&
@@ -67,19 +98,27 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-[#060911] text-slate-100 flex">
-      {/* ── Left Sidebar Navigation ── */}
+      {/* ── Left Sidebar Navigation (Collapsible / Foldable) ── */}
       <Sidebar
         isOpen={sidebarOpen}
+        isCollapsed={isCollapsed}
         onClose={() => setSidebarOpen(false)}
+        onToggleCollapse={toggleCollapse}
         onOpenSearch={() => setSearchOpen(true)}
         apiOnline={apiOnline}
       />
 
       {/* ── Right Content Area ── */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72 transition-[padding] duration-200">
-        {/* Top Contextual Header */}
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-[padding] duration-200 ease-in-out ${
+          isCollapsed ? "lg:pl-[72px]" : "lg:pl-72"
+        }`}
+      >
+        {/* Top Contextual Header with Sidebar Toggle Button */}
         <Header
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
+          onToggleCollapse={toggleCollapse}
+          isCollapsed={isCollapsed}
           onOpenSearch={() => setSearchOpen(true)}
           apiOnline={apiOnline}
         />

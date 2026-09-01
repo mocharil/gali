@@ -18,11 +18,15 @@ import {
   ExternalLink,
   Flame,
   X,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 interface SidebarProps {
   isOpen?: boolean;
+  isCollapsed?: boolean;
   onClose?: () => void;
+  onToggleCollapse?: () => void;
   onOpenSearch?: () => void;
   apiOnline?: boolean | null;
 }
@@ -34,7 +38,7 @@ const MENU_GROUPS = [
       {
         href: "/",
         label: "Executive Dashboard",
-        desc: "Leaderboard & metrik ringkasan",
+        desc: "Leaderboard & ringkasan",
         icon: Pickaxe,
         badge: "Utama",
         badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
@@ -42,7 +46,7 @@ const MENU_GROUPS = [
       {
         href: "/map",
         label: "Peta Konsesi Nasional",
-        desc: "52 situs tambang fisik GPS",
+        desc: "52 situs tambang GPS",
         icon: MapPin,
         badge: "52 GPS",
         badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
@@ -55,7 +59,7 @@ const MENU_GROUPS = [
       {
         href: "/scenario",
         label: "Scenario Studio",
-        desc: "Simulasi stress-test makro real-time",
+        desc: "Simulasi stress-test makro",
         icon: SlidersHorizontal,
         badge: "Simulasi",
         badgeColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
@@ -63,7 +67,7 @@ const MENU_GROUPS = [
       {
         href: "/cost-curve",
         label: "Kurva Biaya Nasional",
-        desc: "Cash cost vs harga acuan ICI",
+        desc: "Cash cost vs acuan ICI",
         icon: TrendingDown,
         badge: "M5",
         badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
@@ -71,7 +75,7 @@ const MENU_GROUPS = [
       {
         href: "/divergence",
         label: "Matriks Divergensi",
-        desc: "Cadangan fisik vs harga pasar",
+        desc: "Cadangan fisik vs pasar",
         icon: LineChart,
         badge: "M8 vs Cap",
         badgeColor: "bg-violet-500/10 text-violet-400 border-violet-500/30",
@@ -84,7 +88,7 @@ const MENU_GROUPS = [
       {
         href: "/coverage",
         label: "Truth Audit & Ledger",
-        desc: "Audit data mentah & kredit API",
+        desc: "Audit data mentah & kredit",
         icon: ShieldCheck,
         badge: "405 Krd",
         badgeColor: "bg-slate-700/60 text-slate-300 border-slate-600",
@@ -113,7 +117,14 @@ const EMITEN_LIST = [
   { symbol: "DSSA", score: 39.8, quality: "PARSIAL" },
 ];
 
-export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: SidebarProps) {
+export function Sidebar({
+  isOpen = false,
+  isCollapsed = false,
+  onClose,
+  onToggleCollapse,
+  onOpenSearch,
+  apiOnline,
+}: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -128,18 +139,23 @@ export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: Si
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex w-72 flex-col border-r border-slate-800/80 bg-[#080d19]/95 backdrop-blur-2xl transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-slate-800/80 bg-[#080d19]/95 backdrop-blur-2xl transition-[width,transform] duration-200 ease-in-out ${
+          isCollapsed ? "lg:w-[72px]" : "lg:w-72"
+        } ${isOpen ? "w-72 translate-x-0" : "max-lg:-translate-x-full"}`}
       >
         {/* Brand Header */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800/80 px-5">
+        <div
+          className={`flex h-16 shrink-0 items-center border-b border-slate-800/80 ${
+            isCollapsed ? "justify-center px-2" : "justify-between px-4 sm:px-5"
+          }`}
+        >
           <Link
             href="/"
             onClick={onClose}
             className="flex items-center gap-3 group transition-transform active:scale-95"
+            title="GALI — Beranda"
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/30 p-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/30 p-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
               <Image
                 src="/gali_logo.png"
                 alt="GALI logo"
@@ -149,18 +165,32 @@ export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: Si
                 className="h-full w-full object-contain drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]"
               />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xl font-black tracking-wider text-white">GALI</span>
-                <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">
-                  v1.0
-                </span>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl font-black tracking-wider text-white">GALI</span>
+                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">
+                    v1.0
+                  </span>
+                </div>
+                <p className="text-[10px] font-semibold tracking-tight text-slate-400 truncate">
+                  Ground-Truth Mining Intelligence
+                </p>
               </div>
-              <p className="text-[10px] font-semibold tracking-tight text-slate-400">
-                Ground-Truth Mining Intelligence
-              </p>
-            </div>
+            )}
           </Link>
+
+          {/* Desktop Toggle Fold Button */}
+          {!isCollapsed && (
+            <button
+              onClick={onToggleCollapse}
+              className="hidden lg:flex rounded-lg p-1.5 text-slate-400 hover:bg-slate-800/80 hover:text-white transition-colors"
+              title="Lipat Sidebar (Ctrl+B)"
+              aria-label="Lipat sidebar"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </button>
+          )}
 
           {/* Close button on mobile */}
           <button
@@ -173,31 +203,54 @@ export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: Si
         </div>
 
         {/* Quick Search Trigger */}
-        <div className="px-4 pt-3.5 pb-1">
-          <button
-            onClick={() => {
-              if (onOpenSearch) onOpenSearch();
-              if (onClose) onClose();
-            }}
-            className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-slate-900/90 px-3.5 py-2.5 text-xs text-slate-400 transition-all hover:border-amber-500/40 hover:bg-slate-800/80 hover:text-slate-200 group shadow-inner"
-          >
-            <div className="flex items-center gap-2.5">
-              <Search className="h-3.5 w-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Cari emiten / fitur...</span>
-            </div>
-            <kbd className="flex items-center rounded border border-slate-700 bg-slate-950 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
-              ⌘K
-            </kbd>
-          </button>
+        <div className={`pt-3.5 pb-1 ${isCollapsed ? "px-2" : "px-4"}`}>
+          {isCollapsed ? (
+            <button
+              onClick={() => {
+                if (onOpenSearch) onOpenSearch();
+                if (onClose) onClose();
+              }}
+              className="relative flex h-10 w-full items-center justify-center rounded-xl border border-slate-800 bg-slate-900/90 text-amber-400 hover:border-amber-500/40 hover:bg-slate-800 transition-all group"
+              title="Cari emiten atau fitur (⌘K)"
+              aria-label="Buka pencarian"
+            >
+              <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              {/* Tooltip on folded hover */}
+              <span className="pointer-events-none absolute left-full ml-3 hidden rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white shadow-2xl group-hover:block z-50 whitespace-nowrap">
+                Cari (⌘K)
+              </span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                if (onOpenSearch) onOpenSearch();
+                if (onClose) onClose();
+              }}
+              className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-slate-900/90 px-3.5 py-2.5 text-xs text-slate-400 transition-all hover:border-amber-500/40 hover:bg-slate-800/80 hover:text-slate-200 group shadow-inner"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Search className="h-3.5 w-3.5 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="font-medium truncate">Cari emiten / fitur...</span>
+              </div>
+              <kbd className="flex items-center rounded border border-slate-700 bg-slate-950 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 shrink-0">
+                ⌘K
+              </kbd>
+            </button>
+          )}
         </div>
 
         {/* Scrollable Navigation Groups */}
-        <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-5 scrollbar-thin">
+        <div className={`flex-1 overflow-y-auto py-3 space-y-4 scrollbar-thin ${isCollapsed ? "px-2" : "px-3.5"}`}>
           {MENU_GROUPS.map((group) => (
             <div key={group.title} className="space-y-1">
-              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                {group.title}
-              </div>
+              {!isCollapsed ? (
+                <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  {group.title}
+                </div>
+              ) : (
+                <div className="mx-auto my-1.5 h-px w-6 bg-slate-800/80" />
+              )}
+
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href;
@@ -207,11 +260,14 @@ export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: Si
                       key={item.href}
                       href={item.href}
                       onClick={onClose}
-                      className={`group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                      className={`group relative flex items-center rounded-xl transition-all ${
+                        isCollapsed ? "justify-center h-10 w-full" : "justify-between px-3 py-2 text-xs"
+                      } ${
                         isActive
                           ? "bg-slate-800/90 text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.12)] font-bold"
                           : "text-slate-300 hover:bg-slate-900/90 hover:text-white border border-transparent"
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
@@ -223,19 +279,30 @@ export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: Si
                         >
                           <Icon className="h-3.5 w-3.5" />
                         </div>
-                        <div className="truncate">
-                          <div className="truncate">{item.label}</div>
-                          <div className="text-[10px] font-normal text-slate-500 truncate leading-none mt-0.5">
-                            {item.desc}
+                        {!isCollapsed && (
+                          <div className="truncate">
+                            <div className="truncate font-semibold">{item.label}</div>
+                            <div className="text-[10px] font-normal text-slate-500 truncate leading-none mt-0.5">
+                              {item.desc}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
-                      {item.badge && (
+
+                      {!isCollapsed && item.badge && (
                         <span
                           className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[9px] font-mono font-bold ${item.badgeColor}`}
                         >
                           {item.badge}
                         </span>
+                      )}
+
+                      {/* Tooltip on folded hover */}
+                      {isCollapsed && (
+                        <div className="pointer-events-none absolute left-full ml-3 hidden rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-2xl group-hover:flex flex-col z-50 whitespace-nowrap min-w-[140px]">
+                          <span className="font-bold text-amber-400">{item.label}</span>
+                          <span className="text-[10px] font-normal text-slate-400">{item.desc}</span>
+                        </div>
                       )}
                     </Link>
                   );
@@ -245,81 +312,143 @@ export function Sidebar({ isOpen = false, onClose, onOpenSearch, apiOnline }: Si
           ))}
 
           {/* Universe 9 Emiten Quick Jump */}
-          <div className="space-y-1 pt-1 border-t border-slate-800/60">
-            <div className="flex items-center justify-between px-3 py-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
-                <Flame className="h-3 w-3 text-amber-400" />
-                Universe 9 Emiten IDX
-              </span>
-              <span className="text-[9px] font-mono text-slate-500">Skor M8</span>
-            </div>
+          <div className="pt-2 border-t border-slate-800/60">
+            {!isCollapsed ? (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between px-3 py-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
+                    <Flame className="h-3 w-3 text-amber-400" />
+                    Universe 9 Emiten IDX
+                  </span>
+                  <span className="text-[9px] font-mono text-slate-500">Skor M8</span>
+                </div>
 
-            <div className="grid grid-cols-3 gap-1 px-1">
-              {EMITEN_LIST.map((emiten) => {
-                const isSelected = pathname === `/issuer/${emiten.symbol}`;
-                return (
-                  <Link
-                    key={emiten.symbol}
-                    href={`/issuer/${emiten.symbol}`}
-                    onClick={onClose}
-                    className={`flex flex-col items-center justify-center rounded-lg p-1.5 text-center transition-all border ${
-                      isSelected
-                        ? "bg-amber-500/15 border-amber-500/40 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.15)]"
-                        : "bg-slate-900/50 border-slate-800/80 text-slate-300 hover:border-slate-700 hover:bg-slate-800/80 hover:text-white"
-                    }`}
-                  >
-                    <span className="font-mono text-xs font-black tracking-tight">{emiten.symbol}</span>
-                    <span className="font-mono text-[10px] text-slate-400">{emiten.score.toFixed(1)}</span>
-                  </Link>
-                );
-              })}
-            </div>
+                <div className="grid grid-cols-3 gap-1 px-1">
+                  {EMITEN_LIST.map((emiten) => {
+                    const isSelected = pathname === `/issuer/${emiten.symbol}`;
+                    return (
+                      <Link
+                        key={emiten.symbol}
+                        href={`/issuer/${emiten.symbol}`}
+                        onClick={onClose}
+                        className={`flex flex-col items-center justify-center rounded-lg p-1.5 text-center transition-all border ${
+                          isSelected
+                            ? "bg-amber-500/15 border-amber-500/40 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.15)]"
+                            : "bg-slate-900/50 border-slate-800/80 text-slate-300 hover:border-slate-700 hover:bg-slate-800/80 hover:text-white"
+                        }`}
+                      >
+                        <span className="font-mono text-xs font-black tracking-tight">{emiten.symbol}</span>
+                        <span className="font-mono text-[10px] text-slate-400">{emiten.score.toFixed(1)}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="relative group flex justify-center py-1">
+                <div
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 cursor-pointer transition-colors"
+                  title="Universe 9 Emiten Tambang"
+                >
+                  <Flame className="h-4 w-4" />
+                </div>
+                {/* Popover on folded hover */}
+                <div className="pointer-events-none absolute left-full ml-3 hidden rounded-xl border border-slate-700 bg-[#0c1322] p-2.5 shadow-2xl group-hover:block z-50 w-52">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400 mb-1.5">
+                    9 Emiten Batubara IDX
+                  </div>
+                  <div className="grid grid-cols-3 gap-1">
+                    {EMITEN_LIST.map((e) => (
+                      <Link
+                        key={e.symbol}
+                        href={`/issuer/${e.symbol}`}
+                        onClick={onClose}
+                        className="pointer-events-auto rounded bg-slate-900 p-1 text-center font-mono text-[11px] font-bold text-slate-200 hover:bg-amber-500 hover:text-black transition-colors"
+                      >
+                        {e.symbol}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Sidebar Footer Info */}
-        <div className="shrink-0 border-t border-slate-800/80 bg-slate-950/60 p-3.5 space-y-2.5">
-          {/* Hackathon Track Card */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <Sparkles className="h-3 w-3" />
+        <div className={`shrink-0 border-t border-slate-800/80 bg-slate-950/60 ${isCollapsed ? "p-2" : "p-3.5 space-y-2.5"}`}>
+          {!isCollapsed ? (
+            <>
+              {/* Hackathon Track Card */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <Sparkles className="h-3 w-3" />
+                  </div>
+                  <div className="text-[10px]">
+                    <div className="font-bold text-slate-200">Sectors Hackathon 2026</div>
+                    <div className="text-slate-400">Track 3: Market Intelligence</div>
+                  </div>
+                </div>
               </div>
-              <div className="text-[10px]">
-                <div className="font-bold text-slate-200">Sectors Hackathon 2026</div>
-                <div className="text-slate-400">Track 3: Market Intelligence</div>
-              </div>
-            </div>
-          </div>
 
-          {/* Links & Live status */}
-          <div className="flex items-center justify-between text-[11px] px-1 text-slate-400">
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  apiOnline === true
-                    ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"
-                    : apiOnline === false
-                    ? "bg-rose-500"
-                    : "bg-slate-500 animate-pulse"
-                }`}
+              {/* Links & Live status */}
+              <div className="flex items-center justify-between text-[11px] px-1 text-slate-400">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      apiOnline === true
+                        ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"
+                        : apiOnline === false
+                        ? "bg-rose-500"
+                        : "bg-slate-500 animate-pulse"
+                    }`}
+                  />
+                  <span className="font-mono text-[10px] text-slate-300">
+                    {apiOnline === true ? "API Online" : apiOnline === false ? "API Offline" : "Connecting..."}
+                  </span>
+                </div>
+
+                <a
+                  href="https://github.com/mocharil/gali"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition-colors"
+                >
+                  <Github className="h-3.5 w-3.5" />
+                  <span>GitHub</span>
+                  <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                </a>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2 py-1">
+              {/* Expand Toggle Button at bottom */}
+              <button
+                onClick={onToggleCollapse}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-amber-400 hover:bg-slate-800 transition-colors"
+                title="Buka Sidebar Penuh (Ctrl+B)"
+                aria-label="Buka sidebar penuh"
+              >
+                <PanelLeftOpen className="h-4 w-4" />
+              </button>
+
+              <div
+                className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"
+                title="API Online"
               />
-              <span className="font-mono text-[10px] text-slate-300">
-                {apiOnline === true ? "API Online" : apiOnline === false ? "API Offline" : "Connecting..."}
-              </span>
-            </div>
 
-            <a
-              href="https://github.com/mocharil/gali"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition-colors"
-            >
-              <Github className="h-3.5 w-3.5" />
-              <span>GitHub</span>
-              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-            </a>
-          </div>
+              <a
+                href="https://github.com/mocharil/gali"
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-900 hover:text-white transition-colors"
+                title="GitHub Repository"
+              >
+                <Github className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          )}
         </div>
       </aside>
     </>

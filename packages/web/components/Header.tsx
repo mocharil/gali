@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
-  Menu,
   Search,
   Sliders,
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  PanelLeft,
 } from "lucide-react";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
+  onToggleCollapse: () => void;
+  isCollapsed?: boolean;
   onOpenSearch: () => void;
   apiOnline?: boolean | null;
 }
@@ -55,7 +57,13 @@ const ROUTE_CONTEXTS: Record<string, { title: string; category: string; desc: st
   },
 };
 
-export function Header({ onToggleSidebar, onOpenSearch, apiOnline }: HeaderProps) {
+export function Header({
+  onToggleSidebar,
+  onToggleCollapse,
+  isCollapsed = false,
+  onOpenSearch,
+  apiOnline,
+}: HeaderProps) {
   const pathname = usePathname();
   const [macroOpen, setMacroOpen] = useState(false);
 
@@ -81,15 +89,27 @@ export function Header({ onToggleSidebar, onOpenSearch, apiOnline }: HeaderProps
     <header className="sticky top-0 z-30 flex flex-col border-b border-slate-800/80 bg-[#060911]/90 backdrop-blur-xl">
       {/* Main Topbar Row */}
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left: Mobile Hamburger & Breadcrumb Context */}
+        {/* Left: Sidebar Toggle & Breadcrumb Context */}
         <div className="flex items-center gap-3 min-w-0">
+          {/* Mobile Drawer Toggle */}
           <button
             type="button"
             onClick={onToggleSidebar}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 hover:text-white lg:hidden"
-            aria-label="Buka navigasi menu"
+            aria-label="Buka navigasi menu (mobile)"
           >
-            <Menu className="h-5 w-5 text-amber-400" />
+            <PanelLeft className="h-5 w-5 text-amber-400" />
+          </button>
+
+          {/* Desktop Fold / Unfold Toggle */}
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="hidden lg:flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-400 hover:border-amber-500/40 hover:bg-slate-800 hover:text-amber-400 transition-all group"
+            title={isCollapsed ? "Buka Sidebar Penuh (Ctrl+B)" : "Lipat Sidebar (Ctrl+B)"}
+            aria-label="Toggle sidebar fold"
+          >
+            <PanelLeft className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
 
           <div className="min-w-0">
