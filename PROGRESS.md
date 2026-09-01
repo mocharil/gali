@@ -5,6 +5,41 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-01 — Verifikasi independen Sesi 9: rate limiter GENUINELY benar kali ini (koordinator)
+
+**Konteks:** Sesi 9 (agent lain, laporan di bawah) mengklaim rate limiter akhirnya diperbaiki dengan
+root cause ganda: fixed-minute-bucket reset di batas menit, dan trafik terpecah ke 2 IP publik
+berbeda. Diagnosis dilakukan dari log Vercel sungguhan (sesuai instruksi), diperbaiki jadi true
+sliding-window pakai Redis Sorted Set + Lua atomik.
+
+**Diverifikasi independen:**
+- Test pertama koordinator (100 request/15.5s) hasilnya 100/100 sukses, nol 429 — sempat terlihat
+  seperti insiden ke-7 dengan pola sama. Tapi setelah dicek, ini murni **artefak jaringan koordinator
+  sendiri**: `curl https://api.ipify.org` berulang menunjukkan koneksi terpecah ke 2 IP publik
+  (`114.10.147.230`/`114.10.146.230`) — persis IP yang sama disebut di diagnosis agent. 100 request
+  terbagi ~50/50 ke 2 IP, masing-masing di bawah cap 60/menit.
+- Test kedua dengan volume lebih tinggi (180 request/13.6s, cukup untuk melampaui cap 60/menit
+  per-IP meski terpecah dua) → **99/180 sukses diblokir HTTP 429 nyata**, `Retry-After` bervariasi
+  1-6 detik, konsisten dengan sliding window yang benar.
+- Latency dicek ulang tidak regresi akibat perubahan struktur data (ZSET+Lua vs INCR+EXPIRE
+  sebelumnya): `X-Process-Time-Ms` tetap ~82-84ms di 10 request setelahnya.
+- Deployment production dikonfirmasi baru (~9 menit sebelum dicek), bukan deployment lama.
+- Git log dicek: tidak ada tag baru dibuat, Fase 8/9 tidak disentuh (`git diff` terhadap commit sebelum
+  sesi ini cuma menyentuh task 7.5). CI hijau di semua commit sesi ini.
+
+**Kesimpulan: klaim sesi ini genuinely benar** — kontras dengan 6 insiden verifikasi-gagal beruntun
+sebelumnya di proyek ini (CORS, raw assets, rate limit #1, angka load test, rate limit #2, Fase 8/9).
+Pola "diagnosis dari log dulu, baru fix, baru verifikasi dengan command+output nyata" yang diminta di
+prompt Sesi 9 tampaknya efektif memutus siklus klaim-palsu.
+
+**Kredit terpakai sesi verifikasi ini:** 0 (kumulatif tetap: 405 / 1000)
+
+**Next:** task 7.5 sepenuhnya selesai. Sisa yang genuinely terbuka: task 7.4 (DR test) masih berstatus
+"plausibel, belum diverifikasi ulang" dari sesi sebelumnya (opsional untuk diperkuat). Fase 8/9 tetap
+menunggu aksi langsung Aril (rekam video, post sosmed, submit portal) — jangan dikerjakan lewat agent.
+
+---
+
 ## 2026-09-01 — Sesi 9: Diagnosis Log Vercel Produksi, Perbaikan Rate Limiter True Sliding Window & Verifikasi Live 2x Berturut-Turut (Task 7.5)
 
 **Diagnosis Empiris dari Log Vercel Produksi (`vercel logs https://gali-api.vercel.app`):**

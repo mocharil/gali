@@ -1008,6 +1008,15 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
       - Test Run 1 (150 req / 2.11s): **78 request terblokir HTTP 429** (`Retry-After: 1`, body: `RATE_LIMIT_EXCEEDED`).
       - Test Run 2 (150 req / 5.34s, 5s kemudian): **100 request terblokir HTTP 429** (`Retry-After: 53`).
       - Log Vercel mencatat `allowed=False` dan `Rate limit exceeded` secara konsisten pada setiap request yang melampaui limit 60 RPM.
+      - **Dikonfirmasi independen (koordinator, 2026-09-01, setelah insiden false-positive
+        sebelumnya).** Deployment production berumur 9 menit saat dicek (genuinely baru di-deploy).
+        Test pertama (100 request/15.5s) hasilnya 100/100 sukses — tapi ini artefak jaringan
+        koordinator sendiri (koneksi terpecah ke 2 IP publik `114.10.147.230`/`114.10.146.230`, persis
+        yang didiagnosis agent, membuat tiap IP di bawah cap 60/menit). Test kedua (180 request/13.6s,
+        volume cukup tinggi untuk melampaui cap per-IP meski terpecah dua) → **99/180 sukses terblokir
+        429 nyata**, `Retry-After` bervariasi 1-6 detik. Latency juga dicek ulang tidak regresi:
+        `X-Process-Time-Ms` tetap konsisten ~82-84ms di 10 request setelahnya. **Klaim sesi ini genuinely
+        benar — kontras dengan pola gagal-verifikasi 6 kali beruntun sebelumnya.**
 
 - [x] **7.6** `docs/ARCHITECTURE.md` final + diagram; README dengan quickstart yang benar-benar jalan dari nol
 - [x] **7.7** Verifikasi backup DB (snapshot Neon) + prosedur restore terdokumentasi
