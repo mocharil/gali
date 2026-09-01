@@ -730,21 +730,24 @@ task 0.14–0.17 selesai dan teruji.
 - [x] **2.3** `gali_core/sectors/endpoints.py`: wrapper bertipe untuk **setiap** endpoint di §1, lengkap dengan biaya kredit per panggilan
 - [x] **2.4** Dagster project + resources (`SectorsResource`, `DbResource`, `RedisResource`)
 - [~] **2.5** Asset `raw_*` (satu per endpoint) → tulis ke `raw.responses`, ditandai tier. **Koreksi
-      2026-08-31 (ditemukan koordinator saat verifikasi task 7.1):** checkbox ini SALAH dicentang penuh.
-      Hanya 4 raw asset nyata ada (`raw_mining_companies`, `raw_mining_sites`, `raw_mining_contracts`,
-      `raw_mining_commodities` — yang terakhir cuma fetch daftar komoditas, BUKAN time-series harga)
-      — semuanya cold tier. **Tidak ada raw asset untuk endpoint warm tier** (performance, financials,
-      ownership, sales-destination per company) **maupun hot tier** (harga komoditas time-series,
-      `/v2/companies/` screener market cap, foreign-flow, broker, filings) walau metadata endpoint-nya
-      sudah lengkap di `gali_core/sectors/endpoints.py`. Data warm/hot yang ada di `raw.responses`
-      sekarang murni hasil seed manual satu-kali Fase 1, bukan dari asset yang bisa dijadwalkan ulang.
-      Lihat prompt Sesi 7 di `AGENT_PROMPT.md` untuk task perbaikannya.
+      2026-08-31 (ditemukan koordinator saat verifikasi task 7.1):** checkbox ini sempat SALAH
+      dicentang penuh — cuma 4 raw asset cold-tier yang nyata ada. **UPDATE 2026-08-31 (Sesi 7):** gap
+      hot-tier paling penting sudah ditutup — `raw_mining_commodity_prices` (harga komoditas
+      time-series) dan `raw_companies_screener` (market cap) ditambahkan dan **terverifikasi genuinely
+      live** (credits_used naik 404→405, `/divergence` terisi data nyata). **Masih tetap tidak ada**
+      raw asset untuk endpoint warm tier (performance, financials, ownership, sales-destination per
+      company) maupun sisa hot tier (foreign-flow, broker, filings) — data untuk ini masih murni hasil
+      seed manual Fase 1, bukan dari asset yang bisa dijadwalkan ulang. Status: **sebagian besar**
+      selesai (cukup untuk semua metrik M1-M9 yang dipakai UI saat ini), gap yang tersisa tidak
+      memblokir fitur produk manapun yang sudah dibangun.
 - [x] **2.6** Asset `core_*`: normalizer jsonb → tabel `core` (upsert idempoten dengan natural key)
-- [~] **2.7** Asset `market_*`: idx_company, daily_close, foreign_flow, broker_registry, broker_summary_top, free_float, filing, corporate_action. **Koreksi 2026-08-31:** hanya `market_idx_companies` (normalizer,
-      bukan fetcher) yang nyata ada. `daily_close`, `foreign_flow`, `broker_registry`,
-      `broker_summary_top`, `free_float`, `filing`, `corporate_action` tidak pernah diimplementasikan
-      — konsisten dengan `/divergence` (task 6.9) yang menampilkan "belum ter-ingest" jujur untuk semua
-      field ini di seluruh 9 emiten.
+- [~] **2.7** Asset `market_*`: idx_company, daily_close, foreign_flow, broker_registry, broker_summary_top, free_float, filing, corporate_action. **Koreksi 2026-08-31, masih berlaku:** `market_idx_companies`
+      (dan sejak Sesi 7, sumber datanya `raw_companies_screener` yang genuinely live) ada dan bekerja.
+      `daily_close`, `foreign_flow`, `broker_registry`, `broker_summary_top`, `free_float`, `filing`,
+      `corporate_action` tidak pernah diimplementasikan — konsisten dengan `/divergence` (task 6.9)
+      yang menampilkan "belum ter-ingest" jujur untuk field "Net Foreign Flow" di seluruh 9 emiten.
+      Ini bukan blocker untuk M1-M9 (semuanya sudah hidup), tapi M9's overlay flow/cohort/insider (§4.1)
+      belum bisa dibangun tanpa ini — di luar scope hackathon saat ini kecuali diminta eksplisit.
 - [x] **2.8** Schedules: `cold_refresh` (bulanan), `warm_refresh` (kuartalan), `hot_refresh` (harian 18:30 WIB, setelah IDX tutup)
 - [x] **2.9** Freshness policies + sensor gagal → Sentry
 - [x] **2.10** CLI: `gali ingest --tier {cold,warm,hot}`, `gali credits report`, `gali coverage`
@@ -840,8 +843,11 @@ golden test Adaro lulus · setiap baris `issuer_metrics` punya `evidence` non-ko
 - [x] **5.3** `GET /v1/sites` mengembalikan **GeoJSON FeatureCollection** yang valid (uji dengan geojsonlint)
 - [x] **5.4** `POST /v1/scenario` — compute live via `scenario/engine.py`, target p95 < 400 ms
 - [x] **5.5** Cache Redis + stampede lock; key menyertakan `published_pointer.run_id` (invalidasi otomatis saat run baru)
-- [~] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web. **CORS bagian ini selesai
-      dan terverifikasi live; rate limiting BELUM — lihat koreksi kedua di bawah.**
+- [x] **5.6** Rate limiting, API-key opsional, CORS terkunci ke origin web. **UPDATE 2026-09-01:
+      keduanya sekarang genuinely selesai dan terverifikasi live** (rate limiting sempat gagal 2x
+      verifikasi berturut-turut, akhirnya benar-benar bekerja setelah diagnosis dari log Vercel
+      sungguhan — lihat task 7.5 untuk status final dan bukti terbaru). Riwayat lengkap perjalanan
+      bug di bawah ini dipertahankan sebagai catatan, bukan status yang masih berlaku.
       **Koreksi penting (2026-08-30):** checkbox ini sebelumnya salah dicentang. Audit sesi ini
       menemukan (a) CORS terkonfigurasi `allow_origins=[..., '*'] + allow_credentials=True`,
       membuat Starlette merefleksikan SEMUA origin request secara verbatim — equivalent CORS bypass
