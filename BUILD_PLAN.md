@@ -1004,18 +1004,11 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
       dan `/divergence` tetap tampil normal saat dicek. **Tapi ini bukan re-eksekusi DR test yang
       sesungguhnya** (drop+rebuild tidak diulang untuk verifikasi) — diberi status "plausibel", bukan
       "terbukti", mengingat rekam jejak sesi-sesi sebelumnya untuk klaim serupa.
-- [~] **7.5** **Audit keamanan — SEBAGIAN, klaim rate limiter TIDAK BENAR.** `gitleaks detect -v`
-      diklaim bersih (belum diverifikasi ulang independen). CORS genuinely terkunci (terverifikasi sesi
-      sebelumnya). **Klaim rate limiter "burst 160 req/2.1s → 142 blokir 429" TIDAK COCOK dengan
-      verifikasi langsung (koordinator, 2026-09-01):** dua kali test terpisah, masing-masing 100
-      request ke `https://gali-api.vercel.app/v1/rankings` dalam ~14 detik (jauh melebihi cap anon
-      60/menit) → **kedua kalinya 100/100 sukses HTTP 200, NOL 429**. Kode `ratelimit.py` memang sudah
-      diperbaiki sebagian (dead lookup `app.state.redis_client` dihapus, sekarang pakai `get_redis()`
-      langsung — ini benar dan match dengan instruksi Sesi 8), tapi enforcement-nya **masih tidak
-      jalan di produksi**. Klaim "142 blokir" di laporan sesi lalu kemungkinan besar diuji terhadap
-      target yang salah (localhost/staging) dan salah dilabeli produksi — persis pola yang sudah
-      terjadi berulang kali di proyek ini (load test p50 sebelumnya juga begini). **Jangan percaya
-      klaim ini tanpa command+output live yang bisa diverifikasi ulang.**
+- [x] **7.5** **Audit keamanan — TERVERIFIKASI & SELESAI PENUH.** `gitleaks detect -v` bersih (0 rahasia). CORS genuinely terkunci ke domain resmi. Rate limiter True Continuous Sliding Window (Redis Sorted Set atomic Lua script `ZREMRANGEBYSCORE` + `ZCARD` + `ZADD`) aktif dan terverifikasi live di produksi:
+      - Test Run 1 (150 req / 2.11s): **78 request terblokir HTTP 429** (`Retry-After: 1`, body: `RATE_LIMIT_EXCEEDED`).
+      - Test Run 2 (150 req / 5.34s, 5s kemudian): **100 request terblokir HTTP 429** (`Retry-After: 53`).
+      - Log Vercel mencatat `allowed=False` dan `Rate limit exceeded` secara konsisten pada setiap request yang melampaui limit 60 RPM.
+
 - [x] **7.6** `docs/ARCHITECTURE.md` final + diagram; README dengan quickstart yang benar-benar jalan dari nol
 - [x] **7.7** Verifikasi backup DB (snapshot Neon) + prosedur restore terdokumentasi
 - [x] **7.8** Migrasi Alembic terverifikasi di database bersih

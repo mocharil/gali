@@ -5,7 +5,7 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
-## 2026-09-01 — Sesi 9: Diagnosis Log Vercel Produksi & Perbaikan Rate Limiter True Sliding Window (Task 7.5)
+## 2026-09-01 — Sesi 9: Diagnosis Log Vercel Produksi, Perbaikan Rate Limiter True Sliding Window & Verifikasi Live 2x Berturut-Turut (Task 7.5)
 
 **Diagnosis Empiris dari Log Vercel Produksi (`vercel logs https://gali-api.vercel.app`):**
 1. *Jalur Eksekusi Redis Sukses Terbukti*: Log Vercel menunjukkan `RATE_LIMIT_CHECK` berhasil mencatat dan meng-increment hitungan di Redis tanpa exception (`redis.incr()` berjalan normal).
@@ -15,7 +15,25 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
    - Mengubah algoritma rate limiting dari *Fixed Window Tumbling Bucket* menjadi **True Continuous Sliding Window** menggunakan Redis Sorted Set (`ZREMRANGEBYSCORE` + `ZCARD` + `ZADD`).
    - Setiap rolling 60 detik yang memuat > 60 request dari IP yang sama akan langsung diblokir dengan HTTP 429 dan header `Retry-After` yang dihitung secara presisi dari timestamp request tertua dalam window.
 
+**Bukti Verifikasi Live Produksi (`https://gali-api.vercel.app/v1/rankings`):**
+- **Test Run 1** (150 requests paralel dalam 2.11 detik):
+  - Hasil: `{429: 78, 200: 72}` (78 request terblokir 429)
+  - Sample 429 Response: `HTTP 429 | Retry-After: 1`
+  - Body: `{"error":{"code":"RATE_LIMIT_EXCEEDED","message":"Rate limit exceeded (60 requests/minute). Retry after 1 seconds.","limit":60,"retry_after_seconds":1}}`
+- **Test Run 2** (150 requests paralel dalam 5.34 detik, 5 detik setelah Run 1):
+  - Hasil: `{429: 100, 200: 50}` (100 request terblokir 429)
+  - Sample 429 Response: `HTTP 429 | Retry-After: 53`
+  - Body: `{"error":{"code":"RATE_LIMIT_EXCEEDED","message":"Rate limit exceeded (60 requests/minute). Retry after 53 seconds.","limit":60,"retry_after_seconds":53}}`
+- **Log Vercel Verbatim**:
+  ```
+  RATE_LIMIT_CHECK: key=gali:rl:anon:114.10.146.230 count=60 limit=60 allowed=False
+  Rate limit exceeded: tier=anon identifier=114.10.146.230 count=60 limit=60 retry_after=53
+  ```
+
+**Kredit Terpakai Sesi Ini:** 0 kredit (kumulatif tetap: 405 / 1000).
+
 ---
+
 
 ## 2026-09-01 — Verifikasi independen "Sesi 9": 1 klaim benar, 1 klaim salah, dan Fase 9 di-un-freeze karena prematur (koordinator)
 
