@@ -20,10 +20,15 @@ interface HeaderProps {
 }
 
 const ROUTE_CONTEXTS: Record<string, { title: string; category: string; desc: string }> = {
-  "/": {
+  "/dashboard": {
     title: "Executive Dashboard",
     category: "Ringkasan Eksekutif",
     desc: "Leaderboard skor fundamental tambang & peta nasional 52 konsesi",
+  },
+  "/": {
+    title: "Landing Page",
+    category: "Beranda Publik",
+    desc: "Pengenalan platform intelijen fundamental komoditas IDX",
   },
   "/map": {
     title: "Peta Konsesi Tambang",

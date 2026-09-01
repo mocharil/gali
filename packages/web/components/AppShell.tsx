@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
+import { LandingNavbar } from "./LandingNavbar";
 import { Footer } from "./Footer";
 import { CommandPalette } from "./CommandPalette";
 
@@ -17,6 +18,8 @@ export function AppShell({ children }: AppShellProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
+
+  const isLandingPage = pathname === "/";
 
   // Restore sidebar collapsed preference from localStorage safely after mount
   useEffect(() => {
@@ -54,14 +57,14 @@ export function AppShell({ children }: AppShellProps) {
 
   // Global hotkeys:
   // - Ctrl/Cmd+K or "/" to open Command Palette
-  // - Ctrl/Cmd+B to toggle sidebar folding
+  // - Ctrl/Cmd+B to toggle sidebar folding (on app routes)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setSearchOpen((v) => !v);
       }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b" && !isLandingPage) {
         e.preventDefault();
         toggleCollapse();
       }
@@ -76,7 +79,7 @@ export function AppShell({ children }: AppShellProps) {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isLandingPage]);
 
   // Auto-close mobile sidebar and search on route changes
   useEffect(() => {
@@ -96,8 +99,28 @@ export function AppShell({ children }: AppShellProps) {
     };
   }, [sidebarOpen]);
 
+  // ── 1. Landing Page Layout (Full-Width, No Sidebar) ──
+  if (isLandingPage) {
+    return (
+      <div className="min-h-screen bg-[#060911] text-slate-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+        {/* Landing Top Navigation Bar */}
+        <LandingNavbar apiOnline={apiOnline} />
+
+        {/* Full-Width Landing Content */}
+        <main className="flex-1 bg-ambient-radial">{children}</main>
+
+        {/* Landing Footer */}
+        <Footer />
+
+        {/* Fast Command Palette */}
+        <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      </div>
+    );
+  }
+
+  // ── 2. App & Dashboard Layout (Sidebar + Contextual Header) ──
   return (
-    <div className="min-h-screen bg-[#060911] text-slate-100 flex">
+    <div className="min-h-screen bg-[#060911] text-slate-100 flex selection:bg-amber-500/30 selection:text-amber-200">
       {/* ── Left Sidebar Navigation (Collapsible / Foldable) ── */}
       <Sidebar
         isOpen={sidebarOpen}

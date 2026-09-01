@@ -20,6 +20,7 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
+  Home,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -36,7 +37,7 @@ const MENU_GROUPS = [
     title: "Dashboard & Peta",
     items: [
       {
-        href: "/",
+        href: "/dashboard",
         label: "Executive Dashboard",
         desc: "Leaderboard & ringkasan",
         icon: Pickaxe,
@@ -50,6 +51,14 @@ const MENU_GROUPS = [
         icon: MapPin,
         badge: "52 GPS",
         badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+      },
+      {
+        href: "/",
+        label: "Landing Page",
+        desc: "Beranda publik & pengenalan",
+        icon: Home,
+        badge: "Home",
+        badgeColor: "bg-slate-700/60 text-slate-300 border-slate-600",
       },
     ],
   },

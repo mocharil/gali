@@ -1,26 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  TrendingDown,
-  Gauge,
-  ShieldAlert,
   Sparkles,
   MapPin,
   SlidersHorizontal,
-  FileSpreadsheet,
-  Activity,
-  Layers,
-  Search,
+  TrendingDown,
+  ShieldCheck,
+  BookOpen,
   Pickaxe,
-  Zap,
+  CheckCircle2,
+  Flame,
+  Clock,
   Compass,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { MiningSitesMap } from "@/components/MiningSitesMap";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 
 function fmtUSD(n: number | null | undefined, digits = 1): string {
@@ -31,49 +28,54 @@ function fmtUSD(n: number | null | undefined, digits = 1): string {
   return `$${n.toFixed(0)}`;
 }
 
-const EVALUATION_GUIDE = [
+const PILLARS = [
   {
-    step: "01",
-    title: "Peta 52 Situs GPS",
-    subtitle: "Validasi Konsesi Fisik",
-    desc: "Cek sebaran 52 konsesi tambang batubara berkoordinat GPS di Kalimantan & Sumatra yang terhubung ke emiten bursa.",
+    step: "Pilar 01",
+    title: "Peta Konsesi Fisik Ber-GPS",
+    metric: "M1 Asset Ground Truth",
+    desc: "Menghubungkan kode saham di BEI ke 52 konsesi tambang fisik nyata dengan koordinat GPS terverifikasi di Kalimantan dan Sumatra.",
+    icon: MapPin,
     href: "/map",
-    badge: "Spasial",
-    accent: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+    badge: "52 Situs GPS",
+    accent: "text-amber-400 border-amber-500/30 bg-amber-500/10 hover:border-amber-500/50",
+    buttonText: "Eksplorasi Peta",
   },
   {
-    step: "02",
-    title: "Sisa Umur Tambang (RLI)",
-    subtitle: "Reserve Life Index",
-    desc: "Bandingkan cadangan fisik terbukti vs laju produksi tahunan. Temukan gap ekspektasi valuasi pasar modal.",
+    step: "Pilar 02",
+    title: "Reserve Life Index (RLI)",
+    metric: "M2 Sisa Umur Tambang",
+    desc: "Menghitung sisa tahun cadangan terbukti berdasarkan laju produksi tahunan aktual. Mengungkap gap antara ekspektasi pasar modal vs umur tambang fisik.",
+    icon: Clock,
     href: "/issuer/ADRO",
-    badge: "Cadangan",
-    accent: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10",
+    badge: "Sisa Umur Thn",
+    accent: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10 hover:border-cyan-500/50",
+    buttonText: "Lihat RLI Emiten",
   },
   {
-    step: "03",
+    step: "Pilar 03",
     title: "Kurva Biaya Nasional",
-    subtitle: "Cash Cost Breakeven",
-    desc: "Identifikasi produsen batubara biaya terendah (Q1) dan emiten yang merugi tunai jika harga acuan ICI anjlok.",
+    metric: "M5 Cash Cost Breakeven",
+    desc: "Memetakan cumulative cash cost per ton terhadap harga acuan pasar ICI-4 ($85/t). Mengidentifikasi produsen Q1 terendah dan emiten yang merugi tunai.",
+    icon: TrendingDown,
     href: "/cost-curve",
-    badge: "Biaya / t",
-    accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    badge: "Cash Cost / t",
+    accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:border-emerald-500/50",
+    buttonText: "Buka Cost Curve",
   },
   {
-    step: "04",
-    title: "Scenario Studio",
-    subtitle: "Simulasi Stress-Test",
-    desc: "Geser slider harga batubara, tarif impor China, dan diskon izin ESDM untuk melihat dampak valuasi seketika.",
+    step: "Pilar 04",
+    title: "Scenario Stress-Test Studio",
+    metric: "M9 Live Shock Engine",
+    desc: "Simulasi real-time dampak shock harga batubara, tarif impor China (+30%), dan diskon kedaluwarsa izin ESDM langsung ke valuasi Reserve-Backed Value.",
+    icon: SlidersHorizontal,
     href: "/scenario",
-    badge: "Real-Time",
-    accent: "text-indigo-400 border-indigo-500/30 bg-indigo-500/10",
+    badge: "Simulasi Real-Time",
+    accent: "text-indigo-400 border-indigo-500/30 bg-indigo-500/10 hover:border-indigo-500/50",
+    buttonText: "Uji Skenario",
   },
 ];
 
-export default function HomePage() {
-  const [filterType, setFilterType] = useState<"all" | "complete" | "partial">("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
+export default function LandingPage() {
   const { data: issuers, isLoading } = useQuery({
     queryKey: ["issuers"],
     queryFn: () => api.getIssuers(),
@@ -81,491 +83,318 @@ export default function HomePage() {
 
   const complete = issuers?.filter((i) => i.data_quality === "LENGKAP") ?? [];
   const totalRbv = complete.reduce((s, i) => s + (i.reserve_backed_value_usd ?? 0), 0);
-  const completeWithRli = complete.filter((i) => i.rli_years != null);
-  const avgRli =
-    completeWithRli.length > 0
-      ? completeWithRli.reduce((s, i) => s + (i.rli_years ?? 0), 0) / completeWithRli.length
-      : null;
-  const worstCliff = issuers
-    ? [...issuers]
-        .filter((i) => i.license_cliff_3y != null)
-        .sort((a, b) => (b.license_cliff_3y ?? 0) - (a.license_cliff_3y ?? 0))[0]
-    : null;
-
-  let filteredLeaderboard = issuers ? [...issuers] : [];
-  if (filterType === "complete") {
-    filteredLeaderboard = filteredLeaderboard.filter((i) => i.data_quality === "LENGKAP");
-  } else if (filterType === "partial") {
-    filteredLeaderboard = filteredLeaderboard.filter((i) => i.data_quality === "PARSIAL");
-  }
-  if (searchQuery.trim()) {
-    filteredLeaderboard = filteredLeaderboard.filter(
-      (i) =>
-        i.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        i.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
-  filteredLeaderboard.sort((a, b) => (b.ground_truth_score ?? -1) - (a.ground_truth_score ?? -1));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-      {/* ── Hero Orientation Banner ── */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-gradient-to-br from-[#0d1829] via-[#090e1a] to-[#060911] p-6 sm:p-10 shadow-2xl animate-fade-up">
-        {/* Ambient background glow orbs */}
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-amber-500/12 blur-[80px]" />
-        <div className="pointer-events-none absolute -left-16 -bottom-16 h-72 w-72 rounded-full bg-cyan-500/10 blur-[80px]" />
-        <div className="pointer-events-none absolute right-1/3 top-1/2 h-40 w-40 rounded-full bg-indigo-500/8 blur-[60px]" />
+    <div className="space-y-20 pb-20 overflow-hidden">
+      {/* ── 1. Hero Presentation Banner (Full-Width) ── */}
+      <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+        {/* Ambient glow orbs */}
+        <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-amber-500/15 blur-[100px]" />
+        <div className="pointer-events-none absolute top-40 -left-20 h-80 w-80 rounded-full bg-cyan-500/10 blur-[90px]" />
+        <div className="pointer-events-none absolute top-40 -right-20 h-80 w-80 rounded-full bg-indigo-500/10 blur-[90px]" />
 
-        <div className="relative z-10 max-w-3xl">
-          {/* Track Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-bold text-amber-400 shadow-sm">
+        <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+          {/* Hackathon Track Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Sectors Hackathon 2026 · Track 3 — Market Intelligence</span>
           </div>
 
-          <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl sm:leading-[1.1]">
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
             Gali lebih dalam dari{" "}
-            <span className="text-gradient-amber">kode sahamnya.</span>
+            <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(245,158,11,0.3)]">
+              kode sahamnya.
+            </span>
           </h1>
 
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-[15px]">
-            GALI adalah platform intelijen fundamental komoditas yang menilai emiten batubara IDX langsung
-            dari tambang fisiknya — berapa ton cadangan tersisa, berapa tahun sisa umur tambang (RLI), estimasi
-            cash cost per ton, risiko kedaluwarsa izin ESDM, dan simulasi stress-test makro real-time.
+          {/* Subtitle */}
+          <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed font-medium">
+            Platform intelijen fundamental komoditas pertama yang menghubungkan neraca keuangan emiten tambang
+            IDX langsung ke <strong className="text-amber-400">52 konsesi tambang fisik ber-GPS</strong>, sisa
+            umur cadangan geologis (RLI), estimasi cash cost per ton, dan simulasi stress-test makro real-time.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-7 py-3.5 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:scale-105 active:scale-95"
+            >
+              <Pickaxe className="h-4 w-4" />
+              <span>Buka Executive Dashboard</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
             <Link
               href="/map"
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all hover:bg-amber-400 hover:shadow-[0_0_28px_rgba(245,158,11,0.5)] active:scale-95"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-bold text-slate-200 shadow-lg backdrop-blur-xl transition-all hover:border-cyan-500/50 hover:bg-slate-800 hover:text-white active:scale-95"
             >
-              <MapPin className="h-4 w-4" />
-              Eksplorasi Peta 52 Tambang
+              <MapPin className="h-4 w-4 text-cyan-400" />
+              <span>Peta 52 Konsesi Tambang</span>
             </Link>
+
             <Link
               href="/scenario"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-5 py-2.5 text-sm font-bold text-white transition-all hover:border-cyan-500/40 hover:bg-slate-700 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-bold text-slate-200 shadow-lg backdrop-blur-xl transition-all hover:border-indigo-500/50 hover:bg-slate-800 hover:text-white active:scale-95"
             >
-              <SlidersHorizontal className="h-4 w-4 text-cyan-400" />
-              Uji Stress-Test Skenario
+              <SlidersHorizontal className="h-4 w-4 text-indigo-400" />
+              <span>Stress-Test Studio</span>
             </Link>
+          </div>
+
+          {/* 3 Live Key Metric Tickers */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-6">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Reserve-Backed Value
+              </div>
+              <div className="font-mono text-2xl font-black text-emerald-400 mt-0.5">
+                {isLoading ? "——" : fmtUSD(totalRbv, 1)}
+              </div>
+              <div className="text-[10px] text-slate-500 mt-0.5">7 Emiten Batubara Lengkap</div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Konsesi Ber-GPS
+              </div>
+              <div className="font-mono text-2xl font-black text-cyan-400 mt-0.5">52 Situs</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">Kalimantan &amp; Sumatra</div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Sectors API Credits
+              </div>
+              <div className="font-mono text-2xl font-black text-amber-400 mt-0.5">405 / 1,000</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">100% Deterministic Cache</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Evaluator Quick Guide (For Judges & Panitia) ── */}
-      <section className="space-y-3 animate-fade-up animate-fade-up-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Compass className="h-4 w-4 text-amber-400" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Panduan Evaluasi Juri · 4 Pilar Fundamental GALI
-            </h2>
+      {/* ── 2. The 4 Fundamental Pillars (For Judges & Panitia) ── */}
+      <section id="pillars" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400">
+            <Compass className="h-4 w-4" />
+            <span>Panduan Evaluasi Juri · 4 Modul Inti</span>
           </div>
-          <span className="text-[11px] font-mono text-slate-500">Klik kartu untuk mencoba langsung</span>
+          <h2 className="text-2xl sm:text-4xl font-black text-white">
+            4 Pilar Ground-Truth Intelligence
+          </h2>
+          <p className="text-sm text-slate-400">
+            Arsitektur analitis deterministik yang dirancang untuk menjawab pertanyaan kritis investor institusional.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {EVALUATION_GUIDE.map((g) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {PILLARS.map((p) => {
+            const Icon = p.icon;
+            return (
+              <div
+                key={p.step}
+                className="glass-card group flex flex-col justify-between rounded-3xl border border-slate-800 p-6 transition-all hover:scale-[1.02]"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400">
+                      {p.step}
+                    </span>
+                    <span className={`rounded-md border px-2 py-0.5 text-[10px] font-mono font-bold ${p.accent}`}>
+                      {p.badge}
+                    </span>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-white mb-3">
+                    <Icon className="h-5 w-5 text-amber-400" />
+                  </div>
+
+                  <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+                    {p.title}
+                  </h3>
+                  <div className="text-[11px] font-mono font-semibold text-slate-400 mt-0.5">
+                    {p.metric}
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed text-slate-400">{p.desc}</p>
+                </div>
+
+                <div className="mt-6 pt-3 border-t border-slate-800/80">
+                  <Link
+                    href={p.href}
+                    className="inline-flex w-full items-center justify-between rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-200 border border-slate-800 hover:border-amber-500/40 hover:bg-slate-800 hover:text-white transition-colors"
+                  >
+                    <span>{p.buttonText}</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── 3. Live Universe 9 Emiten Leaderboard Preview ── */}
+      <section id="leaderboard" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
+              <Flame className="h-4 w-4" />
+              <span>Universe Emiten Terverifikasi</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">
+              Ground Truth Composite Leaderboard (M8)
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Peringkat fundamental 9 raksasa batubara IDX berdasarkan integritas data geologis dan operasional.
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors shrink-0"
+          >
+            Buka Leaderboard Lengkap di Dashboard <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {issuers?.map((i, idx) => (
             <Link
-              key={g.step}
-              href={g.href}
-              className="glass-card group flex flex-col justify-between rounded-2xl border border-slate-800 p-4 transition-all hover:border-amber-500/40 hover:bg-slate-800/70"
+              key={i.symbol}
+              href={`/issuer/${i.symbol}`}
+              className="glass-card group rounded-2xl border border-slate-800 p-4 transition-all hover:border-amber-500/40 hover:bg-slate-800/80 flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400">
-                    Langkah {g.step}
-                  </span>
-                  <span className={`rounded-md border px-2 py-0.5 text-[9px] font-mono font-bold ${g.accent}`}>
-                    {g.badge}
-                  </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-slate-500">#{idx + 1}</span>
+                    <span className="font-mono text-lg font-black text-white group-hover:text-amber-300">
+                      {i.symbol}
+                    </span>
+                  </div>
+                  <ConfidenceBadge dataQuality={i.data_quality} />
                 </div>
-                <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
-                  {g.title}
-                </h3>
-                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">{g.subtitle}</p>
-                <p className="mt-2 text-[11px] leading-relaxed text-slate-400">{g.desc}</p>
+                <div className="text-xs text-slate-400 truncate mt-1">{i.name}</div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-amber-400 transition-colors">
-                <span>Buka Modul</span>
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] text-slate-500">Skor Ground Truth</div>
+                  <div className="font-mono text-base font-black text-amber-400">
+                    {i.ground_truth_score != null ? i.ground_truth_score.toFixed(1) : "—"}
+                    <span className="text-[10px] text-slate-600 font-bold"> / 100</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] text-slate-500">Sisa Umur (RLI)</div>
+                  <div className="font-mono text-xs font-bold text-cyan-400">
+                    {i.rli_years != null ? `${i.rli_years.toFixed(1)} thn` : "N/A"}
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ── Top 3 Executive KPI Cards ── */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3 animate-fade-up animate-fade-up-2">
-        <StatCard
-          icon={Gauge}
-          label="Reserve-Backed Value"
-          sublabel="7 emiten LENGKAP · DCF cadangan fisik"
-          value={fmtUSD(totalRbv, 2)}
-          sub="Valuasi DCF cadangan terbukti (discount rate 12%)"
-          accentColor="emerald"
-          loading={isLoading}
-        />
-        <StatCard
-          icon={TrendingDown}
-          label="Rata-rata Sisa Umur (RLI)"
-          sublabel="Produksi aktual vs cadangan terbukti"
-          value={avgRli != null ? `${avgRli.toFixed(1)} thn` : "—"}
-          sub="Cadangan terbukti ÷ volume produksi aktual tahunan"
-          accentColor="cyan"
-          loading={isLoading}
-        />
-        <StatCard
-          icon={ShieldAlert}
-          label="License Cliff 3-Tahun Tertinggi"
-          sublabel="Emiten dengan risiko izin ESDM tertinggi"
-          value={worstCliff ? `${worstCliff.symbol} · ${worstCliff.license_cliff_3y?.toFixed(0)}%` : "—"}
-          sub="Porsi produksi yang izin konsesinya habis dalam ≤ 3 tahun"
-          accentColor="amber"
-          loading={isLoading}
-        />
+      {/* ── 4. Zero Black-Box Architecture & Provenance ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-[#0a1120] via-slate-900/60 to-[#060911] p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>100% Transparansi &amp; Audit Trail</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-black text-white">
+                Zero Black-Box Intelligence. Setiap Angka Bisa Diaudit.
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Platform keuangan konvensional seringkali menjadi black-box. GALI menyajikan{" "}
+                <strong className="text-white">Evidence Drawer</strong> di setiap halaman emiten, memungkinkan
+                investor dan juri menginspeksi payload mentah Sectors API, formula DCF finite annuity (M6), dan
+                pohon kepemilikan efektif hingga ke entitas pemegang IUP.
+              </p>
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>3-Tier Cache (Cold/Warm/Hot)</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>Formula Deterministik M1–M9</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>Ledger Kredit API Publik</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>FastAPI + PostgreSQL + Redis</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 flex flex-col gap-3">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5 space-y-3 shadow-inner">
+                <div className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  Dokumentasi Rumus &amp; Metodologi
+                </div>
+                <p className="text-xs text-slate-400">
+                  Pelajari rumus matematis M1 hingga M9, parameter diskon kalori Newcastle, dan asumsi hurdle rate 12%.
+                </p>
+                <Link
+                  href="/methodology"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-colors"
+                >
+                  <BookOpen className="h-3.5 w-3.5 text-amber-400" />
+                  Baca Metodologi M1–M9 →
+                </Link>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5 space-y-3 shadow-inner">
+                <div className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                  Audit Saldo Kredit API
+                </div>
+                <p className="text-xs text-slate-400">
+                  Lihat rekapitulasi 405 kredit Sectors API yang dikeluarkan secara efisien dan deterministik.
+                </p>
+                <Link
+                  href="/coverage"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-colors"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
+                  Cek Truth Audit &amp; Ledger →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* ── Main Workspace: Interactive Map & Leaderboard ── */}
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-12 animate-fade-up animate-fade-up-3">
-        {/* Map Column (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-amber-400" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-                Peta Sebaran Konsesi Tambang
-              </h2>
-              <span className="rounded-full bg-slate-800 border border-slate-700 px-2 py-0.5 text-[10px] font-mono text-slate-400">
-                52 situs ber-GPS
-              </span>
-            </div>
+      {/* ── 5. Bottom Call to Action ── */}
+      <section className="max-w-5xl mx-auto px-4 text-center space-y-6">
+        <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#0a1120] to-[#060911] p-10 sm:p-14 shadow-2xl space-y-5 relative">
+          <h2 className="text-3xl sm:text-5xl font-black text-white">
+            Siap Menilai Emiten Komoditas IDX dengan Data Fisik Nyata?
+          </h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+            Masuk ke Executive Dashboard untuk mengakses peta konsesi, stress-test skenario, dan kurva biaya nasional.
+          </p>
+          <div className="pt-3">
             <Link
-              href="/map"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-8 py-4 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:bg-amber-400 hover:scale-105 active:scale-95 transition-all"
             >
-              Peta penuh <ArrowRight className="h-3.5 w-3.5" />
+              <Pickaxe className="h-4 w-4" />
+              <span>Buka Executive Dashboard Sekarang</span>
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl" style={{ minHeight: 360 }}>
-            <MiningSitesMap compact />
-          </div>
         </div>
-
-        {/* Leaderboard Column (5 cols) */}
-        <div className="lg:col-span-5">
-          <div className="glass-card flex h-full flex-col rounded-2xl border border-slate-800 p-5">
-            {/* Header */}
-            <div className="mb-4 flex items-start justify-between">
-              <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-                  Ground Truth Leaderboard
-                </h2>
-                <p className="mt-0.5 text-[11px] text-slate-400">Skor komposit fundamental tambang 0–100</p>
-              </div>
-              <Link
-                href="/divergence"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors shrink-0"
-              >
-                Divergence <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            {/* Filter tabs & Search */}
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex rounded-lg border border-slate-800 bg-slate-900/80 p-0.5 text-[11px]">
-                {(["all", "complete", "partial"] as const).map((f) => {
-                  const labels = { all: `Semua (${issuers?.length ?? 9})`, complete: "Lengkap (7)", partial: "Parsial (2)" };
-                  const activeColors = { all: "text-amber-400", complete: "text-emerald-400", partial: "text-amber-400" };
-                  return (
-                    <button
-                      key={f}
-                      onClick={() => setFilterType(f)}
-                      className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                        filterType === f
-                          ? `bg-slate-800 ${activeColors[f]} font-bold shadow-sm`
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {labels[f]}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Filter emiten..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950/60 pl-6 pr-2 py-1.5 text-[11px] text-white placeholder-slate-600 focus:border-amber-500/40 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Rows List */}
-            <ol className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{ maxHeight: 360 }}>
-              {isLoading &&
-                Array.from({ length: 9 }).map((_, i) => (
-                  <li key={i} className="skeleton h-11 rounded-xl" />
-                ))}
-
-              {!isLoading && filteredLeaderboard.map((issuer, idx) => {
-                const score = issuer.ground_truth_score;
-                const scorePct = score != null ? Math.min(100, Math.max(0, score)) : 0;
-                const topThree = idx < 3;
-                return (
-                  <li key={issuer.symbol}>
-                    <Link
-                      href={`/issuer/${issuer.symbol}`}
-                      className={`group flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-all hover:border-amber-500/40 hover:bg-slate-800/80 ${
-                        topThree
-                          ? "border-amber-500/20 bg-amber-500/5"
-                          : "border-slate-800/60 bg-slate-900/40"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span
-                          className={`w-5 text-right text-[11px] font-mono font-bold ${
-                            topThree ? "text-amber-400" : "text-slate-500 group-hover:text-amber-400"
-                          }`}
-                        >
-                          {idx + 1}
-                        </span>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-mono font-bold text-white group-hover:text-amber-300">
-                              {issuer.symbol}
-                            </span>
-                            <ConfidenceBadge dataQuality={issuer.data_quality} />
-                          </div>
-                          <div className="text-[10px] text-slate-400 truncate max-w-[150px] sm:max-w-[180px]">
-                            {issuer.name}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        {/* Progress Bar */}
-                        <div className="hidden sm:block w-16">
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-                            <div
-                              className="score-bar h-full"
-                              style={{ width: `${scorePct}%` }}
-                            />
-                          </div>
-                        </div>
-                        <span className="min-w-[36px] text-right font-mono text-sm font-black text-amber-400">
-                          {score != null ? score.toFixed(1) : "—"}
-                        </span>
-                        <ArrowRight className="h-3.5 w-3.5 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-
-              {!isLoading && filteredLeaderboard.length === 0 && (
-                <li className="py-8 text-center text-sm text-slate-500">
-                  Tidak ada emiten yang cocok dengan kata kunci.
-                </li>
-              )}
-            </ol>
-
-            <div className="mt-3 flex items-center justify-between border-t border-slate-800/60 pt-3 text-[11px] text-slate-500">
-              <span>Klik baris untuk rincian RLI &amp; Evidence</span>
-              <span className="font-mono text-slate-400">9 Emiten · IDX Mining</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Feature Deep Dive Grid ── */}
-      <section className="animate-fade-up animate-fade-up-3">
-        <div className="mb-4 flex items-center gap-2">
-          <Zap className="h-4 w-4 text-amber-400" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
-            Alat Analisis Lanjutan
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <NavCard
-            href="/cost-curve"
-            icon={TrendingDown}
-            title="Kurva Biaya Nasional"
-            desc="Cash cost per ton vs harga pasar acuan ICI-4 ($85/t)"
-            accent="emerald"
-          />
-          <NavCard
-            href="/scenario"
-            icon={SlidersHorizontal}
-            title="Scenario Studio"
-            desc="Simulasi shock harga & tarif impor batubara real-time"
-            accent="cyan"
-          />
-          <NavCard
-            href="/divergence"
-            icon={Activity}
-            title="Matriks Divergensi"
-            desc="RBV vs Market Cap — temukan emiten undervalued"
-            accent="indigo"
-          />
-          <NavCard
-            href="/coverage"
-            icon={FileSpreadsheet}
-            title="Audit Kejujuran"
-            desc="Data provenance & audit saldo kredit API (405/1000)"
-            accent="amber"
-          />
-        </div>
-      </section>
-
-      {/* ── Transparency & Provenance Banner ── */}
-      <section className="animate-fade-up animate-fade-up-4 overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-r from-slate-900/90 via-[#0e1830]/60 to-slate-900/90 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
-            <Layers className="h-5 w-5 text-amber-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white">100% Data Provenance · Zero Black-Box</h3>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Setiap metrik dihitung deterministik dari respon mentah Sectors API dan dapat diverifikasi via{" "}
-              <span className="text-amber-400 font-semibold">Evidence Drawer</span> di halaman emiten.
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/methodology"
-          className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-200 transition-all hover:border-amber-500/40 hover:bg-slate-700 hover:text-amber-300"
-        >
-          <Pickaxe className="h-3.5 w-3.5 text-amber-400" />
-          Lihat Rumus Matematis M1–M9
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
       </section>
     </div>
-  );
-}
-
-/* ── StatCard Component ── */
-function StatCard({
-  icon: Icon,
-  label,
-  sublabel,
-  value,
-  sub,
-  accentColor,
-  loading,
-}: {
-  icon: React.ElementType;
-  label: string;
-  sublabel?: string;
-  value: string;
-  sub: string;
-  accentColor: "emerald" | "cyan" | "amber";
-  loading: boolean;
-}) {
-  const cfg = {
-    emerald: {
-      icon: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
-      val: "text-emerald-400",
-      glow: "hover:shadow-[0_0_28px_rgba(16,185,129,0.15)]",
-    },
-    cyan: {
-      icon: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10",
-      val: "text-cyan-400",
-      glow: "hover:shadow-[0_0_28px_rgba(6,182,212,0.15)]",
-    },
-    amber: {
-      icon: "text-amber-400 border-amber-500/20 bg-amber-500/10",
-      val: "text-amber-400",
-      glow: "hover:shadow-[0_0_28px_rgba(245,158,11,0.18)]",
-    },
-  }[accentColor];
-
-  return (
-    <div
-      className={`glass-card relative overflow-hidden rounded-2xl border border-slate-800 p-5 flex flex-col gap-3 ${cfg.glow} transition-all`}
-    >
-      <div className="flex items-center justify-between">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-lg border ${cfg.icon}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse" />
-          Live Compute
-        </span>
-      </div>
-
-      <div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
-        {sublabel && <div className="text-[10px] text-slate-500 mt-0.5">{sublabel}</div>}
-        <div
-          className={`mt-2 font-mono text-3xl font-black leading-none tracking-tight ${
-            loading ? "skeleton text-transparent" : cfg.val
-          }`}
-        >
-          {loading ? "——" : value}
-        </div>
-      </div>
-
-      <p className="border-t border-slate-800/60 pt-2.5 text-[11px] text-slate-500">{sub}</p>
-    </div>
-  );
-}
-
-/* ── NavCard Component ── */
-function NavCard({
-  href,
-  icon: Icon,
-  title,
-  desc,
-  accent,
-}: {
-  href: string;
-  icon: React.ElementType;
-  title: string;
-  desc: string;
-  accent: "emerald" | "cyan" | "amber" | "indigo";
-}) {
-  const cfg = {
-    emerald: {
-      icon: "text-emerald-400",
-      border: "hover:border-emerald-500/30 hover:shadow-[0_0_24px_rgba(16,185,129,0.12)]",
-    },
-    cyan: {
-      icon: "text-cyan-400",
-      border: "hover:border-cyan-500/30 hover:shadow-[0_0_24px_rgba(6,182,212,0.12)]",
-    },
-    amber: {
-      icon: "text-amber-400",
-      border: "hover:border-amber-500/30 hover:shadow-[0_0_24px_rgba(245,158,11,0.12)]",
-    },
-    indigo: {
-      icon: "text-indigo-400",
-      border: "hover:border-indigo-500/30 hover:shadow-[0_0_24px_rgba(99,102,241,0.12)]",
-    },
-  }[accent];
-
-  return (
-    <Link
-      href={href}
-      className={`glass-card group flex flex-col justify-between rounded-2xl border border-slate-800 p-4 sm:p-5 transition-all ${cfg.border}`}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <Icon className={`h-5 w-5 ${cfg.icon}`} />
-        <ArrowRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-1 group-hover:text-white" />
-      </div>
-      <div>
-        <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
-          {title}
-        </h3>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{desc}</p>
-      </div>
-    </Link>
   );
 }

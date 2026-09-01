@@ -30,7 +30,8 @@ const COAL_TITANS = [
 ];
 
 const PAGES = [
-  { href: "/", label: "Executive Dashboard", desc: "Leaderboard skor fundamental & peta nasional", icon: Pickaxe },
+  { href: "/dashboard", label: "Executive Dashboard", desc: "Terminal analitis fundamental & leaderboard 9 emiten", icon: Pickaxe },
+  { href: "/", label: "Landing Page", desc: "Beranda publik pengenalan platform & 4 pilar", icon: Sparkles },
   { href: "/map", label: "National Concession Map", desc: "Peta sebaran 52 koordinat situs tambang ber-GPS", icon: MapPin },
   { href: "/scenario", label: "Scenario Studio", desc: "Simulasi stress-test harga batubara & tarif impor", icon: SlidersHorizontal },
   { href: "/cost-curve", label: "National Cost Curve", desc: "Tangga biaya tunai (cash cost) vs harga acuan ICI", icon: TrendingDown },
