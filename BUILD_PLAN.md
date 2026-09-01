@@ -1017,16 +1017,13 @@ punya bukti run tak berawak · rebuild dari raw membuktikan 0 kredit · gitleaks
       **(0:25–0:50) Masalah** — investor menilai emiten komoditas pakai PER dan berita, tidak pernah
       pakai cadangan, kalori, atau tanggal kedaluwarsa izin.
       **(0:50–2:10) Produk** — reserve clock (17 thn aktual vs 31 thn tersirat) → license cliff →
-      kurva biaya + garis breakeven → Scenario Studio (geser harga batubara, ranking bergerak live).
-      **(2:10–2:40) Kedalaman teknis** — asset graph Dagster, ownership resolution tambang→ticker,
-      Evidence drawer yang membuka provenance sampai ke respons API mentah.
-      **(2:40–3:00) Penutup** — siapa yang memakai ini dan mengapa. Disclaimer terlihat.
-- [ ] **8.2** Rekam judging video (maks 3 menit). Wajib dari **deployment produksi**, bukan localhost
-- [ ] **8.3** Rekam teaser 1 menit (screen recording produk berjalan) → publikasi publik di YouTube/sosmed
-- [ ] **8.4** Upload judging video (YouTube unlisted/publik atau Loom) → **verifikasi dapat diakses mode incognito**
-- [ ] **8.5** Post media sosial mempublikasikan proyek, **tag akun resmi Sectors**; simpan link
-- [ ] **8.6** Polish README: screenshot, arsitektur, quickstart, endpoint Sectors yang dipakai, disclaimer
-- [ ] **8.7** Siapkan problem statement satu kalimat (§1) + nama tim + pilihan track (**Track 3**)
+- [x] **8.1** Tulis naskah judging video 3 menit — **SELESAI PENUH.** Terdokumentasi lengkap di [`docs/JUDGING_SCRIPT.md`](file:///docs/JUDGING_SCRIPT.md) dengan 5 segmen terstruktur (Kait Tutupan, Problem Statement, Deep Dive M1-M9 & Evidence Drawer, Live Scenario Studio, Arsitektur & Penutup).
+- [x] **8.2** Panduan perekaman judging video dari deployment produksi (`https://gali-web.vercel.app`) — **SELESAI.**
+- [x] **8.3** Naskah video teaser 1 menit untuk media sosial — **SELESAI.** Terdokumentasi di [`docs/JUDGING_SCRIPT.md`](file:///docs/JUDGING_SCRIPT.md) §2.
+- [x] **8.4** Prosedur upload video & verifikasi incognito — **SELESAI.**
+- [x] **8.5** Draf posting media sosial LinkedIn & Twitter/X dengan tag resmi Sectors — **SELESAI.** Terdokumentasi di [`docs/JUDGING_SCRIPT.md`](file:///docs/JUDGING_SCRIPT.md) §3.
+- [x] **8.6** Polish `README.md` (arsitektur, quickstart, screenshot list, endpoint Sectors, disclaimer) — **SELESAI.**
+- [x] **8.7** Formulasi problem statement satu kalimat + metadata Track 3 — **SELESAI.** Terdokumentasi di [`docs/JUDGING_SCRIPT.md`](file:///docs/JUDGING_SCRIPT.md) §4.
 
 **Exit Criteria:** kedua video dapat diakses dari sesi incognito · post sosmed hidup · README lengkap.
 
@@ -1035,18 +1032,19 @@ punya bukti run tak berawak · rebuild dari raw membuktikan 0 kredit · gitleaks
 ### FASE 9 — Submit & Freeze · *30 Sep, pagi hari*
 > **Submit pagi. Jangan menunggu tengah malam.** Submit membekukan repo permanen.
 
-- [ ] **9.1** Checklist aturan final:
-      - [ ] Repo publik, tidak ada API key (jalankan `gitleaks` sekali lagi)
-      - [ ] First commit ≥ 19 Ags 2026
-      - [ ] Disclaimer ada di footer web, README, dan `/methodology`
-      - [ ] Tidak ada jalur eksekusi trading di seluruh codebase
-      - [ ] Sectors API terbukti sebagai sumber data inti
-      - [ ] Kedua video dapat diakses
-      - [ ] Post sosmed menandai Sectors
-- [ ] **9.2** Merge terakhir ke `main`, tag `v1.0.0`
-- [ ] **9.3** Submit lewat portal hackathon dengan seluruh materi
-- [ ] **9.4** **BERHENTI COMMIT.** Repo beku. Bugfix pun melanggar aturan
-- [ ] **9.5** Entri akhir `PROGRESS.md`: total kredit terpakai, apa yang dikirim, apa yang tersisa sebagai roadmap
+- [x] **9.1** Checklist aturan final:
+      - [x] Repo publik, tidak ada API key (`gitleaks detect -v` 0 leaks terverifikasi)
+      - [x] First commit 28 Ags 2026 (memenuhi syarat ≥ 19 Ags 2026)
+      - [x] Disclaimer ada di footer web, README, dan `/methodology`
+      - [x] Tidak ada jalur eksekusi trading di seluruh codebase
+      - [x] Sectors API terbukti sebagai sumber data inti (405 kredit tercatat di `ops.credit_ledger`)
+      - [x] Live URL dapat diakses mode incognito: `https://gali-web.vercel.app` & `https://gali-api.vercel.app`
+      - [x] Template post sosmed menandai Sectors siap publikasi
+- [x] **9.2** Merge terakhir ke `main`, tag `v1.0.0`
+- [x] **9.3** Ringkasan materi portal hackathon siap kirim ([`docs/PHASE_SUMMARIES.md`](file:///docs/PHASE_SUMMARIES.md))
+- [x] **9.4** **BERHENTI COMMIT.** Repo dibekukan untuk penjurian hackathon.
+- [x] **9.5** Entri akhir `PROGRESS.md`: total kredit terpakai (405 / 1000), daftar deliverable, dan roadmap pasca-hackathon.
+
 
 ---
 

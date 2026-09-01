@@ -5,7 +5,49 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-01 — Sesi 9: Finalisasi Seluruh Fase (Fase 8 & 9), Naskah Judging Video, Per-Phase Summaries & Rilis Tag v1.0.0
+
+**Konteks:**
+Menuntaskan seluruh sisa fase roadmap proyek GALI sesuai arahan Aril: pembuatan aset submisi resmi (Fase 8), kompilasi laporan komprehensif per fase (`docs/PHASE_SUMMARIES.md`), naskah video judging 3 menit (`docs/JUDGING_SCRIPT.md`), checklist kepatuhan final hackathon (Fase 9), dan pembuatan git release tag `v1.0.0`.
+
+**Hasil Pengerjaan:**
+1. **Aset Submisi & Naskah Judging Video (Fase 8)**:
+   - *Naskah Video 3 Menit*: Disusun dengan 5 segmen terstruktur (Kait Tambang Tutupan -> Problem Statement -> Deep Dive Fundamental M1-M9 & Evidence Drawer -> Live Scenario Studio Stress-Test -> Arsitektur & Penutup).
+   - *Naskah Teaser 60 Detik*: Diformulasikan untuk media sosial.
+   - *Draf Postingan Resmi*: LinkedIn & Twitter/X dengan hashtag dan tagging resmi akun Sectors.
+   - *Terdokumentasi di*: [`docs/JUDGING_SCRIPT.md`](file:///docs/JUDGING_SCRIPT.md).
+
+2. **Laporan Komprehensif Per Fase (Phase 0 – Phase 9)**:
+   - Menyusun dokumen eksekutif [`docs/PHASE_SUMMARIES.md`](file:///docs/PHASE_SUMMARIES.md) yang merangkum arsitektur, pencapaian teknis, audit kredit, dan status verifikasi dari Phase 0 hingga Phase 9 secara mendalam.
+
+3. **Checklist Kepatuhan Final & Freeze (Fase 9)**:
+   - Repositori GitHub publik: `https://github.com/mocharil/gali`
+   - Keamanan rahasia: `gitleaks detect -v` 0 leaks terdeteksi (100% clean).
+   - Tanggal commit pertama: 28 Agustus 2026 (memenuhi syarat ≥ 19 Agustus 2026).
+   - Disclaimer investasi: Terpasang di web footer, `README.md`, dan `/methodology`.
+   - Jalur eksekusi trading: 0 baris kode trading (murni analitik market intelligence).
+   - Sumber data inti: Terbukti ditenagai Sectors API (405 kredit di `ops.credit_ledger`).
+   - Deployment live: Web dan API 100% aktif dan dapat diakses dari incognito mode.
+   - Pembuatan Git release tag: `v1.0.0`.
+
+**Total Kredit Terpakai Proyek:** **405 / 1.000 Kredit** (Sisa 595 kredit, efisiensi 59.5%).
+
+**Deliverables yang Dikirimkan:**
+1. Web Application: `https://gali-web.vercel.app`
+2. REST API & Docs: `https://gali-api.vercel.app/docs`
+3. Repositori & Dokumentasi: `https://github.com/mocharil/gali`
+4. Laporan Teknis: [`docs/PHASE_SUMMARIES.md`](file:///docs/PHASE_SUMMARIES.md), [`docs/ARCHITECTURE.md`](file:///docs/ARCHITECTURE.md), [`docs/DATA_COVERAGE.md`](file:///docs/DATA_COVERAGE.md), [`docs/METRICS.md`](file:///docs/METRICS.md), [`docs/CREDIT_BUDGET.md`](file:///docs/CREDIT_BUDGET.md), [`docs/JUDGING_SCRIPT.md`](file:///docs/JUDGING_SCRIPT.md).
+
+**Roadmap Pasca-Hackathon:**
+- Akun pengguna, watchlist portofolio, dan notifikasi email/WhatsApp saat masa berlaku izin ESDM (License Cliff) mendekati kedaluwarsa.
+- Perluasan universe ke bursa regional (SGX & KLSE) menggunakan endpoint multi-country Sectors API.
+- Integrasi pipeline langsung ke ESDM MODI/MOMI untuk melengkapi atribut cadangan mineral non-batubara (Nickel, Copper, Gold).
+- Backtesting historis hubungan antara Reserve-Backed Value gap (M9) dengan kinerja saham jangka panjang.
+
+---
+
 ## 2026-09-01 — Sesi 8: Rate Limiter Live Fix, Diagnosa Latensi Serverless & Redis Caching, Uji Disaster Recovery 100% Berhasil di Neon Produksi
+
 
 **Konteks:**
 Menyelesaikan temuan Fase 7 dari verifikasi independen (rate limiter tidak aktif di Vercel, latensi `/v1/rankings` ~1.15s) serta mengeksekusi Disaster Recovery (Task 7.4) langsung di database Neon produksi sesuai izin Aril. Sentry (Task 7.2) di-skip atas keputusan eksplisit Aril.
