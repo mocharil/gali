@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ShieldCheck, X, FileText, Clock, AlertTriangle, Link as LinkIcon } from "lucide-react";
 
 /**
@@ -32,6 +32,15 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
   const assumptions = evidence.assumptions ?? {};
   const sourceIds = evidence.source_raw_response_ids ?? [];
 
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsOpen(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen]);
+
   return (
     <>
       <button
@@ -49,6 +58,9 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
           onClick={() => setIsOpen(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Evidence dan provenance untuk ${symbol}`}
             className="flex h-full w-full max-w-xl flex-col justify-between overflow-y-auto border-l border-slate-800 bg-[#0e1420] p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >

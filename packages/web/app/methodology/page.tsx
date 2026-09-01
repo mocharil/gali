@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import { ShieldAlert } from "lucide-react";
 
 export const metadata = {
-  title: "Metodologi & Disclaimer — GALI",
+  title: "Metodologi & Disclaimer",
 };
 
 function readMetricsDoc(): string {

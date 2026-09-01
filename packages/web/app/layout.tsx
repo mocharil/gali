@@ -5,10 +5,40 @@ import { AssumptionBar } from "@/components/AssumptionBar";
 import { Footer } from "@/components/Footer";
 import { Providers } from "./providers";
 
+const SITE_URL = "https://gali-web.vercel.app";
+const TITLE = "GALI — Ground-Truth Fundamental Intelligence for IDX Mining";
+const DESCRIPTION =
+  "Valuation and risk analytics engine connecting IDX mining companies to geological reserves, concession lifespans, and real-time macroeconomic shock simulations.";
+
 export const metadata: Metadata = {
-  title: "GALI — Ground-Truth Fundamental Intelligence for IDX Mining",
-  description:
-    "Valuation and risk analytics engine connecting IDX mining companies to geological reserves, concession lifespans, and real-time macroeconomic shock simulations.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s · GALI",
+  },
+  description: DESCRIPTION,
+  keywords: [
+    "IDX",
+    "mining",
+    "batubara",
+    "coal",
+    "reserve life index",
+    "market intelligence",
+    "Sectors Hackathon",
+  ],
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "GALI",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 import { MiningSitesMap } from "@/components/MiningSitesMap";
 
 export const metadata = {
-  title: "Peta Nasional Situs Tambang — GALI",
+  title: "Peta Nasional Situs Tambang",
 };
 
 export default function MapPage() {

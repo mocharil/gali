@@ -101,3 +101,23 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
+
+/* Route-transition progress bar (app/loading.tsx) */
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+/* Consistent visible focus ring for keyboard navigation (a11y) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

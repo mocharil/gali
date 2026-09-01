@@ -128,7 +128,10 @@ export default function ScenarioStudioPage() {
             </div>
           )}
           {sorted.length > 0 && (
-            <div className="space-y-2">
+            <div
+              className={`space-y-2 transition-opacity duration-150 ${mutation.isPending ? "opacity-40" : "opacity-100"}`}
+              aria-busy={mutation.isPending}
+            >
               {sorted.map((imp) => (
                 <ImpactRow key={imp.symbol} imp={imp} />
               ))}

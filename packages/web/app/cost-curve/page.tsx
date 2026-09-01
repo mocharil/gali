@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { api } from "@/lib/api";
+import { Skeleton } from "@/components/Skeleton";
 
 export default function CostCurvePage() {
   const { data, isLoading } = useQuery({
@@ -34,7 +35,7 @@ export default function CostCurvePage() {
 
       <div className="glass-card mt-6 rounded-xl border border-slate-800 p-5">
         {isLoading ? (
-          <div className="flex h-96 items-center justify-center text-sm text-slate-500">Memuat kurva biaya…</div>
+          <Skeleton className="h-[420px]" />
         ) : points.length === 0 ? (
           <div className="flex h-96 items-center justify-center text-sm text-slate-500">Tidak ada data.</div>
         ) : (
@@ -96,6 +97,14 @@ export default function CostCurvePage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
+            {isLoading &&
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>
+                  <td className="px-4 py-2" colSpan={6}>
+                    <Skeleton className="h-4" />
+                  </td>
+                </tr>
+              ))}
             {points.map((p) => (
               <tr key={p.symbol} className="hover:bg-slate-900/40">
                 <td className="px-4 py-2">

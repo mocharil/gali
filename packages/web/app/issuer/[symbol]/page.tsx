@@ -7,6 +7,7 @@ import { ArrowLeft, Clock, AlertTriangle, Ship, Network } from "lucide-react";
 import { api } from "@/lib/api";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
+import { Skeleton } from "@/components/Skeleton";
 
 function fmt(n: number | null | undefined, opts: { digits?: number; suffix?: string; usd?: boolean } = {}): string {
   if (n == null) return "—";
@@ -30,7 +31,28 @@ export default function IssuerDetailPage() {
   });
 
   if (isLoading) {
-    return <div className="mx-auto max-w-6xl px-4 py-16 text-center text-sm text-slate-500">Memuat {sym}…</div>;
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8" aria-busy="true" aria-label={`Memuat data ${sym}`}>
+        <Skeleton className="mb-4 h-4 w-24" />
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <Skeleton className="h-9 w-40" />
+            <Skeleton className="mt-2 h-4 w-56" />
+          </div>
+          <Skeleton className="h-8 w-44" />
+        </div>
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28" />
+          ))}
+        </div>
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Skeleton className="h-40 lg:col-span-2" />
+          <Skeleton className="h-40" />
+        </div>
+        <Skeleton className="h-32" />
+      </div>
+    );
   }
   if (isError || !data) {
     return (
