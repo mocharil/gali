@@ -1,11 +1,172 @@
 # Prompt untuk Agent Pelaksana
 
-> **Sesi 7 ada di bawah ini.** Sesi 1-6 diarsipkan di bagian bawah file.
+> **Sesi 8 ada di bawah ini.** Sesi 1-7 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
 ---
 
-# SESI 7 — Raw asset yang hilang (blocker task 7.1/6.9), lalu lanjut Fase 7 (7.2–7.9)
+# SESI 8 — Rate limiter tidak jalan di produksi + latency `/v1/rankings` ~1.15s, lalu DR test (7.4)
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, entri teratas ("Verifikasi independen Sesi 7...")
+2. `BUILD_PLAN.md` task **5.6**, **7.3**, **7.5** (baru dikoreksi kedua kalinya)
+3. `.env.production` — jangan pernah commit/print
+
+### Konteks
+
+Sesi 7 (agent lain) menutup gap raw asset (commodity price, market cap screener) — ini **genuinely
+selesai dan sudah diverifikasi independen** oleh koordinator: `/divergence` hidup di browser
+sungguhan, `credits_used` naik 404→405 di ledger, `rbv_gap_pct` benar untuk 7 emiten lengkap. **Jangan
+kerjakan ulang bagian ini.**
+
+Tapi verifikasi independen yang sama juga menemukan **dua klaim yang tidak benar**:
+
+**Temuan 1 — Rate limiting ter-deploy tapi tidak pernah trigger di produksi.** 100 request ke
+`https://gali-api.vercel.app/v1/rankings` dalam 14 detik (≈428 req/menit, jauh di atas cap anon
+60/menit) → seluruhnya HTTP 200, nol 429. `/ready` di waktu sama melaporkan `redis:true`. Unit test
+(`test_security.py`, 7/7 hijau) memakai Redis mock, tidak pernah diverifikasi terhadap deployment
+sungguhan — persis pola Bug 1 CORS minggu lalu.
+
+**Bug konkret yang SUDAH ditemukan lewat pembacaan kode (belum diperbaiki), di
+`packages/api/gali_api/ratelimit.py`:**
+```python
+redis: aioredis.Redis | None = getattr(request.app.state, "redis_client", None)
+```
+Tidak ada satu pun kode di `main.py`/`dependencies.py` yang pernah men-set `app.state.redis_client` —
+`init_redis_pool()` di `dependencies.py` menyimpan client di **module-level global** `_redis_client`,
+bukan di `app.state`. Jadi baris ini SELALU `None`, lalu jatuh ke fallback `redis = await get_redis()`
+(fungsi yang sama dipakai `/ready`, dan itu genuinely bekerja — return module-level `_redis_client`).
+Fallback ini SEHARUSNYA berhasil dapat client yang sama dengan `/ready`. Kalau begitu, kemungkinan
+besar `redis.incr(redis_key)` di blok `try` sesudahnya yang gagal — kemungkinan kuat error semacam
+"Event loop is closed" atau koneksi asyncio Redis yang tidak konsisten antar-invocation Vercel
+serverless (redis-py asyncio client dibuat sekali saat cold start/lifespan, dipakai ulang di invocation
+berikutnya yang mungkin jalan di event loop berbeda — pola bug klasik untuk client asyncio di
+lingkungan serverless). Blok `except Exception: logger.warning(...)` di `ratelimit.py` MENELAN error
+ini secara diam-diam dan fail-open — makanya dari luar terlihat seperti "semua request lolos" tanpa
+petunjuk apa pun. **Ini hipotesis berbasis pembacaan kode, belum dikonfirmasi dari log Vercel
+sungguhan** — cek `vercel logs <deployment-url>` atau dashboard Vercel > Logs untuk project `gali-api`
+untuk melihat apakah warning itu benar-benar muncul dan pesan errornya persis apa, sebelum menulis
+fix.
+
+**Temuan 2 — Angka load test di `docs/ARCHITECTURE.md` tidak cocok realita.** Dokumen bilang p50
+45.2ms untuk `/v1/rankings`. Pengukuran independen (curl sekuensial, tanpa concurrency): **konsisten
+1.7–1.9 detik per request**, header `X-Process-Time-Ms` server-side ~1150ms (vs 1.46ms untuk
+`/health` di waktu sama) — jadi genuinely lambat di dalam FastAPI, bukan noise jaringan, dan tidak
+membaik pada request identik berulang (indikasi cache Redis tidak hit untuk endpoint ini). Angka di
+dokumen kemungkinan diukur terhadap lokal/Docker (yang connection pool-nya persisten) lalu salah
+dilabeli "produksi" — di Vercel serverless, tiap invocation berpotensi bikin koneksi DB/Redis baru
+dari nol kalau lifespan/connection-pool tidak survive antar-invocation, yang konsisten dengan gejala
+lambat-terus-menerus ini.
+
+### Keputusan Aril untuk sesi ini
+
+- **Task 7.2 (Sentry): DI-SKIP untuk sekarang.** Jangan kerjakan, jangan tanya lagi — fokus ke item
+  yang lebih penting mengingat deadline 30 Sep.
+- **Task 7.4 (disaster recovery): DIIZINKAN langsung di Neon production.** Aril sudah approve DROP
+  schema `core`/`market`/`graph`/`metrics` di production untuk uji rebuild-from-raw. Web/API akan
+  menampilkan data kosong sesaat selama proses — itu diharapkan, bukan insiden.
+
+### Langkah 1 — Investigasi & perbaiki rate limiter (Temuan 1, prioritas tertinggi)
+
+1. Cek log Vercel sungguhan dulu (`vercel logs` atau dashboard) untuk konfirmasi hipotesis di atas —
+   jangan langsung nebak-nebak fix tanpa lihat error aslinya
+2. Hapus/perbaiki baris `getattr(request.app.state, "redis_client", None)` yang dead code — pakai
+   `get_redis()` langsung sebagai satu-satunya sumber, konsisten dengan `/ready`
+3. Kalau root cause ternyata event-loop/connection lifecycle (paling mungkin di serverless): pastikan
+   client Redis dibuat **per-request** atau pakai pola yang aman untuk serverless (redis-py asyncio
+   punya guidance resmi soal ini — connection pool baru per event loop, atau `close()` eksplisit dan
+   reconnect). Jangan asumsikan lifespan Vercel Python berperilaku sama seperti server long-running
+   biasa — verifikasi dengan tes nyata, bukan asumsi dari dokumentasi umum FastAPI
+4. Tambah regression test yang **tidak mock Redis** — test integrasi nyata (bisa terhadap Redis lokal
+   Docker) yang membuktikan request ke-61 dalam 60 detik benar-benar dapat 429
+5. Deploy ulang, **verifikasi ulang persis seperti yang koordinator lakukan**: 100 request ke
+   `/v1/rankings` production dalam <20 detik, harus ada 429 muncul di suatu titik dengan header
+   `Retry-After`
+6. Baru sekarang centang 5.6/7.5 penuh di `BUILD_PLAN.md`, dengan bukti 429 nyata
+
+### Langkah 2 — Investigasi & perbaiki latency `/v1/rankings` (Temuan 2)
+
+1. Cek apakah root cause sama dengan Langkah 1 (koneksi DB/Redis dibuat ulang tiap invocation) — kalau
+   iya, perbaikan Langkah 1 mungkin sekaligus memperbaiki ini
+2. Cek apakah cache Redis untuk endpoint ini (`make_cache_key`/`get_cached_json`/`set_cached_json` di
+   `gali_api/cache.py`) benar-benar tersimpan — query langsung ke Upstash (`redis.keys('gali:*')`)
+   setelah satu request, cek apakah key rankings ada dan TTL-nya masuk akal
+3. Kalau problemnya connection-per-invocation ke Neon (bukan Redis), cek apakah `DATABASE_URL` yang
+   dipakai sudah benar-benar lewat PgBouncer pooler (`-pooler` di hostname — sudah, tapi cek ulang)
+   dan apakah SQLAlchemy async engine di-reuse dengan benar di konteks Vercel Python Functions
+   (mungkin perlu pola berbeda dari `lifespan`-based pooling biasa)
+4. Ukur ulang dengan metodologi yang jelas dan **jujur label lokal vs produksi** — jangan campur lagi.
+   Kalau tidak berhasil diturunkan signifikan dalam waktu wajar, dokumentasikan sebagai keterbatasan
+   arsitektur serverless yang diketahui (bukan disembunyikan), update `docs/ARCHITECTURE.md` dengan
+   angka yang benar
+5. Update task 7.3 di `BUILD_PLAN.md` dengan angka final yang jujur
+
+### Langkah 3 — Disaster recovery test di production (7.4, sudah diizinkan Aril)
+
+1. Backup dulu: cek Neon dashboard ada snapshot/PITR otomatis (biasanya ada di free tier), atau
+   `pg_dump` manual ke file lokal sebelum mulai, sebagai jaring pengaman tambahan
+2. Catat `SELECT COUNT(*) FROM ops.credit_ledger` atau total `credits_used` dari `/v1/coverage`
+   **sebelum** mulai
+3. `DROP`/kosongkan schema `core`, `market`, `graph`, `metrics` di Neon production (via Alembic
+   downgrade terarah, atau `TRUNCATE ... CASCADE` per tabel, atau `DROP SCHEMA ... CASCADE` + migrate
+   ulang — pilih yang paling reversibel)
+4. Rebuild: materialize ulang asset `core_*`/`graph_*`/`metric_*` dari `raw.responses` yang sudah ada
+   (termasuk raw asset baru dari Sesi 7) sampai `metrics.published_pointer` terisi lagi
+5. Bandingkan `credits_used` sebelum/sesudah — **wajib sama persis**, ini yang membuktikan klaim
+   arsitektur "raw immutable, derived reproducible" (§2.1 di `BUILD_PLAN.md`)
+6. Verifikasi API/web kembali benar setelah rebuild: `/v1/issuers/ADRO`, zero-shock invariant
+   `POST /v1/scenario`, dan `/divergence` (harus terisi lagi persis seperti sebelum di-drop)
+7. Dokumentasikan langkah persis + hasil ledger di `docs/CREDIT_BUDGET.md`/`docs/ARCHITECTURE.md`,
+   centang 7.4
+
+### Langkah 4 — Housekeeping sisa
+
+- Task 7.2 (Sentry): pastikan `BUILD_PLAN.md` mencatat status "di-skip atas keputusan Aril
+  2026-08-31, bukan blocker teknis" — jangan dibiarkan ambigu antara "lupa" vs "sengaja"
+- Review cepat apakah ada checkbox lain yang perlu diverifikasi ulang mengingat pola yang sudah
+  berulang 4x sesi ini (CORS, raw assets, rate limiting, load test) — kalau ada waktu, spot-check 1-2
+  task Fase 6 lain yang belum pernah diverifikasi langsung terhadap production
+- Commit + push per langkah, CI hijau tiap push
+
+### Definisi selesai sesi ini
+
+1. Root cause rate limiter dikonfirmasi dari log Vercel sungguhan (bukan tebakan)
+2. Rate limiter diperbaiki, **429 sungguhan terlihat di production** dengan test yang sama seperti
+   koordinator lakukan (100 req/<20 detik)
+3. Latency `/v1/rankings` diinvestigasi dan diperbaiki (atau didokumentasikan jujur sebagai
+   keterbatasan kalau memang tidak bisa diturunkan cepat)
+4. DR test (7.4) selesai di production, credits_used sebelum=sesudah, API/web terverifikasi benar lagi
+5. `BUILD_PLAN.md`/`PROGRESS.md`/`docs/ARCHITECTURE.md` terupdate jujur berdasarkan bukti nyata
+6. Commit + push per langkah, CI hijau
+
+### Kapan berhenti dan bertanya
+
+- Kalau DR test (Langkah 3) mulai terlihat berisiko lebih tinggi dari perkiraan (mis. Alembic
+  downgrade gagal di tengah jalan, data tidak bisa direbuild penuh) — **berhenti, jangan coba
+  "perbaiki" dengan langkah destruktif lain, laporkan state persis ke Aril**
+- Kalau root cause rate limiter ternyata bukan soal Redis/event-loop sama sekali (mis. Vercel Edge
+  Network sendiri yang menyaring/reorder request dengan cara tak terduga) — laporkan temuan sebelum
+  mencoba fix yang tidak sesuai akar masalah
+- Sentry (7.2) — jangan dikerjakan, sudah diputuskan skip
+- Kalau ditemukan checkbox palsu lain — perbaiki kalau kecil, atau catat jujur + laporkan kalau besar,
+  pola yang sama sepanjang proyek ini
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 7</b></summary>
+
+# SESI 7 — Raw asset yang hilang (blocker task 7.1/6.9), lalu lanjut Fase 7 (7.2–7.9) — **raw asset,
+market cap screener, /divergence, gitleaks selesai & terverifikasi genuinely production; TAPI rate
+limiting dan angka load test yang dilaporkan "selesai" ternyata tidak benar, lihat Sesi 8**
 
 ## ▼ SALIN MULAI DARI SINI ▼
 
@@ -166,6 +327,8 @@ Neon didokumentasikan. Alembic upgrade/downgrade/upgrade di DB bersih/lokal. CI 
   jangan dibiarkan diam-diam
 
 ## ▲ SALIN SAMPAI SINI ▲
+
+</details>
 
 ---
 
