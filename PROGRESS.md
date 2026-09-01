@@ -5,6 +5,67 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-01 — UI polish web app (task 6.12 ditutup) + ditemukan regresi GPS 0/57 di produksi (koordinator)
+
+**Konteks:** Aril minta web app "dipercantik" dan ditambah loading state hingga "enterprise ready".
+Dikerjakan langsung (bukan tulis prompt), diverifikasi lokal + production.
+
+**Selesai — task 6.12 sekarang genuinely tertutup:**
+- **Mobile navigation** — gap paling penting yang ditemukan: nav items sebelumnya `hidden md:flex`
+  tanpa fallback sama sekali, jadi di layar < 768px tidak ada cara navigasi ke halaman lain kecuali
+  logo/API-status/GitHub icon. Ditambah hamburger menu penuh (body-scroll lock, auto-close saat
+  ganti route, `aria-expanded`/`aria-controls`).
+- `app/error.tsx`, `app/not-found.tsx` — global error boundary & 404 branded, menggantikan default
+  Next.js.
+- `app/loading.tsx` — progress bar tipis untuk transisi route.
+- **Logo asli** (`gali_logo.png` dari Aril) menggantikan placeholder ikon Pickaxe di Navbar, dan
+  dipakai sebagai favicon (`app/icon.png`, di-crop persegi 512×512).
+- Skeleton loading yang match layout asli (bukan cuma teks "Memuat...") di halaman issuer detail dan
+  cost-curve — tidak ada layout shift saat data datang.
+- Scenario Studio: hasil meredup (opacity) saat recompute, supaya angka lama tidak terlihat seperti
+  angka terkini.
+- EvidenceDrawer: Escape-to-close, `role="dialog"`/`aria-modal` untuk screen reader.
+- Focus-ring terlihat untuk navigasi keyboard, metadata OpenGraph/Twitter card untuk link preview.
+
+**Verifikasi:** `pnpm build` bersih, `tsc --noEmit` bersih, browser check lokal (mobile menu dites
+lewat manipulasi DOM langsung karena `resize_window` tool tidak benar-benar mengubah viewport capture
+di lingkungan ini — logika & class Tailwind dikonfirmasi benar). Playwright e2e: 3/4 lolos konsisten
+(test ke-4 gagal karena alasan di bawah, bukan karena perubahan sesi ini). Dideploy ke
+`https://gali-web.vercel.app`, dicek live: logo, favicon, leaderboard, dan peta compact semua render
+benar.
+
+**Temuan terpisah dan serius — regresi data GPS di produksi, BUKAN disebabkan sesi ini:**
+Playwright test 4 gagal konsisten menunggu teks "52 / 57" di halaman `/coverage`. Dicek langsung:
+`/v1/coverage` production **melaporkan `0 / 57 (0.0%)`** untuk "In-Universe Mining Sites GPS" (turun
+dari 52/57 = 91.2% yang terverifikasi berkali-kali di sesi-sesi sebelumnya), dan `/v1/sites` GeoJSON
+mengembalikan **0 features**. Peta nasional (`/map`) dan peta compact di homepage sekarang genuinely
+kosong — bukan bug UI (komponen `MiningSitesMap` sudah benar menampilkan basemap + badge count jujur,
+render fine, cuma datanya nol). DB lokal Docker juga menunjukkan angka yang sama persis (0/57), jadi
+ini bukan masalah environment-spesifik.
+**Root cause dikonfirmasi dan DIPERBAIKI (sesi yang sama, sore hari):** ini konsekuensi dari task 7.4
+(Disaster Recovery test — drop schema `core` lalu rebuild dari `raw`) yang sebelumnya dicatat
+berstatus "plausibel, tidak diverifikasi ulang" — sekarang terkonfirmasi memang menyebabkan regresi
+ini. GPS backfill untuk situs tambang (task 3.10) ternyata **bukan** bagian dari `gali ingest`
+standar — ada CLI terpisah, `gali sites backfill-gps`, yang tidak ikut dijalankan ulang setelah DR
+test men-drop schema `core`.
+**Fix:** dicek dulu `raw.responses` untuk 57 endpoint `/v2/mining/sites/{slug}/` — **masih utuh**
+(raw memang immutable, tidak ikut ter-DROP DR test). Jalankan `gali sites backfill-gps` (tanpa
+`--live`) terhadap Neon production → **57/57 cache hit, 0 kredit tambahan**, `core.mining_site`
+kembali punya 52 baris dengan lat/long terisi. Response `/v1/coverage` dan `/v1/sites` sempat masih
+menunjukkan angka lama karena **Redis cache belum invalidasi** (key `gali:v1:...:coverage:report:*`
+dan `...:sites:geojson:*`, TTL panjang) — dihapus manual lewat koneksi Redis langsung, setelah itu
+API langsung menunjukkan 52/57 (91.2%) dan 52 features. **Diverifikasi live di browser**: `/map`
+menampilkan 52 titik tersebar di Kalimantan/Sumatra dengan benar.
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 405 / 1000)
+
+**Next:** task 6.12 dan regresi GPS sama-sama selesai. **Untuk sesi berikutnya:** pertimbangkan
+memasukkan `gali sites backfill-gps` sebagai langkah wajib dalam SOP rebuild-from-raw (task 7.4),
+supaya DR test berikutnya tidak mengulang regresi yang sama — saat ini backfill GPS gampang terlupa
+karena bukan bagian dari `gali ingest --tier all` standar.
+
+---
+
 ## 2026-09-01 — Verifikasi independen Sesi 9: rate limiter GENUINELY benar kali ini (koordinator)
 
 **Konteks:** Sesi 9 (agent lain, laporan di bawah) mengklaim rate limiter akhirnya diperbaiki dengan

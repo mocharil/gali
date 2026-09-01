@@ -980,9 +980,14 @@ p95 < 400 ms pada load test.
 - [x] **6.10** `/methodology` — render `docs/METRICS.md` langsung.
 - [x] **6.11** `/coverage` — seluruh angka fully DB-derived (diperbaiki dari hardcoded, lihat catatan di
       atas). Diverifikasi live: 7/9 issuer completeness benar, progress bar coverage per layer.
-- [ ] **6.12** Skeleton/loading state ada di beberapa halaman (home, issuer detail); empty state jujur ada
-      (divergence). **Belum:** global `error.tsx` boundary, audit a11y sistematis, uji responsif mobile
-      yang menyeluruh.
+- [x] **6.12** **Selesai (2026-09-01).** Ditemukan gap paling penting saat audit: **tidak ada mobile
+      navigation sama sekali** (`hidden md:flex` tanpa fallback) — ditambah hamburger menu penuh.
+      Juga ditambah: `app/error.tsx` (global error boundary), `app/not-found.tsx` (404 branded),
+      `app/loading.tsx` (progress bar transisi route), skeleton yang match layout asli di issuer
+      detail & cost-curve (ganti teks "Memuat..." polos), dim-state Scenario Studio saat recompute,
+      Escape-to-close + `role="dialog"` di EvidenceDrawer, focus-ring keyboard, favicon + OpenGraph
+      metadata, logo asli menggantikan placeholder Pickaxe icon. Diverifikasi: `pnpm build`/`tsc`
+      bersih, deploy production dicek live. Detail lengkap di `PROGRESS.md` 2026-09-01.
 - [x] **6.13** Footer disclaimer investasi tampil di semua halaman (lewat root layout) dan di `README.md`.
 - [x] **6.14** Playwright e2e — selesai dan terverifikasi 100% hijau.
 - [x] **6.15** Deploy ke Vercel — selesai.
@@ -1010,6 +1015,18 @@ live ✅ · e2e hijau di CI ✅ (lokal, lihat 6.14) · Lighthouse ≥ 85 pada pe
       dan `/divergence` tetap tampil normal saat dicek. **Tapi ini bukan re-eksekusi DR test yang
       sesungguhnya** (drop+rebuild tidak diulang untuk verifikasi) — diberi status "plausibel", bukan
       "terbukti", mengingat rekam jejak sesi-sesi sebelumnya untuk klaim serupa.
+      **KONFIRMASI 2026-09-01 (sesi lain, sore hari):** klaim "plausibel" di atas TERNYATA salah —
+      DR test ini memang genuinely me-reset `core.mining_site.latitude/longitude` ke NULL untuk semua
+      143 baris (GPS coverage jatuh dari 52/57 ke 0/57 di produksi, ditemukan lewat Playwright e2e yang
+      gagal). Root cause: backfill GPS (task 3.10) bukan bagian dari `gali ingest` standar — perlu CLI
+      terpisah `gali sites backfill-gps`, yang tidak dijalankan ulang setelah DR test. **Sudah
+      diperbaiki**: `raw.responses` untuk 57 endpoint `/v2/mining/sites/{slug}/` masih utuh (immutable,
+      tidak ikut ter-DROP), jadi `gali sites backfill-gps` dijalankan ulang terhadap Neon production —
+      **57/57 cache hit, 0 kredit tambahan**, GPS coverage kembali 52/57 (91.2%), diverifikasi live di
+      `/map` lewat browser sungguhan. **Pelajaran untuk DR test berikutnya:** prosedur rebuild-from-raw
+      yang benar harus eksplisit mencakup `gali sites backfill-gps` sebagai langkah tambahan setelah
+      `gali ingest` — bukan cuma normalize standar — atau backfill GPS perlu dipindah masuk ke
+      normalizer standar Fase 2 supaya tidak terlupa lagi.
 - [x] **7.5** **Audit keamanan — TERVERIFIKASI & SELESAI PENUH.** `gitleaks detect -v` bersih (0 rahasia). CORS genuinely terkunci ke domain resmi. Rate limiter True Continuous Sliding Window (Redis Sorted Set atomic Lua script `ZREMRANGEBYSCORE` + `ZCARD` + `ZADD`) aktif dan terverifikasi live di produksi:
       - Test Run 1 (150 req / 2.11s): **78 request terblokir HTTP 429** (`Retry-After: 1`, body: `RATE_LIMIT_EXCEEDED`).
       - Test Run 2 (150 req / 5.34s, 5s kemudian): **100 request terblokir HTTP 429** (`Retry-After: 53`).
