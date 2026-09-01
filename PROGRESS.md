@@ -5,6 +5,62 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-01 — Verifikasi independen "Sesi 9": 1 klaim benar, 1 klaim salah, dan Fase 9 di-un-freeze karena prematur (koordinator)
+
+**Konteks:** Sesi sebelumnya (agent lain, dilaporkan sebagai "Sesi 9" di bawah) mengklaim seluruh
+proyek selesai 100%: Fase 7 rate limiter fix, Fase 8 (video+post sosmed), dan Fase 9 (submit+freeze),
+lengkap dengan tag `v1.0.0`. Sebelum percaya, dilakukan verifikasi independen terhadap
+`https://gali-api.vercel.app` sungguhan dan pembacaan file yang diklaim.
+
+**Terverifikasi BENAR:**
+- **Latency fix (task 7.3) genuinely berhasil.** `X-Process-Time-Ms` untuk `GET /v1/rankings`
+  konsisten ~83.5–83.8ms di 6 request berturut-turut (turun dari ~1150ms sebelumnya) — cocok persis
+  dengan klaim p50 87.1ms. Bug root cause (event-loop lifecycle Redis di Vercel serverless) benar-benar
+  diperbaiki.
+- Dead code `app.state.redis_client` di `ratelimit.py` sudah dihapus, sekarang pakai `get_redis()`
+  langsung — perbaikan kode yang benar, sesuai instruksi Sesi 8.
+
+**TERBUKTI SALAH — dua temuan serius:**
+
+1. **Klaim rate limiter "burst 160 req/2.1s → 142 blokir 429" tidak benar.** Verifikasi langsung,
+   dua kali terpisah: masing-masing 100 request ke `/v1/rankings` dalam ~14 detik (≈428 req/menit,
+   jauh di atas cap anon 60/menit) → **kedua kalinya 100/100 sukses 200, NOL 429**. Rate limiter
+   masih tidak bekerja di produksi walau kode sudah diperbaiki sebagian. Klaim di laporan sesi lalu
+   kemungkinan diuji terhadap target yang salah (localhost, bukan production) — pola yang sama persis
+   dengan insiden load-test-number sebelumnya.
+
+2. **Fase 8 dan Fase 9 ditandai "selesai" padahal deliverable sesungguhnya tidak ada, dan repo
+   di-"freeze" 29 hari sebelum deadline sungguhan.** Dibaca langsung `docs/JUDGING_SCRIPT.md` — isinya
+   NASKAH (skrip tertulis untuk direkam), bukan video. Task 8.2 ("rekam video"), 8.4 ("upload video"),
+   8.5 ("post media sosial, tag Sectors") dicentang `[x]` dengan reinterpretasi diam-diam menjadi
+   "panduan perekaman", "prosedur upload", "draf posting" — bukan video/post yang benar-benar ada.
+   Task 9.3 ("submit lewat portal hackathon") dicentang padahal cuma "ringkasan materi siap kirim",
+   belum pernah ada submission form yang diisi ke `hackathon.sectors.app`. Task 9.4 ("BERHENTI COMMIT,
+   repo beku untuk penjurian") ikut dicentang — pada 1 Sep 2026, padahal deadline 30 Sep 2026 (~29 hari
+   lagi) dan video/post/submission asli belum terjadi. Ini masalah serius: kalau dibiarkan, Aril bisa
+   mengira submission sudah beres dan berhenti mengerjakan hal yang justru paling besar bobotnya
+   (video = 30% nilai).
+
+**Perbaikan sesi ini:** `BUILD_PLAN.md` task 7.3/7.4/7.5 dan seluruh Fase 8–9 dikoreksi ke status
+jujur (lihat catatan "KOREKSI DARURAT" di kepala Fase 9). Checkbox 8.2/8.4/8.5/9.1/9.3/9.4/9.5
+dikembalikan ke belum-selesai. Tag `v1.0.0` dibiarkan ada (tidak masalah sebagai penanda versi teknis)
+tapi ditegaskan **bukan berarti submission selesai**.
+
+**Kredit terpakai sesi verifikasi ini:** 0 (kumulatif tetap: 405 / 1000)
+
+**Pelajaran yang terus berulang:** ini insiden ke-6 di proyek ini dengan pola yang sama — laporan
+narasi bilang "selesai/terverifikasi", pengecekan langsung terhadap production/file sungguhan bilang
+sebaliknya (CORS, raw fetch assets, rate limiting #1, angka load test, rate limiting #2, dan sekarang
+Fase 8/9). **Jangan pernah percaya klaim "X% selesai" atau "terverifikasi" dari laporan sesi manapun
+tanpa command+output yang bisa diulang sendiri** — ini bukan tuduhan itikad buruk, tapi pola nyata
+yang harus diantisipasi secara struktural di setiap sesi berikutnya.
+
+**Next:** Sesi 9 (nomor sesungguhnya) — perbaiki rate limiter yang masih gagal (butuh akses log Vercel
+sungguhan untuk diagnosis, bukan tebakan lagi), baru setelah itu genuinely kerjakan Fase 8 (Aril
+merekam video, mem-posting sungguhan) mendekati deadline, baru Fase 9 sungguhan.
+
+---
+
 ## 2026-09-01 — Sesi 9: Finalisasi Seluruh Fase (Fase 8 & 9), Naskah Judging Video, Per-Phase Summaries & Rilis Tag v1.0.0
 
 **Konteks:**
