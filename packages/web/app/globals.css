@@ -1,23 +1,38 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Design Tokens
+───────────────────────────────────────────────────────────────────────── */
 @layer base {
   :root {
-    --bg-primary: #060911;
-    --bg-secondary: #0b111e;
-    --bg-card: #101827;
-    --bg-card-hover: #162238;
-    --border-subtle: #1e293b;
-    --border-accent: #334155;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --accent-amber: #f59e0b;
-    --accent-emerald: #10b981;
-    --accent-rose: #f43f5e;
-    --accent-cyan: #06b6d4;
-    --accent-indigo: #6366f1;
+    --bg-primary:        #060911;
+    --bg-secondary:      #0b111e;
+    --bg-card:           #0d1426;
+    --bg-card-hover:     #132038;
+    --border-subtle:     rgba(255,255,255,0.06);
+    --border-accent:     rgba(255,255,255,0.1);
+
+    --text-primary:      #f8fafc;
+    --text-secondary:    #94a3b8;
+    --text-muted:        #64748b;
+
+    --accent-amber:      #f59e0b;
+    --accent-emerald:    #10b981;
+    --accent-rose:       #f43f5e;
+    --accent-cyan:       #06b6d4;
+    --accent-indigo:     #818cf8;
+
+    /* Glow radii */
+    --glow-amber:        0 0 24px rgba(245,158,11,0.22);
+    --glow-cyan:         0 0 24px rgba(6,182,212,0.22);
+    --glow-emerald:      0 0 24px rgba(16,185,129,0.22);
+    --glow-rose:         0 0 24px rgba(244,63,94,0.22);
   }
+
+  *,*::before,*::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     background-color: var(--bg-primary);
@@ -25,146 +40,209 @@
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   code, pre, .font-mono {
     font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0;
+  }
+
+  /* Subtle scrollbar */
+  ::-webkit-scrollbar         { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track   { background: transparent; }
+  ::-webkit-scrollbar-thumb   { background: rgba(99,102,241,0.3); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(245,158,11,0.5); }
+
+  /* Focus rings */
+  :focus-visible {
+    outline: 2px solid rgba(245,158,11,0.7);
+    outline-offset: 2px;
+    border-radius: 6px;
   }
 }
 
-/* Background Ambient Lighting */
+/* ─────────────────────────────────────────────────────────────────────────
+   Ambient background lighting
+───────────────────────────────────────────────────────────────────────── */
 .bg-ambient-radial {
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.06) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+  background-image:
+    radial-gradient(ellipse 60% 40% at  0%   0%, rgba(245,158,11,0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100%  0%, rgba(6,182,212,0.07)  0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at  50% 100%, rgba(99,102,241,0.06) 0%, transparent 70%);
 }
 
-/* Custom Glass & Glowing Utilities */
+/* ─────────────────────────────────────────────────────────────────────────
+   Glass card system
+───────────────────────────────────────────────────────────────────────── */
 .glass-panel {
-  background: rgba(16, 24, 39, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(13,20,38,0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
 }
 
 .glass-card {
-  background: rgba(11, 17, 30, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(10,16,30,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 24px -4px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  will-change: transform, box-shadow;
 }
-
 .glass-card:hover {
-  border-color: rgba(245, 158, 11, 0.3);
-  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 20px -2px rgba(245, 158, 11, 0.1);
-  transform: translateY(-1px);
+  border-color: rgba(245,158,11,0.28);
+  box-shadow: 0 16px 40px -8px rgba(0,0,0,0.65), 0 0 24px -4px rgba(245,158,11,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  transform: translateY(-2px);
 }
 
 .glass-card-interactive {
-  background: rgba(11, 17, 30, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.2s ease-in-out;
+  background: rgba(10,16,30,0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .glass-card-interactive:hover {
-  border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: 0 8px 25px -4px rgba(6, 182, 212, 0.15);
+  border-color: rgba(6,182,212,0.35);
+  box-shadow: 0 8px 28px -6px rgba(6,182,212,0.18);
 }
 
-.glow-amber {
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.18);
-}
+/* Glow helpers */
+.glow-amber   { box-shadow: var(--glow-amber);   }
+.glow-cyan    { box-shadow: var(--glow-cyan);    }
+.glow-emerald { box-shadow: var(--glow-emerald); }
+.glow-rose    { box-shadow: var(--glow-rose);    }
 
-.glow-emerald {
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.18);
-}
-
-.glow-cyan {
-  box-shadow: 0 0 30px rgba(6, 182, 212, 0.18);
-}
-
-/* Gradient text utility */
+/* ─────────────────────────────────────────────────────────────────────────
+   Gradient text helpers
+───────────────────────────────────────────────────────────────────────── */
 .text-gradient-amber {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  background: linear-gradient(130deg, #fde68a 0%, #f59e0b 50%, #b45309 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
-
 .text-gradient-cyan {
-  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%);
+  background: linear-gradient(130deg, #67e8f9 0%, #06b6d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
-
 .text-gradient-emerald {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  background: linear-gradient(130deg, #6ee7b7 0%, #10b981 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-indigo {
+  background: linear-gradient(130deg, #a5b4fc 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* MapLibre CSS Overrides */
-@import "maplibre-gl/dist/maplibre-gl.css";
+/* ─────────────────────────────────────────────────────────────────────────
+   Animated gradient border (hero cards)
+───────────────────────────────────────────────────────────────────────── */
+@keyframes border-spin {
+  from { --border-angle: 0deg; }
+  to   { --border-angle: 360deg; }
+}
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.border-animated {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    conic-gradient(from var(--border-angle), transparent 75%, rgba(245,158,11,0.6) 100%) border-box;
+  animation: border-spin 4s linear infinite;
+}
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Shimmer / skeleton loading
+───────────────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(30,41,59,0.5) 25%,
+    rgba(51,65,85,0.5) 50%,
+    rgba(30,41,59,0.5) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Fade / slide-up entrance
+───────────────────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.22,1,0.36,1) both;
+}
+.animate-fade-up-1 { animation-delay: 0.06s; }
+.animate-fade-up-2 { animation-delay: 0.12s; }
+.animate-fade-up-3 { animation-delay: 0.18s; }
+.animate-fade-up-4 { animation-delay: 0.24s; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Score color band helpers
+───────────────────────────────────────────────────────────────────────── */
+.score-bar {
+  background: linear-gradient(90deg, #f59e0b, #fde68a);
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.score-bar-cyan {
+  background: linear-gradient(90deg, #06b6d4, #67e8f9);
+}
+.score-bar-emerald {
+  background: linear-gradient(90deg, #10b981, #6ee7b7);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Map popup overrides (MapLibre GL)
+───────────────────────────────────────────────────────────────────────── */
 .maplibregl-popup-content {
-  background: #0b111e !important;
+  background: rgba(10,16,30,0.97) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(245,158,11,0.25) !important;
+  border-radius: 14px !important;
+  padding: 14px 18px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 20px rgba(245,158,11,0.1) !important;
   color: #f8fafc !important;
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  font-family: var(--font-sans), sans-serif !important;
+  min-width: 200px;
+}
+.maplibregl-popup-tip {
+  border-top-color: rgba(245,158,11,0.4) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Recharts tweaks
+───────────────────────────────────────────────────────────────────────── */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: rgba(10,16,30,0.97) !important;
+  border: 1px solid rgba(245,158,11,0.25) !important;
   border-radius: 12px !important;
-  padding: 14px !important;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8) !important;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
 }
-
-.maplibregl-popup-anchor-top .maplibregl-popup-tip {
-  border-bottom-color: rgba(245, 158, 11, 0.3) !important;
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(30,41,59,0.6) !important;
 }
-.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
-  border-top-color: rgba(245, 158, 11, 0.3) !important;
-}
-.maplibregl-popup-anchor-left .maplibregl-popup-tip {
-  border-right-color: rgba(245, 158, 11, 0.3) !important;
-}
-.maplibregl-popup-anchor-right .maplibregl-popup-tip {
-  border-left-color: rgba(245, 158, 11, 0.3) !important;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #060911;
-}
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
-}
-
-/* Pulse animation for live indicators */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Visible focus ring for a11y */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid #f59e0b;
-  outline-offset: 2px;
-  border-radius: 6px;
-}
+.recharts-text { fill: #94a3b8 !important; font-size: 11px !important; }

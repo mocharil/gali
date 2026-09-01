@@ -134,28 +134,43 @@ export default function IssuerDetailPage() {
       </div>
 
       {/* Main Header Banner */}
-      <div className="glass-card rounded-2xl border border-slate-800 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 h-48 w-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl border border-slate-800/70 bg-gradient-to-br from-[#0d1829] via-[#090e1a] to-[#060911] p-6 sm:p-8">
+        {/* ambient glow orbs */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-amber-500/10 blur-[80px]" />
+        <div className="pointer-events-none absolute -left-12 bottom-0 h-48 w-48 rounded-full bg-cyan-500/8 blur-[70px]" />
 
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-mono text-3xl sm:text-4xl font-black text-white">{data.symbol}</h1>
-            <ConfidenceBadge dataQuality={data.data_quality} />
-            <span className="rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-0.5 text-xs font-medium text-slate-300">
-              Sektor Energi / Pertambangan Batubara
-            </span>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div className="space-y-3">
+            {/* Symbol + badges */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="font-mono text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+                {data.symbol}
+              </h1>
+              <ConfidenceBadge dataQuality={data.data_quality} />
+            </div>
+            <p className="text-base font-semibold text-slate-200">{data.name}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1 text-[11px] font-medium text-slate-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                Sektor Energi · Pertambangan Batubara IDX
+              </span>
+              {data.ground_truth_score != null && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-400">
+                  Ground Truth Score: {data.ground_truth_score.toFixed(1)} / 100
+                </span>
+              )}
+            </div>
           </div>
-          <p className="text-base text-slate-300 font-medium">{data.name}</p>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href={`/scenario`}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-bold text-cyan-400 hover:bg-slate-700 hover:text-cyan-300 transition-colors"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" /> Stress-Test di Scenario
-          </Link>
-          <EvidenceDrawer symbol={data.symbol} runId={data.run_id} evidence={data.evidence as never} />
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Link
+              href="/scenario"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700 px-4 py-2 text-xs font-bold text-cyan-400 hover:border-cyan-500/40 hover:bg-slate-800 hover:text-cyan-300 transition-all"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" /> Stress-Test
+            </Link>
+            <EvidenceDrawer symbol={data.symbol} runId={data.run_id} evidence={data.evidence as never} />
+          </div>
         </div>
       </div>
 
@@ -347,23 +362,34 @@ function MetricTile({
   accent: string;
   badge?: string;
 }) {
+  const isNull = value === "null";
   return (
-    <div className="glass-card rounded-2xl border border-slate-800 p-5 flex flex-col justify-between relative overflow-hidden">
+    <div className="glass-card group rounded-2xl border border-slate-800 p-5 flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-700">
+      {/* top accent line */}
+      <div className={`absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl opacity-60 ${accent.replace('text-', 'bg-')}`} />
       <div>
         <div className="flex items-center justify-between">
-          <Icon className={`h-5 w-5 ${accent}`} />
+          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${accent.replace('text-', 'bg-').replace('400','500/10')} border ${accent.replace('text-', 'border-').replace('400','500/20')}`}>
+            <Icon className={`h-4 w-4 ${accent}`} />
+          </div>
           {badge && (
-            <span className="rounded-md bg-slate-800 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-300 border border-slate-700">
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold border ${
+              badge.includes('Tinggi') || badge.includes('High')
+                ? 'text-rose-400 border-rose-500/30 bg-rose-500/10'
+                : badge.includes('Aktual') || badge.includes('Thn')
+                ? 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10'
+                : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
+            }`}>
               {badge}
             </span>
           )}
         </div>
-        <div className="mt-3 text-[11px] uppercase tracking-wider font-semibold text-slate-400">{label}</div>
-        <div className={`mt-1 font-mono text-2xl font-black ${value === "null" ? "text-slate-600" : "text-white"}`}>
-          {value}
+        <div className="mt-3 text-[10px] uppercase tracking-wider font-bold text-slate-500">{label}</div>
+        <div className={`mt-1.5 font-mono text-2xl font-black leading-none ${isNull ? 'text-slate-600' : accent}`}>
+          {isNull ? 'N/A' : value}
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-slate-500 border-t border-slate-800/60 pt-2 leading-relaxed">{sub}</p>
+      <p className="mt-3 text-[11px] text-slate-500 border-t border-slate-800/60 pt-2.5 leading-relaxed">{sub}</p>
     </div>
   );
 }
