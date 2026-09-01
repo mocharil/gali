@@ -20,7 +20,6 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
-  Home,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -51,14 +50,6 @@ const MENU_GROUPS = [
         icon: MapPin,
         badge: "52 GPS",
         badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
-      },
-      {
-        href: "/",
-        label: "Landing Page",
-        desc: "Beranda publik & pengenalan",
-        icon: Home,
-        badge: "Home",
-        badgeColor: "bg-slate-700/60 text-slate-300 border-slate-600",
       },
     ],
   },
@@ -159,10 +150,10 @@ export function Sidebar({
           }`}
         >
           <Link
-            href="/"
+            href="/dashboard"
             onClick={onClose}
             className="flex items-center gap-3 group transition-transform active:scale-95"
-            title="GALI — Beranda"
+            title="GALI — Executive Dashboard"
           >
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/30 p-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
               <Image
