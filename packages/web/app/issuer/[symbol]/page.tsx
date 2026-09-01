@@ -1,13 +1,34 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, AlertTriangle, Ship, Network } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  AlertTriangle,
+  Ship,
+  Network,
+  Pickaxe,
+  SlidersHorizontal,
+} from "lucide-react";
+
 import { api } from "@/lib/api";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
 import { Skeleton } from "@/components/Skeleton";
+
+const ALL_ISSUERS = [
+  { symbol: "AADI", label: "AADI" },
+  { symbol: "ADMR", label: "ADMR" },
+  { symbol: "ADRO", label: "ADRO" },
+  { symbol: "BUMI", label: "BUMI" },
+  { symbol: "BYAN", label: "BYAN" },
+  { symbol: "DSSA", label: "DSSA" },
+  { symbol: "GEMS", label: "GEMS" },
+  { symbol: "ITMG", label: "ITMG" },
+  { symbol: "PTBA", label: "PTBA" },
+];
 
 function fmt(n: number | null | undefined, opts: { digits?: number; suffix?: string; usd?: boolean } = {}): string {
   if (n == null) return "—";
@@ -23,7 +44,8 @@ function fmt(n: number | null | undefined, opts: { digits?: number; suffix?: str
 
 export default function IssuerDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
-  const sym = symbol.toUpperCase();
+  const router = useRouter();
+  const sym = (symbol || "").toUpperCase();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["issuer", sym],
@@ -32,34 +54,43 @@ export default function IssuerDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8" aria-busy="true" aria-label={`Memuat data ${sym}`}>
-        <Skeleton className="mb-4 h-4 w-24" />
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-6" aria-busy="true" aria-label={`Memuat data ${sym}`}>
+        <Skeleton className="h-4 w-28" />
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <Skeleton className="h-9 w-40" />
-            <Skeleton className="mt-2 h-4 w-56" />
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="mt-2 h-4 w-64" />
           </div>
-          <Skeleton className="h-8 w-44" />
+          <Skeleton className="h-10 w-44" />
         </div>
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28" />
+            <Skeleton key={i} className="h-36 rounded-2xl" />
           ))}
         </div>
-        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Skeleton className="h-40 lg:col-span-2" />
-          <Skeleton className="h-40" />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Skeleton className="h-56 rounded-2xl lg:col-span-2" />
+          <Skeleton className="h-56 rounded-2xl" />
         </div>
-        <Skeleton className="h-32" />
       </div>
     );
   }
+
   if (isError || !data) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-16 text-center">
-        <p className="text-sm text-rose-400">Emiten &quot;{sym}&quot; tidak ditemukan di universe in-scope.</p>
-        <Link href="/" className="mt-4 inline-block text-xs text-amber-400 hover:underline">
-          ← Kembali ke beranda
+      <div className="mx-auto max-w-6xl px-4 py-20 text-center">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 mb-4">
+          <AlertTriangle className="h-8 w-8" />
+        </div>
+        <h2 className="text-xl font-bold text-white">Emiten &quot;{sym}&quot; Tidak Ditemukan</h2>
+        <p className="mt-2 text-sm text-slate-400 max-w-md mx-auto">
+          Simbol ini tidak terdaftar dalam universe 9 emiten batubara in-scope Sectors Hackathon 2026.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-amber-400 hover:bg-slate-700 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Leaderboard
         </Link>
       </div>
     );
@@ -73,54 +104,103 @@ export default function IssuerDetailPage() {
         : null;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <Link href="/" className="mb-4 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300">
-        <ArrowLeft className="h-3.5 w-3.5" /> Beranda
-      </Link>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      {/* Top Breadcrumb & Quick Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Beranda Executive
+        </Link>
 
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-mono text-3xl font-black text-white">{data.symbol}</h1>
-            <ConfidenceBadge dataQuality={data.data_quality} />
-          </div>
-          <p className="mt-1 text-sm text-slate-400">{data.name}</p>
+        {/* Quick Ticker Switcher Pills */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <span className="text-[11px] font-medium text-slate-500 mr-1 hidden sm:inline">Pilih emiten:</span>
+          {ALL_ISSUERS.map((i) => (
+            <button
+              key={i.symbol}
+              onClick={() => router.push(`/issuer/${i.symbol}`)}
+              className={`rounded-lg px-2.5 py-1 text-xs font-mono font-bold transition-all ${
+                i.symbol === sym
+                  ? "bg-amber-500 text-slate-950 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                  : "bg-slate-900/80 text-slate-400 border border-slate-800 hover:border-slate-700 hover:text-white"
+              }`}
+            >
+              {i.symbol}
+            </button>
+          ))}
         </div>
-        <EvidenceDrawer symbol={data.symbol} runId={data.run_id} evidence={data.evidence as never} />
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Main Header Banner */}
+      <div className="glass-card rounded-2xl border border-slate-800 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 h-48 w-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-mono text-3xl sm:text-4xl font-black text-white">{data.symbol}</h1>
+            <ConfidenceBadge dataQuality={data.data_quality} />
+            <span className="rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+              Sektor Energi / Pertambangan Batubara
+            </span>
+          </div>
+          <p className="text-base text-slate-300 font-medium">{data.name}</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href={`/scenario`}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-bold text-cyan-400 hover:bg-slate-700 hover:text-cyan-300 transition-colors"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" /> Stress-Test di Scenario
+          </Link>
+          <EvidenceDrawer symbol={data.symbol} runId={data.run_id} evidence={data.evidence as never} />
+        </div>
+      </div>
+
+      {/* 4 Core Fundamental Metric Tiles */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* RLI */}
         <MetricTile
           icon={Clock}
-          label="Reserve Life Index (aktual)"
+          label="Reserve Life Index (RLI)"
           value={data.rli_years != null ? fmt(data.rli_years, { suffix: " thn" }) : "null"}
           sub={
             data.rli_years == null
-              ? "Cadangan tidak dilaporkan — RLI tidak dapat dihitung"
+              ? "Cadangan tidak dilaporkan di laporan resmi"
               : gapYears != null
                 ? `Pasar menyiratkan ${fmt(data.implied_life_years, { suffix: " thn" })} (gap ${gapYears > 0 ? "+" : ""}${fmt(gapYears, { suffix: " thn" })})`
-                : "Market cap belum ter-ingest — gap tidak dapat dihitung"
+                : "Market cap belum ter-ingest"
           }
-          accent={data.rli_years == null ? "text-slate-600" : "text-cyan-400"}
+          accent={data.rli_years == null ? "text-slate-500" : "text-cyan-400"}
+          badge={data.rli_years != null ? `${data.rli_years.toFixed(1)} Tahun Aktual` : undefined}
         />
+
+        {/* License Cliff */}
         <MetricTile
           icon={AlertTriangle}
-          label="License Cliff (3 tahun)"
+          label="License Cliff (3 Tahun)"
           value={data.license_cliff_3y != null ? fmt(data.license_cliff_3y, { suffix: "%" }) : "—"}
-          sub={`CNC coverage: ${fmt(data.cnc_coverage_pct, { suffix: "%" })}`}
-          accent="text-amber-400"
+          sub={`Clean & Clear (CNC) coverage: ${fmt(data.cnc_coverage_pct, { suffix: "%" })}`}
+          accent={data.license_cliff_3y && data.license_cliff_3y > 30 ? "text-rose-400" : "text-amber-400"}
+          badge={data.license_cliff_3y != null ? (data.license_cliff_3y > 30 ? "Risiko Tinggi" : "Terkendali") : undefined}
         />
+
+        {/* Cash Cost */}
         <MetricTile
           icon={Ship}
           label="Cash Cost / Breakeven"
           value={data.cash_cost_per_ton_usd != null ? `$${data.cash_cost_per_ton_usd.toFixed(2)}/t` : "null"}
           sub={
             data.breakeven_benchmark_price_usd != null
-              ? `Breakeven benchmark: $${data.breakeven_benchmark_price_usd.toFixed(2)}/t`
+              ? `Harga acuan impas: $${data.breakeven_benchmark_price_usd.toFixed(2)}/t`
               : "Finansial tidak dilaporkan"
           }
-          accent={data.cash_cost_per_ton_usd == null ? "text-slate-600" : "text-emerald-400"}
+          accent={data.cash_cost_per_ton_usd == null ? "text-slate-500" : "text-emerald-400"}
         />
+
+        {/* RBV */}
         <MetricTile
           icon={Network}
           label="Reserve-Backed Value"
@@ -130,54 +210,122 @@ export default function IssuerDetailPage() {
               ? `Gap vs market cap: ${data.rbv_gap_pct > 0 ? "+" : ""}${data.rbv_gap_pct.toFixed(1)}%`
               : "Market cap belum ter-ingest"
           }
-          accent={data.reserve_backed_value_usd == null ? "text-slate-600" : "text-indigo-400"}
+          accent={data.reserve_backed_value_usd == null ? "text-slate-500" : "text-indigo-400"}
         />
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="glass-card rounded-xl border border-slate-800 p-5 lg:col-span-2">
-          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-300">Kualitas &amp; Destinasi</h2>
+      {/* Coal Quality & Export Destination Profile */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="glass-card rounded-2xl border border-slate-800 p-6 lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+              <Pickaxe className="h-4 w-4 text-amber-400" />
+              Profil Kualitas Geologis &amp; Pasar Ekspor
+            </h2>
+            <span className="text-[11px] font-mono text-slate-500">M4 &amp; M7 Metrik</span>
+          </div>
+
           <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
             <Field label="Grade Benchmark" value={data.benchmark_grade ?? "—"} />
-            <Field label="Diskon Kualitas" value={data.quality_discount_pct != null ? `${data.quality_discount_pct.toFixed(1)}%` : "—"} />
-            <Field label="Kalori Tertimbang" value={data.weighted_cv_kcal != null ? `${data.weighted_cv_kcal.toFixed(0)} kcal` : "—"} />
-            <Field label="Tujuan Utama" value={data.top_destination ?? "—"} />
-            <Field label="% Volume ke Tujuan Utama" value={data.top_destination_pct != null ? `${data.top_destination_pct.toFixed(1)}%` : "—"} />
-            <Field label="Destination HHI" value={data.destination_hhi != null ? data.destination_hhi.toFixed(0) : "—"} />
+            <Field
+              label="Diskon Kualitas"
+              value={data.quality_discount_pct != null ? `${data.quality_discount_pct.toFixed(1)}%` : "—"}
+            />
+            <Field
+              label="Kalori Rata-rata"
+              value={data.weighted_cv_kcal != null ? `${data.weighted_cv_kcal.toFixed(0)} kcal/kg` : "—"}
+            />
+            <Field label="Negara Tujuan Terbesar" value={data.top_destination ?? "—"} />
+            <Field
+              label="Porsi Volume Ekspor"
+              value={data.top_destination_pct != null ? `${data.top_destination_pct.toFixed(1)}%` : "—"}
+            />
+            <Field
+              label="Destination HHI"
+              value={data.destination_hhi != null ? data.destination_hhi.toFixed(0) : "—"}
+              sub={data.destination_hhi != null ? (data.destination_hhi > 2500 ? "Konsentrasi Tinggi" : "Terdiversifikasi") : undefined}
+            />
           </dl>
         </div>
-        <div className="glass-card rounded-xl border border-slate-800 p-5">
-          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-300">Ground Truth Score</h2>
-          <div className="font-mono text-3xl font-bold text-amber-400">
-            {data.ground_truth_score != null ? data.ground_truth_score.toFixed(1) : "—"}
-            <span className="text-sm text-slate-500"> / 100</span>
+
+        {/* Ground Truth Score Breakdown Tile */}
+        <div className="glass-card rounded-2xl border border-slate-800 p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">Ground Truth Score</h2>
+              <span className="text-[11px] font-mono text-amber-400 font-bold">M8 Komposit</span>
+            </div>
+
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="font-mono text-4xl font-black text-amber-400">
+                {data.ground_truth_score != null ? data.ground_truth_score.toFixed(1) : "—"}
+              </span>
+              <span className="text-sm text-slate-500 font-bold">/ 100</span>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {data.component_scores &&
+                Object.entries(data.component_scores as Record<string, number>).map(([k, v]) => (
+                  <div key={k} className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400 capitalize">{k.replace(/_/g, " ")}</span>
+                      <span className="font-mono font-bold text-slate-200">{v.toFixed(0)}</span>
+                    </div>
+                    <div className="h-1 w-full bg-slate-800/80 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full"
+                        style={{ width: `${Math.min(100, Math.max(0, v))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
-          <div className="mt-3 space-y-1.5">
-            {data.component_scores &&
-              Object.entries(data.component_scores as Record<string, number>).map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">{k.replace(/_/g, " ")}</span>
-                  <span className="font-mono text-slate-300">{v.toFixed(0)}</span>
-                </div>
-              ))}
+
+          <div className="mt-4 pt-3 border-t border-slate-800/80 text-[10px] text-slate-500">
+            Skor dinormalisasi otomatis jika komponen parsial tidak dilaporkan.
           </div>
         </div>
       </div>
 
-      <div className="glass-card rounded-xl border border-slate-800 p-5">
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-300">
-          Entitas Operasi Terhubung ({data.linked_entities?.length ?? 0})
-        </h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Connected Operating Entities Network */}
+      <div className="glass-card rounded-2xl border border-slate-800 p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+              <Network className="h-4 w-4 text-cyan-400" />
+              Entitas Tambang &amp; Konsesi Operasi Terhubung ({data.linked_entities?.length ?? 0})
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Graf kepemilikan efektif dan entitas pemegang IUP/IUPK yang diatribusikan ke emiten ini
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {data.linked_entities?.map((e) => (
-            <div key={e.company_slug} className="rounded-lg border border-slate-800/60 bg-slate-900/40 px-3 py-2">
-              <div className="truncate text-xs font-semibold text-slate-200">{e.name}</div>
-              <div className="mt-0.5 flex items-center justify-between text-[11px] text-slate-500">
-                <span>{e.effective_ownership_pct?.toFixed(2)}% kepemilikan efektif</span>
-                <span className="font-mono">{e.confidence != null ? `${(e.confidence * 100).toFixed(0)}%` : ""}</span>
+            <div
+              key={e.company_slug}
+              className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-3.5 space-y-1.5 transition-colors hover:border-slate-700"
+            >
+              <div className="truncate text-xs font-bold text-slate-200">{e.name}</div>
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span className="font-mono text-cyan-400 font-semibold">{e.effective_ownership_pct?.toFixed(1)}%</span>
+                <span>Kepemilikan Efektif</span>
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-800/60">
+                <span>Keyakinan Linkage:</span>
+                <span className="font-mono text-slate-300">
+                  {e.confidence != null ? `${(e.confidence * 100).toFixed(0)}%` : "—"}
+                </span>
               </div>
             </div>
           ))}
+          {(!data.linked_entities || data.linked_entities.length === 0) && (
+            <div className="col-span-full py-6 text-center text-xs text-slate-500">
+              Tidak ada entitas operasi terpisah (operasi langsung oleh induk emiten).
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -190,30 +338,42 @@ function MetricTile({
   value,
   sub,
   accent,
+  badge,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
   sub: string;
   accent: string;
+  badge?: string;
 }) {
   return (
-    <div className="glass-card rounded-xl border border-slate-800 p-4">
-      <Icon className={`h-4 w-4 ${accent}`} />
-      <div className="mt-2 text-[11px] uppercase tracking-wide text-slate-500">{label}</div>
-      <div className={`mt-0.5 font-mono text-xl font-bold ${value === "null" ? "text-slate-600" : "text-white"}`}>
-        {value}
+    <div className="glass-card rounded-2xl border border-slate-800 p-5 flex flex-col justify-between relative overflow-hidden">
+      <div>
+        <div className="flex items-center justify-between">
+          <Icon className={`h-5 w-5 ${accent}`} />
+          {badge && (
+            <span className="rounded-md bg-slate-800 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-300 border border-slate-700">
+              {badge}
+            </span>
+          )}
+        </div>
+        <div className="mt-3 text-[11px] uppercase tracking-wider font-semibold text-slate-400">{label}</div>
+        <div className={`mt-1 font-mono text-2xl font-black ${value === "null" ? "text-slate-600" : "text-white"}`}>
+          {value}
+        </div>
       </div>
-      <div className="mt-1 text-[11px] text-slate-500">{sub}</div>
+      <p className="mt-2 text-[11px] text-slate-500 border-t border-slate-800/60 pt-2 leading-relaxed">{sub}</p>
     </div>
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div>
-      <dt className="text-[11px] text-slate-500">{label}</dt>
-      <dd className="mt-0.5 font-mono text-sm font-semibold text-slate-200">{value}</dd>
+    <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-3">
+      <dt className="text-[11px] font-medium text-slate-400">{label}</dt>
+      <dd className="mt-1 font-mono text-sm font-bold text-slate-100">{value}</dd>
+      {sub && <div className="text-[10px] text-amber-400 mt-0.5 font-medium">{sub}</div>}
     </div>
   );
 }

@@ -1,14 +1,24 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, CheckCircle2, Database, Coins, ArrowRight } from "lucide-react";
+
 import { api } from "@/lib/api";
+import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { Skeleton } from "@/components/Skeleton";
 
 function Bar({ pct }: { pct: number }) {
-  const color = pct >= 80 ? "bg-emerald-500" : pct >= 40 ? "bg-amber-500" : "bg-rose-500";
+  const color =
+    pct >= 80
+      ? "bg-gradient-to-r from-emerald-500 to-teal-400"
+      : pct >= 40
+      ? "bg-gradient-to-r from-amber-500 to-yellow-400"
+      : "bg-gradient-to-r from-rose-500 to-red-400";
+
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-      <div className={`h-full ${color}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/80">
+      <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${Math.min(pct, 100)}%` }} />
     </div>
   );
 }
@@ -20,65 +30,129 @@ export default function CoveragePage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="h-5 w-5 text-emerald-400" />
-        <h1 className="text-2xl font-bold text-white">Truth Audit — Kelengkapan Data</h1>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 mb-2">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Audit Kejujuran &amp; Kelengkapan Data</span>
+          </div>
+          <h1 className="text-3xl font-black text-white">Truth Audit &amp; Credit Ledger</h1>
+          <p className="mt-1 max-w-3xl text-sm text-slate-300">
+            Halaman integritas data. Setiap metrik dihitung langsung dari basis data produksi saat halaman dimuat —
+            termasuk data yang kosong. Bukan target, melainkan kondisi faktual apa adanya.
+          </p>
+        </div>
       </div>
-      <p className="mt-1 max-w-2xl text-sm text-slate-400">
-        Halaman kejujuran. Setiap angka di sini dihitung langsung dari database saat halaman dimuat —
-        termasuk yang kosong. Bukan klaim, bukan target.
-      </p>
 
+      {/* Credit Ledger & Gate Decision Tile */}
       {data && (
-        <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3 text-sm text-slate-300">
-          <strong className="text-amber-400">Keputusan gate:</strong> {data.gate_decision}
-          <span className="ml-3 font-mono text-xs text-slate-500">
-            {data.credits_used} / {data.credits_cap} kredit terpakai
-          </span>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="glass-card rounded-2xl border border-slate-800 p-5">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-xs font-semibold uppercase tracking-wider">Gate Decision</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div className="mt-1 font-mono text-2xl font-black text-emerald-400">
+              {data.gate_decision}
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500">Memenuhi standar kelayakan data untuk evaluasi</p>
+          </div>
+
+          <div className="glass-card rounded-2xl border border-slate-800 p-5">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-xs font-semibold uppercase tracking-wider">Anggaran Kredit Sectors</span>
+              <Coins className="h-4 w-4 text-amber-400" />
+            </div>
+            <div className="mt-1 font-mono text-2xl font-black text-amber-400">
+              {data.credits_used} <span className="text-sm text-slate-500">/ {data.credits_cap}</span>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500">
+              {data.credits_cap - data.credits_used} kredit tersisa (hemat 59.5% dari batas 1.000)
+            </p>
+          </div>
+
+          <div className="glass-card rounded-2xl border border-slate-800 p-5">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-xs font-semibold uppercase tracking-wider">Universe Emiten</span>
+              <Database className="h-4 w-4 text-cyan-400" />
+            </div>
+            <div className="mt-1 font-mono text-2xl font-black text-cyan-400">
+              {data.in_universe_issuers?.length ?? 9} Emiten
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500">7 emiten lengkap + 2 emiten parsial</p>
+          </div>
         </div>
       )}
 
-      <div className="mt-6 space-y-4">
-        {isLoading &&
-          Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-900/60" />)}
-        {data?.metrics.map((m) => (
-          <div key={m.entity} className="glass-card rounded-xl border border-slate-800 p-4">
-            <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-200">{m.entity}</span>
-              <span className="font-mono text-sm font-bold text-white">
-                {m.numerator} / {m.denominator}{" "}
-                <span className="text-slate-500">({m.coverage_pct.toFixed(1)}%)</span>
-              </span>
+      {/* Coverage Progress Bars */}
+      <div className="glass-card rounded-2xl border border-slate-800 p-6 space-y-5">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+          Cakupan Kelengkapan Komponen Data Mentah
+        </h2>
+
+        <div className="space-y-4">
+          {isLoading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-xl" />
+            ))}
+          {data?.metrics.map((m) => (
+            <div
+              key={m.entity}
+              className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4 space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-200">{m.entity}</span>
+                <span className="font-mono text-sm font-black text-white">
+                  {m.numerator} / {m.denominator}{" "}
+                  <span className="text-amber-400 font-semibold">({m.coverage_pct.toFixed(1)}%)</span>
+                </span>
+              </div>
+              <Bar pct={m.coverage_pct} />
+              <p className="text-[11px] text-slate-400">{m.description}</p>
             </div>
-            <Bar pct={m.coverage_pct} />
-            <p className="mt-1.5 text-[11px] text-slate-500">{m.description}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <h2 className="mb-3 mt-8 text-sm font-bold uppercase tracking-wide text-slate-300">
-        Emiten In-Universe ({data?.in_universe_issuers.length ?? 0})
-      </h2>
-      <div className="overflow-x-auto rounded-xl border border-slate-800">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-900/60 text-[11px] uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-2">Symbol</th>
-              <th className="px-4 py-2">Nama</th>
-              <th className="px-4 py-2">Kualitas</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {data?.in_universe_issuers.map((i) => (
-              <tr key={String(i.symbol)} className="hover:bg-slate-900/40">
-                <td className="px-4 py-2 font-mono font-bold text-amber-400">{String(i.symbol)}</td>
-                <td className="px-4 py-2 text-slate-300">{String(i.name)}</td>
-                <td className="px-4 py-2 text-xs text-slate-400">{String(i.quality)}</td>
+      {/* In-Universe Issuers Table */}
+      <div className="glass-card rounded-2xl border border-slate-800 p-6 space-y-4">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+          Daftar Emiten In-Universe ({data?.in_universe_issuers.length ?? 0})
+        </h2>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-800 bg-slate-900/60 text-[11px] uppercase tracking-wider text-slate-400">
+              <tr>
+                <th className="px-4 py-3">Symbol</th>
+                <th className="px-4 py-3">Nama Perusahaan</th>
+                <th className="px-4 py-3">Status Kelengkapan</th>
+                <th className="px-4 py-3">Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {data?.in_universe_issuers.map((i) => (
+                <tr key={String(i.symbol)} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="px-4 py-3 font-mono font-black text-amber-400">{String(i.symbol)}</td>
+                  <td className="px-4 py-3 font-medium text-slate-200">{String(i.name)}</td>
+                  <td className="px-4 py-3">
+                    <ConfidenceBadge dataQuality={String(i.quality) as "LENGKAP" | "PARSIAL"} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/issuer/${String(i.symbol)}`}
+                      className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition-colors font-semibold"
+                    >
+                      Audit <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

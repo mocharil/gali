@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { AssumptionBar } from "@/components/AssumptionBar";
 import { Footer } from "@/components/Footer";
 import { Providers } from "./providers";
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 const SITE_URL = "https://gali-web.vercel.app";
 const TITLE = "GALI — Ground-Truth Fundamental Intelligence for IDX Mining";
@@ -35,7 +48,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
   },
@@ -47,8 +60,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-[#080c14] text-slate-100 antialiased min-h-screen flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+    <html lang="en" className={`dark ${plusJakarta.variable} ${jetbrainsMono.variable}`}>
+      <body className="bg-[#060911] text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-amber-500/30 selection:text-amber-200 bg-ambient-radial">
         <Providers>
           <Navbar />
           <AssumptionBar />
