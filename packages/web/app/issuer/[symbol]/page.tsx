@@ -280,16 +280,22 @@ export default function IssuerDetailPage() {
 
             <div className="mt-4 space-y-2">
               {data.component_scores &&
-                Object.entries(data.component_scores as Record<string, number>).map(([k, v]) => (
+                Object.entries(data.component_scores as Record<string, number | null>).map(([k, v]) => (
                   <div key={k} className="space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-400 capitalize">{k.replace(/_/g, " ")}</span>
-                      <span className="font-mono font-bold text-slate-200">{v.toFixed(0)}</span>
+                      <span className="font-mono font-bold text-slate-200">
+                        {v != null ? Number(v).toFixed(0) : "N/A"}
+                      </span>
                     </div>
                     <div className="h-1 w-full bg-slate-800/80 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full"
-                        style={{ width: `${Math.min(100, Math.max(0, v))}%` }}
+                        className={`h-full rounded-full ${
+                          v != null
+                            ? "bg-gradient-to-r from-amber-500 to-yellow-400"
+                            : "bg-slate-800"
+                        }`}
+                        style={{ width: `${v != null ? Math.min(100, Math.max(0, Number(v))) : 0}%` }}
                       />
                     </div>
                   </div>
@@ -325,13 +331,15 @@ export default function IssuerDetailPage() {
             >
               <div className="truncate text-xs font-bold text-slate-200">{e.name}</div>
               <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span className="font-mono text-cyan-400 font-semibold">{e.effective_ownership_pct?.toFixed(1)}%</span>
+                <span className="font-mono text-cyan-400 font-semibold">
+                  {e.effective_ownership_pct != null ? `${Number(e.effective_ownership_pct).toFixed(1)}%` : "—"}
+                </span>
                 <span>Kepemilikan Efektif</span>
               </div>
               <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-800/60">
                 <span>Keyakinan Linkage:</span>
                 <span className="font-mono text-slate-300">
-                  {e.confidence != null ? `${(e.confidence * 100).toFixed(0)}%` : "—"}
+                  {e.confidence != null ? `${(Number(e.confidence) * 100).toFixed(0)}%` : "—"}
                 </span>
               </div>
             </div>
