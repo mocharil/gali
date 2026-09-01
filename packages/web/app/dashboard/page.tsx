@@ -20,6 +20,17 @@ import {
 import { api } from "@/lib/api";
 import { MiningSitesMap } from "@/components/MiningSitesMap";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
 function fmtUSD(n: number | null | undefined, digits = 1): string {
   if (n == null) return "—";
@@ -68,38 +79,88 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 animate-fade-up">
-      {/* Executive KPI Summary Cards */}
+      {/* ── 1. Top Executive KPI Cards (shadcn/ui Card) ── */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard
-          icon={Gauge}
-          label="Reserve-Backed Value"
-          sublabel="7 emiten LENGKAP · DCF cadangan fisik"
-          value={fmtUSD(totalRbv, 2)}
-          sub="Valuasi DCF cadangan terbukti (discount rate 12%)"
-          accentColor="emerald"
-          loading={isLoading}
-        />
-        <StatCard
-          icon={TrendingDown}
-          label="Rata-rata Sisa Umur (RLI)"
-          sublabel="Produksi aktual vs cadangan terbukti"
-          value={avgRli != null ? `${avgRli.toFixed(1)} thn` : "—"}
-          sub="Cadangan terbukti ÷ volume produksi aktual tahunan"
-          accentColor="cyan"
-          loading={isLoading}
-        />
-        <StatCard
-          icon={ShieldAlert}
-          label="License Cliff 3-Tahun Tertinggi"
-          sublabel="Emiten dengan risiko izin ESDM tertinggi"
-          value={worstCliff ? `${worstCliff.symbol} · ${worstCliff.license_cliff_3y?.toFixed(0)}%` : "—"}
-          sub="Porsi produksi yang izin konsesinya habis dalam ≤ 3 tahun"
-          accentColor="amber"
-          loading={isLoading}
-        />
+        <Card className="relative overflow-hidden border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 shadow-xl hover:border-emerald-500/30 transition-all group">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500/80 via-emerald-400 to-transparent" />
+          <CardHeader className="p-5 pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <Gauge className="h-4 w-4" />
+              </div>
+              <Badge variant="success">Live DCF M6</Badge>
+            </div>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-3">
+              Reserve-Backed Value
+            </CardTitle>
+            <CardDescription className="text-[11px] text-slate-400">
+              7 emiten LENGKAP · Nilai wajar fisik
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 pt-1">
+            <div className="font-mono text-3xl font-black tracking-tight text-emerald-400">
+              {isLoading ? "——" : fmtUSD(totalRbv, 2)}
+            </div>
+            <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
+              Valuasi finite annuity DCF cadangan terbukti (hurdle rate 12%).
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 shadow-xl hover:border-cyan-500/30 transition-all group">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500/80 via-cyan-400 to-transparent" />
+          <CardHeader className="p-5 pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                <TrendingDown className="h-4 w-4" />
+              </div>
+              <Badge variant="cyan">Geologi M2</Badge>
+            </div>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-3">
+              Rata-rata Sisa Umur (RLI)
+            </CardTitle>
+            <CardDescription className="text-[11px] text-slate-400">
+              Produksi tahunan vs cadangan terbukti
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 pt-1">
+            <div className="font-mono text-3xl font-black tracking-tight text-cyan-400">
+              {isLoading ? "——" : avgRli != null ? `${avgRli.toFixed(1)} thn` : "—"}
+            </div>
+            <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
+              Cadangan terbukti dibagi laju ekstraksi batubara tahunan aktual.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 shadow-xl hover:border-amber-500/30 transition-all group">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500/80 via-amber-400 to-transparent" />
+          <CardHeader className="p-5 pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <ShieldAlert className="h-4 w-4" />
+              </div>
+              <Badge variant="warning">Izin ESDM M3</Badge>
+            </div>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-3">
+              License Cliff 3-Thn Terbesar
+            </CardTitle>
+            <CardDescription className="text-[11px] text-slate-400">
+              Risiko kedaluwarsa izin konsesi
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 pt-1">
+            <div className="font-mono text-3xl font-black tracking-tight text-amber-400 truncate">
+              {isLoading ? "——" : worstCliff ? `${worstCliff.symbol} · ${worstCliff.license_cliff_3y?.toFixed(0)}%` : "—"}
+            </div>
+            <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
+              Porsi volume produksi yang izin IUP-nya jatuh tempo dalam ≤ 3 tahun.
+            </p>
+          </CardContent>
+        </Card>
       </section>
 
-      {/* Main Workspace: Interactive Map & Leaderboard */}
+      {/* ── 2. Main Workspace: Map & Leaderboard ── */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Map Column (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-3">
@@ -109,9 +170,9 @@ export default function DashboardPage() {
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
                 Peta Sebaran Konsesi Tambang
               </h2>
-              <span className="rounded-full bg-slate-800 border border-slate-700 px-2 py-0.5 text-[10px] font-mono text-slate-400">
-                52 situs ber-GPS
-              </span>
+              <Badge variant="secondary" className="font-mono text-[10px]">
+                52 situs GPS
+              </Badge>
             </div>
             <Link
               href="/map"
@@ -120,21 +181,23 @@ export default function DashboardPage() {
               Peta penuh <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl" style={{ minHeight: 380 }}>
+          <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl" style={{ minHeight: 400 }}>
             <MiningSitesMap compact />
           </div>
         </div>
 
         {/* Leaderboard Column (5 cols) */}
         <div className="lg:col-span-5">
-          <div className="glass-card flex h-full flex-col rounded-2xl border border-slate-800 p-5">
+          <Card className="flex h-full flex-col border-slate-800/80 bg-[#080d19]/90 shadow-2xl p-5">
             {/* Header */}
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+                <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
                   Ground Truth Leaderboard
-                </h2>
-                <p className="mt-0.5 text-[11px] text-slate-400">Skor komposit fundamental tambang 0–100</p>
+                </CardTitle>
+                <CardDescription className="mt-0.5 text-[11px] text-slate-400">
+                  Skor komposit fundamental tambang 0–100 (M8)
+                </CardDescription>
               </div>
               <Link
                 href="/divergence"
@@ -144,19 +207,18 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Filter tabs & Search */}
+            {/* Filter tabs & Search Input (shadcn Input & Button) */}
             <div className="mb-3 flex items-center gap-2">
-              <div className="flex rounded-lg border border-slate-800 bg-slate-900/80 p-0.5 text-[11px]">
+              <div className="flex rounded-xl border border-slate-800 bg-slate-950/80 p-0.5 text-[11px]">
                 {(["all", "complete", "partial"] as const).map((f) => {
                   const labels = { all: `Semua (${issuers?.length ?? 9})`, complete: "Lengkap (7)", partial: "Parsial (2)" };
-                  const activeColors = { all: "text-amber-400", complete: "text-emerald-400", partial: "text-amber-400" };
                   return (
                     <button
                       key={f}
                       onClick={() => setFilterType(f)}
-                      className={`rounded-md px-2.5 py-1 font-medium transition-all ${
+                      className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-all ${
                         filterType === f
-                          ? `bg-slate-800 ${activeColors[f]} font-bold shadow-sm`
+                          ? "bg-slate-800 text-amber-400 font-bold shadow-sm"
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
@@ -166,22 +228,22 @@ export default function DashboardPage() {
                 })}
               </div>
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-500" />
-                <input
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+                <Input
                   type="text"
                   placeholder="Filter emiten..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950/60 pl-6 pr-2 py-1.5 text-[11px] text-white placeholder-slate-600 focus:border-amber-500/40 focus:outline-none"
+                  className="pl-8 h-8 text-[11px]"
                 />
               </div>
             </div>
 
-            {/* Rows List */}
+            {/* Rows List with Progress Indicator */}
             <ol className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{ maxHeight: 380 }}>
               {isLoading &&
                 Array.from({ length: 9 }).map((_, i) => (
-                  <li key={i} className="skeleton h-11 rounded-xl" />
+                  <li key={i} className="skeleton h-12 rounded-xl" />
                 ))}
 
               {!isLoading && filteredLeaderboard.map((issuer, idx) => {
@@ -195,7 +257,7 @@ export default function DashboardPage() {
                       className={`group flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-all hover:border-amber-500/40 hover:bg-slate-800/80 ${
                         topThree
                           ? "border-amber-500/20 bg-amber-500/5"
-                          : "border-slate-800/60 bg-slate-900/40"
+                          : "border-slate-800/70 bg-slate-900/40"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -213,21 +275,16 @@ export default function DashboardPage() {
                             </span>
                             <ConfidenceBadge dataQuality={issuer.data_quality} />
                           </div>
-                          <div className="text-[10px] text-slate-400 truncate max-w-[150px] sm:max-w-[180px]">
+                          <div className="text-[10px] text-slate-400 truncate max-w-[140px] sm:max-w-[180px]">
                             {issuer.name}
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        {/* Progress Bar */}
+                        {/* Progress Bar (shadcn Progress) */}
                         <div className="hidden sm:block w-16">
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-                            <div
-                              className="score-bar h-full"
-                              style={{ width: `${scorePct}%` }}
-                            />
-                          </div>
+                          <Progress value={scorePct} />
                         </div>
                         <span className="min-w-[36px] text-right font-mono text-sm font-black text-amber-400">
                           {score != null ? score.toFixed(1) : "—"}
@@ -240,15 +297,15 @@ export default function DashboardPage() {
               })}
             </ol>
 
-            <div className="mt-3 flex items-center justify-between border-t border-slate-800/60 pt-3 text-[11px] text-slate-500">
+            <div className="mt-3 flex items-center justify-between border-t border-slate-800/60 pt-3 text-[11px] text-slate-400">
               <span>Klik baris untuk rincian RLI &amp; Evidence</span>
               <span className="font-mono text-slate-400">9 Emiten · IDX Mining</span>
             </div>
-          </div>
+          </Card>
         </div>
       </section>
 
-      {/* Feature Deep Dive Grid */}
+      {/* ── 3. Feature Deep Dive Grid (shadcn Cards) ── */}
       <section>
         <div className="mb-4 flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-400" />
@@ -288,10 +345,10 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Transparency & Provenance Banner */}
-      <section className="overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-r from-slate-900/90 via-[#0e1830]/60 to-slate-900/90 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+      {/* ── 4. Provenance & Transparency Banner ── */}
+      <Card className="border-slate-800/80 bg-gradient-to-r from-slate-900/90 via-[#0e1830]/70 to-slate-900/90 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10">
             <Layers className="h-5 w-5 text-amber-400" />
           </div>
           <div>
@@ -302,81 +359,14 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
-        <Link
-          href="/methodology"
-          className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-200 transition-all hover:border-amber-500/40 hover:bg-slate-700 hover:text-amber-300"
-        >
-          <Pickaxe className="h-3.5 w-3.5 text-amber-400" />
-          Lihat Rumus Matematis M1–M9
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </section>
-    </div>
-  );
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  sublabel,
-  value,
-  sub,
-  accentColor,
-  loading,
-}: {
-  icon: React.ElementType;
-  label: string;
-  sublabel?: string;
-  value: string;
-  sub: string;
-  accentColor: "emerald" | "cyan" | "amber";
-  loading: boolean;
-}) {
-  const cfg = {
-    emerald: {
-      icon: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
-      val: "text-emerald-400",
-      glow: "hover:shadow-[0_0_28px_rgba(16,185,129,0.15)]",
-    },
-    cyan: {
-      icon: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10",
-      val: "text-cyan-400",
-      glow: "hover:shadow-[0_0_28px_rgba(6,182,212,0.15)]",
-    },
-    amber: {
-      icon: "text-amber-400 border-amber-500/20 bg-amber-500/10",
-      val: "text-amber-400",
-      glow: "hover:shadow-[0_0_28px_rgba(245,158,11,0.18)]",
-    },
-  }[accentColor];
-
-  return (
-    <div
-      className={`glass-card relative overflow-hidden rounded-2xl border border-slate-800 p-5 flex flex-col gap-3 ${cfg.glow} transition-all`}
-    >
-      <div className="flex items-center justify-between">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-lg border ${cfg.icon}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse" />
-          Live Compute
-        </span>
-      </div>
-
-      <div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
-        {sublabel && <div className="text-[10px] text-slate-500 mt-0.5">{sublabel}</div>}
-        <div
-          className={`mt-2 font-mono text-3xl font-black leading-none tracking-tight ${
-            loading ? "skeleton text-transparent" : cfg.val
-          }`}
-        >
-          {loading ? "——" : value}
-        </div>
-      </div>
-
-      <p className="border-t border-slate-800/60 pt-2.5 text-[11px] text-slate-500">{sub}</p>
+        <Button asChild variant="secondary" size="sm" className="shrink-0 gap-2 font-bold">
+          <Link href="/methodology">
+            <Pickaxe className="h-3.5 w-3.5 text-amber-400" />
+            <span>Lihat Rumus Matematis M1–M9</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </Button>
+      </Card>
     </div>
   );
 }
@@ -416,7 +406,7 @@ function NavCard({
   return (
     <Link
       href={href}
-      className={`glass-card group flex flex-col justify-between rounded-2xl border border-slate-800 p-4 sm:p-5 transition-all ${cfg.border}`}
+      className={`group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-[#080d19]/80 p-4 sm:p-5 transition-all ${cfg.border}`}
     >
       <div className="flex items-center justify-between mb-3">
         <Icon className={`h-5 w-5 ${cfg.icon}`} />
