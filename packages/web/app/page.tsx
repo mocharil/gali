@@ -15,9 +15,9 @@ import {
   Activity,
   Layers,
   Search,
-  ChevronRight,
   Pickaxe,
   Zap,
+  Compass,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { MiningSitesMap } from "@/components/MiningSitesMap";
@@ -31,11 +31,43 @@ function fmtUSD(n: number | null | undefined, digits = 1): string {
   return `$${n.toFixed(0)}`;
 }
 
-const WORKFLOW_STEPS = [
-  { step: "01", label: "Peta GPS Konsesi", color: "text-amber-400", border: "border-amber-500/30", bg: "bg-amber-500/10", href: "/map" },
-  { step: "02", label: "Sisa Umur Tambang (RLI)", color: "text-cyan-400", border: "border-cyan-500/30", bg: "bg-cyan-500/10", href: "/issuer/ADRO" },
-  { step: "03", label: "Cash Cost Breakeven", color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/10", href: "/cost-curve" },
-  { step: "04", label: "Scenario Stress-Test", color: "text-indigo-400", border: "border-indigo-500/30", bg: "bg-indigo-500/10", href: "/scenario" },
+const EVALUATION_GUIDE = [
+  {
+    step: "01",
+    title: "Peta 52 Situs GPS",
+    subtitle: "Validasi Konsesi Fisik",
+    desc: "Cek sebaran 52 konsesi tambang batubara berkoordinat GPS di Kalimantan & Sumatra yang terhubung ke emiten bursa.",
+    href: "/map",
+    badge: "Spasial",
+    accent: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+  },
+  {
+    step: "02",
+    title: "Sisa Umur Tambang (RLI)",
+    subtitle: "Reserve Life Index",
+    desc: "Bandingkan cadangan fisik terbukti vs laju produksi tahunan. Temukan gap ekspektasi valuasi pasar modal.",
+    href: "/issuer/ADRO",
+    badge: "Cadangan",
+    accent: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10",
+  },
+  {
+    step: "03",
+    title: "Kurva Biaya Nasional",
+    subtitle: "Cash Cost Breakeven",
+    desc: "Identifikasi produsen batubara biaya terendah (Q1) dan emiten yang merugi tunai jika harga acuan ICI anjlok.",
+    href: "/cost-curve",
+    badge: "Biaya / t",
+    accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+  },
+  {
+    step: "04",
+    title: "Scenario Studio",
+    subtitle: "Simulasi Stress-Test",
+    desc: "Geser slider harga batubara, tarif impor China, dan diskon izin ESDM untuk melihat dampak valuasi seketika.",
+    href: "/scenario",
+    badge: "Real-Time",
+    accent: "text-indigo-400 border-indigo-500/30 bg-indigo-500/10",
+  },
 ];
 
 export default function HomePage() {
@@ -77,77 +109,103 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800/70 bg-gradient-to-br from-[#0d1829] via-[#090e1a] to-[#060911] p-7 sm:p-10 shadow-2xl animate-fade-up">
-        {/* Ambient orbs */}
+      {/* ── Hero Orientation Banner ── */}
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-gradient-to-br from-[#0d1829] via-[#090e1a] to-[#060911] p-6 sm:p-10 shadow-2xl animate-fade-up">
+        {/* Ambient background glow orbs */}
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-amber-500/12 blur-[80px]" />
         <div className="pointer-events-none absolute -left-16 -bottom-16 h-72 w-72 rounded-full bg-cyan-500/10 blur-[80px]" />
         <div className="pointer-events-none absolute right-1/3 top-1/2 h-40 w-40 rounded-full bg-indigo-500/8 blur-[60px]" />
 
         <div className="relative z-10 max-w-3xl">
-          {/* Badge */}
+          {/* Track Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-bold text-amber-400 shadow-sm">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Sectors Hackathon 2026 · Track 3 — Market Intelligence</span>
           </div>
 
-          <h1 className="mt-5 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl sm:leading-[1.1]">
+          <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl sm:leading-[1.1]">
             Gali lebih dalam dari{" "}
             <span className="text-gradient-amber">kode sahamnya.</span>
           </h1>
 
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-[15px]">
-            GALI menilai emiten batubara IDX dari tambang fisiknya — berapa ton cadangan tersisa, berapa tahun
-            lagi habis (RLI), estimasi cash cost per ton, risiko kedaluwarsa izin ESDM, serta konsentrasi
-            pasar ekspor — menghubungkan aset geologis langsung ke valuasi pasar modal.
+            GALI adalah platform intelijen fundamental komoditas yang menilai emiten batubara IDX langsung
+            dari tambang fisiknya — berapa ton cadangan tersisa, berapa tahun sisa umur tambang (RLI), estimasi
+            cash cost per ton, risiko kedaluwarsa izin ESDM, dan simulasi stress-test makro real-time.
           </p>
 
-          {/* Workflow pills */}
-          <div className="mt-6 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">Alur Analisis:</span>
-            {WORKFLOW_STEPS.map((s, i) => (
-              <Link
-                key={s.step}
-                href={s.href}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition-all hover:scale-105 hover:shadow-lg ${s.color} ${s.border} ${s.bg}`}
-              >
-                <span className="opacity-60">{s.step}</span>
-                {s.label}
-                {i < WORKFLOW_STEPS.length - 1 && (
-                  <ChevronRight className="ml-1 h-3 w-3 opacity-40" />
-                )}
-              </Link>
-            ))}
-          </div>
-
-          {/* CTA buttons */}
-          <div className="mt-7 flex flex-wrap items-center gap-3">
+          {/* CTA Buttons */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
               href="/map"
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-black shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all hover:bg-amber-400 hover:shadow-[0_0_28px_rgba(245,158,11,0.5)] active:scale-95"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all hover:bg-amber-400 hover:shadow-[0_0_28px_rgba(245,158,11,0.5)] active:scale-95"
             >
               <MapPin className="h-4 w-4" />
-              Lihat Peta Konsesi
+              Eksplorasi Peta 52 Tambang
             </Link>
             <Link
               href="/scenario"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-5 py-2.5 text-sm font-bold text-white transition-all hover:border-slate-600 hover:bg-slate-700 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-5 py-2.5 text-sm font-bold text-white transition-all hover:border-cyan-500/40 hover:bg-slate-700 active:scale-95"
             >
               <SlidersHorizontal className="h-4 w-4 text-cyan-400" />
-              Scenario Studio
+              Uji Stress-Test Skenario
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Executive KPI Cards ── */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3 animate-fade-up animate-fade-up-1">
+      {/* ── Evaluator Quick Guide (For Judges & Panitia) ── */}
+      <section className="space-y-3 animate-fade-up animate-fade-up-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Compass className="h-4 w-4 text-amber-400" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              Panduan Evaluasi Juri · 4 Pilar Fundamental GALI
+            </h2>
+          </div>
+          <span className="text-[11px] font-mono text-slate-500">Klik kartu untuk mencoba langsung</span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {EVALUATION_GUIDE.map((g) => (
+            <Link
+              key={g.step}
+              href={g.href}
+              className="glass-card group flex flex-col justify-between rounded-2xl border border-slate-800 p-4 transition-all hover:border-amber-500/40 hover:bg-slate-800/70"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400">
+                    Langkah {g.step}
+                  </span>
+                  <span className={`rounded-md border px-2 py-0.5 text-[9px] font-mono font-bold ${g.accent}`}>
+                    {g.badge}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+                  {g.title}
+                </h3>
+                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">{g.subtitle}</p>
+                <p className="mt-2 text-[11px] leading-relaxed text-slate-400">{g.desc}</p>
+              </div>
+
+              <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-amber-400 transition-colors">
+                <span>Buka Modul</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Top 3 Executive KPI Cards ── */}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3 animate-fade-up animate-fade-up-2">
         <StatCard
           icon={Gauge}
           label="Reserve-Backed Value"
           sublabel="7 emiten LENGKAP · DCF cadangan fisik"
           value={fmtUSD(totalRbv, 2)}
-          sub="Valuasi DCF terbukti · discount rate 10%"
+          sub="Valuasi DCF cadangan terbukti (discount rate 12%)"
           accentColor="emerald"
           loading={isLoading}
         />
@@ -156,30 +214,30 @@ export default function HomePage() {
           label="Rata-rata Sisa Umur (RLI)"
           sublabel="Produksi aktual vs cadangan terbukti"
           value={avgRli != null ? `${avgRli.toFixed(1)} thn` : "—"}
-          sub="Reserves ÷ production rate aktual"
+          sub="Cadangan terbukti ÷ volume produksi aktual tahunan"
           accentColor="cyan"
           loading={isLoading}
         />
         <StatCard
           icon={ShieldAlert}
-          label="License Cliff 3-Tahun"
-          sublabel="Emiten dengan risiko izin tertinggi"
+          label="License Cliff 3-Tahun Tertinggi"
+          sublabel="Emiten dengan risiko izin ESDM tertinggi"
           value={worstCliff ? `${worstCliff.symbol} · ${worstCliff.license_cliff_3y?.toFixed(0)}%` : "—"}
-          sub="Porsi produksi berizin akan habis ≤ 3 thn"
+          sub="Porsi produksi yang izin konsesinya habis dalam ≤ 3 tahun"
           accentColor="amber"
           loading={isLoading}
         />
       </section>
 
-      {/* ── Map + Leaderboard ── */}
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-12 animate-fade-up animate-fade-up-2">
-        {/* Map */}
+      {/* ── Main Workspace: Interactive Map & Leaderboard ── */}
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-12 animate-fade-up animate-fade-up-3">
+        {/* Map Column (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-amber-400" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-                Peta Konsesi Nasional
+                Peta Sebaran Konsesi Tambang
               </h2>
               <span className="rounded-full bg-slate-800 border border-slate-700 px-2 py-0.5 text-[10px] font-mono text-slate-400">
                 52 situs ber-GPS
@@ -192,12 +250,12 @@ export default function HomePage() {
               Peta penuh <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl" style={{ minHeight: 340 }}>
+          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl" style={{ minHeight: 360 }}>
             <MiningSitesMap compact />
           </div>
         </div>
 
-        {/* Leaderboard */}
+        {/* Leaderboard Column (5 cols) */}
         <div className="lg:col-span-5">
           <div className="glass-card flex h-full flex-col rounded-2xl border border-slate-800 p-5">
             {/* Header */}
@@ -206,7 +264,7 @@ export default function HomePage() {
                 <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
                   Ground Truth Leaderboard
                 </h2>
-                <p className="mt-0.5 text-[11px] text-slate-400">Skor komposit fundamental 0–100</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">Skor komposit fundamental tambang 0–100</p>
               </div>
               <Link
                 href="/divergence"
@@ -216,7 +274,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Filter tabs */}
+            {/* Filter tabs & Search */}
             <div className="mb-3 flex items-center gap-2">
               <div className="flex rounded-lg border border-slate-800 bg-slate-900/80 p-0.5 text-[11px]">
                 {(["all", "complete", "partial"] as const).map((f) => {
@@ -228,7 +286,7 @@ export default function HomePage() {
                       onClick={() => setFilterType(f)}
                       className={`rounded-md px-2.5 py-1 font-medium transition-all ${
                         filterType === f
-                          ? `bg-slate-800 ${activeColors[f]} shadow-sm`
+                          ? `bg-slate-800 ${activeColors[f]} font-bold shadow-sm`
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
@@ -241,7 +299,7 @@ export default function HomePage() {
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-500" />
                 <input
                   type="text"
-                  placeholder="Filter..."
+                  placeholder="Filter emiten..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-slate-800 bg-slate-950/60 pl-6 pr-2 py-1.5 text-[11px] text-white placeholder-slate-600 focus:border-amber-500/40 focus:outline-none"
@@ -249,8 +307,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Rows */}
-            <ol className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{ maxHeight: 340 }}>
+            {/* Rows List */}
+            <ol className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{ maxHeight: 360 }}>
               {isLoading &&
                 Array.from({ length: 9 }).map((_, i) => (
                   <li key={i} className="skeleton h-11 rounded-xl" />
@@ -292,7 +350,7 @@ export default function HomePage() {
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        {/* Score bar */}
+                        {/* Progress Bar */}
                         <div className="hidden sm:block w-16">
                           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
                             <div
@@ -313,7 +371,7 @@ export default function HomePage() {
 
               {!isLoading && filteredLeaderboard.length === 0 && (
                 <li className="py-8 text-center text-sm text-slate-500">
-                  Tidak ada emiten yang cocok.
+                  Tidak ada emiten yang cocok dengan kata kunci.
                 </li>
               )}
             </ol>
@@ -326,45 +384,47 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Quick Navigation Cards ── */}
+      {/* ── Feature Deep Dive Grid ── */}
       <section className="animate-fade-up animate-fade-up-3">
         <div className="mb-4 flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-400" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">Alat Analisis</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+            Alat Analisis Lanjutan
+          </h2>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <NavCard
             href="/cost-curve"
             icon={TrendingDown}
             title="Kurva Biaya Nasional"
-            desc="Cash cost per ton vs harga pasar ICI-4"
+            desc="Cash cost per ton vs harga pasar acuan ICI-4 ($85/t)"
             accent="emerald"
           />
           <NavCard
             href="/scenario"
             icon={SlidersHorizontal}
             title="Scenario Studio"
-            desc="Simulasi shock harga & tarif real-time"
+            desc="Simulasi shock harga & tarif impor batubara real-time"
             accent="cyan"
           />
           <NavCard
             href="/divergence"
             icon={Activity}
             title="Matriks Divergensi"
-            desc="RBV vs Market Cap — temukan undervalued"
+            desc="RBV vs Market Cap — temukan emiten undervalued"
             accent="indigo"
           />
           <NavCard
             href="/coverage"
             icon={FileSpreadsheet}
-            title="Audit Kebenaran"
-            desc="Data provenance & ledger kredit API"
+            title="Audit Kejujuran"
+            desc="Data provenance & audit saldo kredit API (405/1000)"
             accent="amber"
           />
         </div>
       </section>
 
-      {/* ── Transparency Banner ── */}
+      {/* ── Transparency & Provenance Banner ── */}
       <section className="animate-fade-up animate-fade-up-4 overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-r from-slate-900/90 via-[#0e1830]/60 to-slate-900/90 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
@@ -373,8 +433,8 @@ export default function HomePage() {
           <div>
             <h3 className="text-sm font-bold text-white">100% Data Provenance · Zero Black-Box</h3>
             <p className="mt-0.5 text-xs text-slate-400">
-              Setiap angka dihitung deterministik dan dapat diaudit hingga ke respon mentah Sectors API melalui{" "}
-              <span className="text-amber-400 font-semibold">Evidence Drawer</span>.
+              Setiap metrik dihitung deterministik dari respon mentah Sectors API dan dapat diverifikasi via{" "}
+              <span className="text-amber-400 font-semibold">Evidence Drawer</span> di halaman emiten.
             </p>
           </div>
         </div>
@@ -383,7 +443,7 @@ export default function HomePage() {
           className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-200 transition-all hover:border-amber-500/40 hover:bg-slate-700 hover:text-amber-300"
         >
           <Pickaxe className="h-3.5 w-3.5 text-amber-400" />
-          Lihat Rumus &amp; Metodologi
+          Lihat Rumus Matematis M1–M9
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </section>
@@ -391,7 +451,7 @@ export default function HomePage() {
   );
 }
 
-/* ── StatCard ── */
+/* ── StatCard Component ── */
 function StatCard({
   icon: Icon,
   label,
@@ -410,27 +470,45 @@ function StatCard({
   loading: boolean;
 }) {
   const cfg = {
-    emerald: { icon: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10", val: "text-emerald-400", glow: "hover:shadow-[0_0_28px_rgba(16,185,129,0.15)]" },
-    cyan:    { icon: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10",       val: "text-cyan-400",    glow: "hover:shadow-[0_0_28px_rgba(6,182,212,0.15)]"   },
-    amber:   { icon: "text-amber-400 border-amber-500/20 bg-amber-500/10",    val: "text-amber-400",   glow: "hover:shadow-[0_0_28px_rgba(245,158,11,0.18)]"  },
+    emerald: {
+      icon: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
+      val: "text-emerald-400",
+      glow: "hover:shadow-[0_0_28px_rgba(16,185,129,0.15)]",
+    },
+    cyan: {
+      icon: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10",
+      val: "text-cyan-400",
+      glow: "hover:shadow-[0_0_28px_rgba(6,182,212,0.15)]",
+    },
+    amber: {
+      icon: "text-amber-400 border-amber-500/20 bg-amber-500/10",
+      val: "text-amber-400",
+      glow: "hover:shadow-[0_0_28px_rgba(245,158,11,0.18)]",
+    },
   }[accentColor];
 
   return (
-    <div className={`glass-card relative overflow-hidden rounded-2xl border border-slate-800 p-5 flex flex-col gap-3 ${cfg.glow} transition-all`}>
+    <div
+      className={`glass-card relative overflow-hidden rounded-2xl border border-slate-800 p-5 flex flex-col gap-3 ${cfg.glow} transition-all`}
+    >
       <div className="flex items-center justify-between">
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg border ${cfg.icon}`}>
           <Icon className="h-4 w-4" />
         </div>
         <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse" />
-          Live
+          Live Compute
         </span>
       </div>
 
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
-        {sublabel && <div className="text-[10px] text-slate-600 mt-0.5">{sublabel}</div>}
-        <div className={`mt-2 font-mono text-3xl font-black leading-none tracking-tight ${loading ? "skeleton text-transparent" : cfg.val}`}>
+        {sublabel && <div className="text-[10px] text-slate-500 mt-0.5">{sublabel}</div>}
+        <div
+          className={`mt-2 font-mono text-3xl font-black leading-none tracking-tight ${
+            loading ? "skeleton text-transparent" : cfg.val
+          }`}
+        >
           {loading ? "——" : value}
         </div>
       </div>
@@ -440,7 +518,7 @@ function StatCard({
   );
 }
 
-/* ── NavCard ── */
+/* ── NavCard Component ── */
 function NavCard({
   href,
   icon: Icon,
@@ -455,10 +533,22 @@ function NavCard({
   accent: "emerald" | "cyan" | "amber" | "indigo";
 }) {
   const cfg = {
-    emerald: { icon: "text-emerald-400", border: "hover:border-emerald-500/30 hover:shadow-[0_0_24px_rgba(16,185,129,0.12)]" },
-    cyan:    { icon: "text-cyan-400",    border: "hover:border-cyan-500/30    hover:shadow-[0_0_24px_rgba(6,182,212,0.12)]"   },
-    amber:   { icon: "text-amber-400",   border: "hover:border-amber-500/30   hover:shadow-[0_0_24px_rgba(245,158,11,0.12)]"  },
-    indigo:  { icon: "text-indigo-400",  border: "hover:border-indigo-500/30  hover:shadow-[0_0_24px_rgba(99,102,241,0.12)]"  },
+    emerald: {
+      icon: "text-emerald-400",
+      border: "hover:border-emerald-500/30 hover:shadow-[0_0_24px_rgba(16,185,129,0.12)]",
+    },
+    cyan: {
+      icon: "text-cyan-400",
+      border: "hover:border-cyan-500/30 hover:shadow-[0_0_24px_rgba(6,182,212,0.12)]",
+    },
+    amber: {
+      icon: "text-amber-400",
+      border: "hover:border-amber-500/30 hover:shadow-[0_0_24px_rgba(245,158,11,0.12)]",
+    },
+    indigo: {
+      icon: "text-indigo-400",
+      border: "hover:border-indigo-500/30 hover:shadow-[0_0_24px_rgba(99,102,241,0.12)]",
+    },
   }[accent];
 
   return (
@@ -471,7 +561,9 @@ function NavCard({
         <ArrowRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-1 group-hover:text-white" />
       </div>
       <div>
-        <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">{title}</h3>
+        <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+          {title}
+        </h3>
         <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{desc}</p>
       </div>
     </Link>

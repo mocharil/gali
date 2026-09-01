@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { AssumptionBar } from "@/components/AssumptionBar";
-import { Footer } from "@/components/Footer";
+import { AppShell } from "@/components/AppShell";
 import { Providers } from "./providers";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -61,12 +59,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${plusJakarta.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-[#060911] text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-amber-500/30 selection:text-amber-200 bg-ambient-radial">
+      <body className="bg-[#060911] text-slate-100 font-sans antialiased min-h-screen selection:bg-amber-500/30 selection:text-amber-200">
         <Providers>
-          <Navbar />
-          <AssumptionBar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>
