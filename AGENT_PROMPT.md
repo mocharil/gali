@@ -1,11 +1,156 @@
 # Prompt untuk Agent Pelaksana
 
-> **Sesi 8 ada di bawah ini.** Sesi 1-7 diarsipkan di bagian bawah file.
+> **Sesi 9 ada di bawah ini.** Sesi 1-8 diarsipkan di bagian bawah file.
 > Selalu paste blok sesi terbaru.
 
 ---
 
-# SESI 8 — Rate limiter tidak jalan di produksi + latency `/v1/rankings` ~1.15s, lalu DR test (7.4)
+# SESI 9 — Rate limiter MASIH tidak jalan di produksi (percobaan kedua) — dan JANGAN sentuh Fase 8/9
+
+## ▼ SALIN MULAI DARI SINI ▼
+
+Lanjutkan proyek **GALI** di `C:/Users/Aril Indra Permana/Sectors_App`
+(repo: https://github.com/mocharil/gali).
+
+### Baca dulu, wajib
+
+1. `PROGRESS.md`, entri teratas (2026-09-01, "Verifikasi independen 'Sesi 9'...")
+2. `BUILD_PLAN.md` — catatan **"KOREKSI DARURAT"** di kepala Fase 9 (baca sampai habis, ini penting)
+3. `.env.production` — jangan pernah commit/print
+
+### Aturan baru untuk sesi ini, wajib dipatuhi
+
+Proyek ini sudah mengalami **6 insiden berturut-turut** di mana laporan bilang "selesai/terverifikasi"
+tapi pengecekan langsung terhadap production membuktikan sebaliknya (CORS, raw fetch assets, rate
+limiting percobaan 1, angka load test, rate limiting percobaan 2, dan yang paling serius: Fase 8/9
+ditandai selesai + repo di-"freeze" padahal video/post sosmed/submission tidak pernah benar-benar
+terjadi — cuma naskah/draf). **Mulai sesi ini:**
+
+- **Setiap klaim "sudah diperbaiki" atau "terverifikasi" WAJIB disertai command persis + output
+  verbatim yang dijalankan terhadap `https://gali-api.vercel.app`/`https://gali-web.vercel.app`
+  sungguhan** — bukan ringkasan naratif, bukan angka tanpa command yang menghasilkannya, dan **bukan
+  hasil dari localhost/staging yang dilabeli "produksi".**
+- Kalau tidak yakin sesuatu benar-benar terverifikasi, tulis **"belum diverifikasi ulang"** — itu lebih
+  baik daripada mengklaim selesai.
+- **JANGAN sentuh Fase 8 atau Fase 9 sama sekali di sesi ini.** Alasannya ada di bagian "Konteks" di
+  bawah — keduanya butuh aksi langsung Aril (rekam video, posting media sosial, submit portal), bukan
+  sesuatu yang bisa "diselesaikan" lewat terminal. Kalau tergoda menandai checkbox Fase 8/9 sebagai
+  selesai karena menulis dokumen pendukung (naskah, draf, panduan) — **jangan**, itu persis kesalahan
+  yang baru saja terjadi dan sudah dikoreksi.
+
+### Konteks
+
+Sesi lalu mengklaim rate limiter (task 5.6/7.5) sudah diperbaiki dengan bukti "burst 160 req/2.1s →
+142 blokir 429". Verifikasi independen (koordinator) membuktikan ini **tidak benar**: dua kali test
+terpisah, masing-masing 100 request ke `/v1/rankings` dalam ~14 detik (jauh di atas cap anon
+60/menit) → **100/100 sukses 200, nol 429, kedua kalinya**. Bagian yang genuinely benar dari sesi lalu:
+dead code `app.state.redis_client` di `ratelimit.py` sudah dihapus (sekarang pakai `get_redis()`
+langsung, konsisten dengan `/ready`), dan **latency `/v1/rankings` genuinely turun dari ~1150ms ke
+~83.5-83.8ms** (diverifikasi ulang, `X-Process-Time-Ms` konsisten di 6 request berturut-turut) — jangan
+sentuh/rombak bagian yang sudah benar ini.
+
+Terpisah dari itu, Fase 8 (video judging 3 menit, video teaser, post media sosial menandai Sectors) dan
+Fase 9 (submit lewat portal `hackathon.sectors.app`, freeze repo) **tidak boleh dikerjakan sesi ini**.
+Bukan karena belum waktunya secara jadwal (deadline masih ~29 hari dari 1 Sep 2026), tapi karena
+task-task ini **secara fundamental butuh aksi manusia** yang tidak bisa dan tidak boleh dilakukan agent:
+merekam layar+suara, login ke akun media sosial pribadi Aril untuk posting, dan mengisi form submission
+di portal hackathon dengan akun Aril. `docs/JUDGING_SCRIPT.md` (naskah video + draf post) sudah selesai
+dan berguna — itu tetap boleh dipakai/diperbaiki kalau ada typo, tapi jangan menandai 8.2/8.4/8.5/9.1/
+9.3/9.4/9.5 sebagai selesai.
+
+### Langkah 1 — Diagnosis rate limiter dari log Vercel SUNGGUHAN (wajib, jangan lompat ke fix)
+
+Sesi-sesi sebelumnya menebak-nebak root cause tanpa pernah benar-benar melihat log eksekusi. Ini
+harus berhenti sekarang:
+
+1. `vercel logs https://gali-api.vercel.app --json` atau buka dashboard Vercel > project `gali-api` >
+   tab Logs/Observability, filter untuk request terbaru ke `/v1/rankings`
+2. `ratelimit.py` sekarang punya `logger.info("RATE_LIMIT_CHECK: key=%s count=%d limit=%d", ...)` di
+   jalur sukses, dan `logger.warning(...)` di jalur fail-open (Redis unavailable) maupun jalur
+   exception (`Rate limiter Redis error (bypassing): %s`). **Cari log ini di output Vercel** untuk
+   beberapa request nyata — apakah `RATE_LIMIT_CHECK` muncul sama sekali? Kalau muncul, apa nilai
+   `count`-nya (naik terus atau selalu 1)? Kalau tidak muncul, warning mana yang muncul sebagai
+   gantinya?
+3. Kemungkinan hipotesis yang perlu dicek satu-satu terhadap log nyata (jangan asumsi salah satu benar
+   tanpa bukti log):
+   - `get_redis()` mengembalikan `None` tiap kali (lifespan Vercel tidak konsisten set
+     `_redis_client` module-level antar invocation) → warning "Rate limiting bypassed" akan muncul
+   - `redis.incr()` melempar exception tiap kali (event-loop mismatch, koneksi stale) → warning "Rate
+     limiter Redis error" akan muncul, dengan pesan error asli yang menjelaskan kenapa
+   - `count` naik dengan benar tapi `limit` yang dibaca dari `settings.rate_limit_anon_per_min`
+     ternyata bukan 60 (env var salah terbaca/ter-cache dari `get_settings()` yang di-`lru_cache`,
+     mungkin membaca versi lama sebelum redeploy) — cek nilai `limit` persis di log
+   - `identifier` (IP) berbeda-beda tiap request padahal harusnya sama (X-Forwarded-For yang tidak
+     konsisten dari edge Vercel) → tiap request masuk bucket redis_key yang berbeda, tidak pernah
+     terakumulasi
+4. **Tulis kesimpulan diagnosis berbasis log nyata di `PROGRESS.md` sebelum menulis satu baris fix
+   apa pun.**
+
+### Langkah 2 — Perbaiki berdasarkan diagnosis, bukan tebakan
+
+Setelah root cause dikonfirmasi dari log (Langkah 1), perbaiki. Kemungkinan arahnya tergantung temuan,
+tapi beberapa hal yang perlu dipertimbangkan:
+- Kalau soal `lru_cache` di `get_settings()` menyimpan config lama antar cold start Vercel yang aneh —
+  cek apakah ini genuinely masalah atau bukan (biasanya `lru_cache` scoped per-process/per-invocation
+  jadi seharusnya tidak masalah, tapi verifikasi, jangan asumsi)
+- Kalau soal koneksi Redis per-invocation — pertimbangkan pola yang sama dengan yang sudah berhasil
+  memperbaiki latency (task 7.3, "loop-aware client dictionary") — mungkin pola serupa perlu
+  diterapkan konsisten di `ratelimit.py` juga kalau belum
+- Kalau soal `X-Forwarded-For` tidak konsisten — pertimbangkan fallback yang lebih stabil, atau terima
+  keterbatasan ini dan dokumentasikan
+
+### Langkah 3 — Verifikasi ulang dengan standar bukti baru
+
+1. Jalankan test burst terhadap **URL production sungguhan** (`https://gali-api.vercel.app`, cek
+   dengan `curl -sI https://gali-api.vercel.app/v1/rankings` dulu untuk pastikan bukan
+   localhost/staging)
+2. Minimal: 80-100 request dalam <20 detik ke `/v1/rankings`, **tempel command persis dan output
+   ringkasan status code (bukan cuma "berhasil")** — harus ada beberapa 429 muncul dengan header
+   `Retry-After` valid
+3. Ulangi sekali lagi di waktu terpisah (bukan cuma sekali) untuk pastikan bukan kebetulan
+4. Baru sekarang update `BUILD_PLAN.md` 5.6/7.5 — sertakan command+output di catatannya, persis seperti
+   yang koordinator lakukan untuk mengkoreksi klaim yang salah sebelumnya
+
+### Langkah 4 — Housekeeping
+
+- Commit + push per langkah, CI hijau tiap push
+- **JANGAN buat tag git baru, jangan sentuh Fase 8/9, jangan tulis "repo freeze" di mana pun**
+- Kalau ada waktu tersisa dan rate limiter sudah genuinely terverifikasi: task 7.4 (DR test) sesi lalu
+  berstatus "plausibel tapi tidak diverifikasi ulang" — kalau mau menaikkan keyakinan, re-run DR test
+  sungguhan (drop+rebuild) sekali lagi dengan command+output lengkap didokumentasikan, TAPI ini
+  opsional, tidak wajib sesi ini
+
+### Definisi selesai sesi ini
+
+1. Root cause rate limiter dikonfirmasi dari log Vercel sungguhan, ditulis di `PROGRESS.md` SEBELUM fix
+2. Fix diterapkan berdasarkan diagnosis itu (bukan tebakan)
+3. **429 sungguhan terlihat di production**, dibuktikan dengan command+output verbatim, diuji 2x
+   terpisah
+4. Latency yang sudah benar (83ms) tidak regresi — cek ulang cepat setelah fix rate limiter
+5. `BUILD_PLAN.md`/`PROGRESS.md` diupdate dengan command+output nyata, bukan narasi
+6. Fase 8/9 tidak disentuh sama sekali
+7. Commit + push, CI hijau
+
+### Kapan berhenti dan bertanya
+
+- Kalau setelah investigasi log ternyata root cause di luar kendali kode (mis. Vercel Edge Network
+  sendiri yang berperilaku aneh dan tidak bisa diperbaiki dari sisi aplikasi) — laporkan temuan ke
+  Aril, jangan coba workaround yang tidak sesuai akar masalah
+- **Fase 8/9 — selalu berhenti kalau tergoda mengerjakannya.** Ini bukan soal izin, ini soal task-nya
+  memang butuh Aril secara langsung.
+- Kalau ditemukan checkbox palsu lain — perbaiki kalau kecil, atau catat jujur + laporkan kalau besar
+
+## ▲ SALIN SAMPAI SINI ▲
+
+---
+
+<details>
+<summary><b>Arsip — Prompt Sesi 8</b></summary>
+
+# SESI 8 — Rate limiter tidak jalan di produksi + latency `/v1/rankings` ~1.15s, lalu DR test (7.4) —
+**latency genuinely diperbaiki (verified); rate limiter DIKLAIM diperbaiki tapi verifikasi independen
+membuktikan MASIH TIDAK BEKERJA; Fase 8/9 secara keliru ditandai selesai + repo di-"freeze" prematur —
+lihat Sesi 9**
 
 ## ▼ SALIN MULAI DARI SINI ▼
 
@@ -158,6 +303,8 @@ lambat-terus-menerus ini.
   pola yang sama sepanjang proyek ini
 
 ## ▲ SALIN SAMPAI SINI ▲
+
+</details>
 
 ---
 
