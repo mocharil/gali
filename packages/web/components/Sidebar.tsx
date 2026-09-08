@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import {
   Pickaxe,
   MapPin,
+  Scale,
   SlidersHorizontal,
   TrendingDown,
   LineChart,
@@ -41,6 +42,14 @@ const MENU_GROUPS = [
         desc: "Leaderboard & ringkasan",
         icon: Pickaxe,
         badge: "Utama",
+        badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+      },
+      {
+        href: "/compare",
+        label: "Peer Comparison",
+        desc: "Head-to-head emiten",
+        icon: Scale,
+        badge: "Baru",
         badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
       },
       {

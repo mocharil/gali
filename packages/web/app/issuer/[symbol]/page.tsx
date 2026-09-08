@@ -11,9 +11,23 @@ import {
   Network,
   Pickaxe,
   SlidersHorizontal,
+  Scale,
+  Printer,
+  Sparkles,
+  HelpCircle,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Tooltip as RechartsTooltip,
+} from "recharts";
 
 import { api } from "@/lib/api";
+import type { IssuerDetail } from "@/lib/types";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
 import { Skeleton } from "@/components/Skeleton";
@@ -40,6 +54,104 @@ function fmt(n: number | null | undefined, opts: { digits?: number; suffix?: str
     return `$${n.toFixed(digits)}`;
   }
   return `${n.toFixed(digits)}${suffix}`;
+}
+
+function MetricTooltip({ text }: { text: string }) {
+  return (
+    <span className="group relative inline-flex items-center cursor-help ml-1">
+      <HelpCircle className="h-3 w-3 text-slate-500 hover:text-amber-400 transition-colors" />
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-50 w-52 rounded-lg border border-slate-700 bg-slate-900/95 p-2 text-[10px] text-slate-200 shadow-2xl backdrop-blur-md leading-relaxed text-center normal-case font-normal">
+        {text}
+      </span>
+    </span>
+  );
+}
+
+function generateExecutiveBrief(data: IssuerDetail) {
+  const points: { title: string; desc: string; type: "warning" | "success" | "neutral" }[] = [];
+
+  // 1. RLI vs Implied Life Gap
+  if (data.rli_years != null && data.implied_life_years != null) {
+    const gap = data.implied_life_years - data.rli_years;
+    if (gap > 5) {
+      points.push({
+        title: "Disparitas Valuasi Cadangan (Implied Gap)",
+        desc: `Pasar saat ini menilai saham ${data.symbol} dengan asumsi umur operasional tambang ${data.implied_life_years.toFixed(1)} tahun (implied life). Ini menciptakan gap +${gap.toFixed(1)} tahun di atas cadangan fisik terbukti ESDM (${data.rli_years.toFixed(1)} tahun), mengindikasikan ekspektasi premi tinggi yang menuntut penambahan izin baru atau ekspansi M&A.`,
+        type: "warning",
+      });
+    } else if (gap < -3) {
+      points.push({
+        title: "Diskon Cadangan Fisik (Deep Value)",
+        desc: `Valuasi pasar (${data.implied_life_years.toFixed(1)} tahun implied) berada di bawah potensi cadangan fisik tambang terbukti (${data.rli_years.toFixed(1)} tahun). Terdapat diskon sisa umur cadangan sebesar ${Math.abs(gap).toFixed(1)} tahun yang berpotensi menjadi margin of safety tebal bagi investor jangka panjang.`,
+        type: "success",
+      });
+    } else {
+      points.push({
+        title: "Valuasi Cadangan Seimbang",
+        desc: `Valuasi pasar saat ini terkalibrasi secara rasional dengan umur cadangan fisik terbukti (${data.rli_years.toFixed(1)} thn fisik vs ${data.implied_life_years.toFixed(1)} thn implied), mencerminkan ekspektasi konsensus yang realistis.`,
+        type: "neutral",
+      });
+    }
+  } else if (data.rli_years != null) {
+    points.push({
+      title: "Umur Cadangan Fisik (RLI)",
+      desc: `Emiten memiliki sisa umur cadangan batubara terbukti sebesar ${data.rli_years.toFixed(1)} tahun berdasarkan kapasitas produksi tahunan saat ini.`,
+      type: "neutral",
+    });
+  }
+
+  // 2. Cash Cost Position
+  if (data.cash_cost_per_ton_usd != null) {
+    if (data.cash_cost_per_ton_usd <= 45) {
+      points.push({
+        title: "Keunggulan Biaya Tunai Rendah (Cost Advantage)",
+        desc: `Cash cost penambangan berada di level $${data.cash_cost_per_ton_usd.toFixed(1)}/t (kuartil bawah industri), memberikan bantalan margin EBITDA yang sangat kuat terhadap risiko penurunan harga acuan komoditas dunia.`,
+        type: "success",
+      });
+    } else if (data.cash_cost_per_ton_usd >= 65) {
+      points.push({
+        title: "Sensitivitas Biaya Tinggi",
+        desc: `Cash cost penambangan relatif tinggi di level $${data.cash_cost_per_ton_usd.toFixed(1)}/t, membuat profitabilitas emiten ini lebih sensitif jika indeks harga batubara ICI melemah.`,
+        type: "warning",
+      });
+    } else {
+      points.push({
+        title: "Struktur Biaya Industri Rata-Rata",
+        desc: `Cash cost penambangan berada pada rentang wajar industri ($${data.cash_cost_per_ton_usd.toFixed(1)}/t) dengan ketahanan margin yang moderat.`,
+        type: "neutral",
+      });
+    }
+  }
+
+  // 3. License Cliff Expiry Risk
+  if (data.license_cliff_3y != null) {
+    if (data.license_cliff_3y > 20) {
+      points.push({
+        title: "Perhatian Risiko Perizinan (License Cliff)",
+        desc: `Sebanyak ${data.license_cliff_3y.toFixed(1)}% konsesi operasi tambang akan kedaluwarsa dalam jangka waktu 3 tahun ke depan. Kepastian perpanjangan IUP/IUPK oleh Kementerian ESDM menjadi katalis kunci yang wajib dipantau.`,
+        type: "warning",
+      });
+    } else {
+      points.push({
+        title: "Landasan Perizinan Aman",
+        desc: `Risiko kedaluwarsa izin 3-tahun sangat rendah (${data.license_cliff_3y.toFixed(1)}%), memastikan kepastian operasional jangka menengah tanpa gangguan legalitas konsesi.`,
+        type: "success",
+      });
+    }
+  }
+
+  // 4. Export Exposure
+  if (data.top_destination && data.top_destination_pct != null) {
+    if (data.top_destination_pct >= 40) {
+      points.push({
+        title: `Ketergantungan Ekspor ${data.top_destination}`,
+        desc: `Porsi penjualan ekspor terkonsentrasi sebesar ${data.top_destination_pct.toFixed(1)}% ke ${data.top_destination}, sehingga volume penjualan memiliki eksposur tinggi terhadap kebijakan proteksionisme/kuota negara tersebut.`,
+        type: "neutral",
+      });
+    }
+  }
+
+  return points;
 }
 
 export default function IssuerDetailPage() {
@@ -103,10 +215,21 @@ export default function IssuerDetailPage() {
         ? data.implied_life_years - data.rli_years
         : null;
 
+  const executiveBrief = generateExecutiveBrief(data);
+
+  // Radar data for M8 Ground Truth Score
+  const radarData = [
+    { subject: "Cadangan (RLI)", score: Number(data.component_scores?.rli_score ?? 0), fullMark: 100 },
+    { subject: "Izin (License)", score: Number(data.component_scores?.license_score ?? 0), fullMark: 100 },
+    { subject: "Biaya (Cost)", score: Number(data.component_scores?.cost_score ?? 0), fullMark: 100 },
+    { subject: "Pasar Ekspor", score: Number(data.component_scores?.export_score ?? 0), fullMark: 100 },
+    { subject: "Supply Chain", score: Number(data.component_scores?.contract_score ?? 0), fullMark: 100 },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
       {/* Top Breadcrumb & Quick Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 print:hidden">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors"
@@ -162,10 +285,22 @@ export default function IssuerDetailPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 print:hidden">
+            <Link
+              href={`/compare?a=${data.symbol}`}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 text-xs font-bold text-amber-400 hover:bg-amber-500/20 transition-all shadow-lg"
+            >
+              <Scale className="h-3.5 w-3.5" /> Bandingkan
+            </Link>
+            <button
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700 px-3.5 py-2 text-xs font-bold text-slate-300 hover:border-slate-600 hover:bg-slate-800 hover:text-white transition-all shadow-lg"
+            >
+              <Printer className="h-3.5 w-3.5" /> Cetak One-Pager
+            </button>
             <Link
               href="/scenario"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700 px-4 py-2 text-xs font-bold text-cyan-400 hover:border-cyan-500/40 hover:bg-slate-800 hover:text-cyan-300 transition-all"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700 px-3.5 py-2 text-xs font-bold text-cyan-400 hover:border-cyan-500/40 hover:bg-slate-800 hover:text-cyan-300 transition-all shadow-lg"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" /> Stress-Test
             </Link>
@@ -174,12 +309,63 @@ export default function IssuerDetailPage() {
         </div>
       </div>
 
+      {/* ── Executive Intelligence Brief (Ground-Truth Synthesis) ── */}
+      {executiveBrief.length > 0 && (
+        <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-[#0c1322] via-[#080d19] to-[#050810] p-6 shadow-2xl relative overflow-hidden">
+          <div className="pointer-events-none absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-amber-500/5 blur-[50px]" />
+          
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
+                GALI Executive Intelligence Brief · Realitas Geologis vs Pasar
+              </h2>
+            </div>
+            <span className="text-[10px] font-mono text-amber-400/80 border border-amber-500/20 bg-amber-500/5 px-2 py-0.5 rounded-full font-semibold">
+              Deterministic Synthesis
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {executiveBrief.map((item, idx) => (
+              <div
+                key={idx}
+                className={`rounded-xl border p-4 space-y-1.5 transition-colors ${
+                  item.type === "warning"
+                    ? "border-rose-500/20 bg-rose-500/5"
+                    : item.type === "success"
+                    ? "border-emerald-500/20 bg-emerald-500/5"
+                    : "border-slate-800 bg-slate-900/40"
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      item.type === "warning"
+                        ? "bg-rose-400"
+                        : item.type === "success"
+                        ? "bg-emerald-400"
+                        : "bg-amber-400"
+                    }`}
+                  />
+                  <h3 className="text-xs font-bold text-white">{item.title}</h3>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 4 Core Fundamental Metric Tiles */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* RLI */}
         <MetricTile
           icon={Clock}
           label="Reserve Life Index (RLI)"
+          tooltip="Sisa umur cadangan tambang fisik terbukti (tahun) jika laju produksi tahunan konstan berlanjut."
           value={data.rli_years != null ? fmt(data.rli_years, { suffix: " thn" }) : "null"}
           sub={
             data.rli_years == null
@@ -196,6 +382,7 @@ export default function IssuerDetailPage() {
         <MetricTile
           icon={AlertTriangle}
           label="License Cliff (3 Tahun)"
+          tooltip="Persentase luas konsesi tambang yang masa berlaku izin IUP/IUPK-nya akan kedaluwarsa dalam 3 tahun ke depan."
           value={data.license_cliff_3y != null ? fmt(data.license_cliff_3y, { suffix: "%" }) : "—"}
           sub={`Clean & Clear (CNC) coverage: ${fmt(data.cnc_coverage_pct, { suffix: "%" })}`}
           accent={data.license_cliff_3y && data.license_cliff_3y > 30 ? "text-rose-400" : "text-amber-400"}
@@ -206,6 +393,7 @@ export default function IssuerDetailPage() {
         <MetricTile
           icon={Ship}
           label="Cash Cost / Breakeven"
+          tooltip="Estimasi biaya tunai penambangan per ton. Makin rendah, makin tebal bantalan margin jika harga acuan batubara anjlok."
           value={data.cash_cost_per_ton_usd != null ? `$${data.cash_cost_per_ton_usd.toFixed(2)}/t` : "null"}
           sub={
             data.breakeven_benchmark_price_usd != null
@@ -219,6 +407,7 @@ export default function IssuerDetailPage() {
         <MetricTile
           icon={Network}
           label="Reserve-Backed Value"
+          tooltip="Nilai wajar berbasis nilai tunai arus kas terdiskonto (DCF finite annuity) dari sisa cadangan fisik terbukti."
           value={data.reserve_backed_value_usd != null ? fmt(data.reserve_backed_value_usd, { usd: true, digits: 2 }) : "null"}
           sub={
             data.rbv_gap_pct != null
@@ -229,7 +418,7 @@ export default function IssuerDetailPage() {
         />
       </div>
 
-      {/* Coal Quality & Export Destination Profile */}
+      {/* Coal Quality & Export Destination Profile + Ground Truth Score */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="glass-card rounded-2xl border border-slate-800 p-6 lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
@@ -257,13 +446,14 @@ export default function IssuerDetailPage() {
             />
             <Field
               label="Destination HHI"
+              tooltip="Indeks Herfindahl-Hirschman konsentrasi pasar (>2500 menunjukkan ketergantungan ekspor tinggi)."
               value={data.destination_hhi != null ? data.destination_hhi.toFixed(0) : "—"}
               sub={data.destination_hhi != null ? (data.destination_hhi > 2500 ? "Konsentrasi Tinggi" : "Terdiversifikasi") : undefined}
             />
           </dl>
         </div>
 
-        {/* Ground Truth Score Breakdown Tile */}
+        {/* Ground Truth Score Breakdown Tile with Radar Chart */}
         <div className="glass-card rounded-2xl border border-slate-800 p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
@@ -278,7 +468,28 @@ export default function IssuerDetailPage() {
               <span className="text-sm text-slate-500 font-bold">/ 100</span>
             </div>
 
-            <div className="mt-4 space-y-2">
+            {/* Radar / Spider Chart */}
+            <div className="h-44 w-full -my-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData} outerRadius="70%">
+                  <PolarGrid stroke="#1e293b" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 9 }} />
+                  <PolarRadiusAxis domain={[0, 100]} stroke="#334155" tick={false} axisLine={false} />
+                  <Radar
+                    name={data.symbol}
+                    dataKey="score"
+                    stroke="#f59e0b"
+                    fill="#f59e0b"
+                    fillOpacity={0.3}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "11px" }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="mt-3 space-y-2">
               {data.component_scores &&
                 Object.entries(data.component_scores as Record<string, number | null>).map(([k, v]) => (
                   <div key={k} className="space-y-1">
@@ -358,6 +569,7 @@ export default function IssuerDetailPage() {
 function MetricTile({
   icon: Icon,
   label,
+  tooltip,
   value,
   sub,
   accent,
@@ -365,6 +577,7 @@ function MetricTile({
 }: {
   icon: React.ElementType;
   label: string;
+  tooltip?: string;
   value: string;
   sub: string;
   accent: string;
@@ -392,7 +605,10 @@ function MetricTile({
             </span>
           )}
         </div>
-        <div className="mt-3 text-[10px] uppercase tracking-wider font-bold text-slate-500">{label}</div>
+        <div className="mt-3 flex items-center text-[10px] uppercase tracking-wider font-bold text-slate-500">
+          <span>{label}</span>
+          {tooltip && <MetricTooltip text={tooltip} />}
+        </div>
         <div className={`mt-1.5 font-mono text-2xl font-black leading-none ${isNull ? 'text-slate-600' : accent}`}>
           {isNull ? 'N/A' : value}
         </div>
@@ -402,10 +618,13 @@ function MetricTile({
   );
 }
 
-function Field({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Field({ label, tooltip, value, sub }: { label: string; tooltip?: string; value: string; sub?: string }) {
   return (
     <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-3">
-      <dt className="text-[11px] font-medium text-slate-400">{label}</dt>
+      <dt className="flex items-center text-[11px] font-medium text-slate-400">
+        <span>{label}</span>
+        {tooltip && <MetricTooltip text={tooltip} />}
+      </dt>
       <dd className="mt-1 font-mono text-sm font-bold text-slate-100">{value}</dd>
       {sub && <div className="text-[10px] text-amber-400 mt-0.5 font-medium">{sub}</div>}
     </div>

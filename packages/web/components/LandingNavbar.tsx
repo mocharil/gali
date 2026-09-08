@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   MapPin,
+  Scale,
   SlidersHorizontal,
 } from "lucide-react";
 
@@ -62,6 +63,13 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
           >
             Leaderboard 9 Emiten
           </a>
+          <Link
+            href="/compare"
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors flex items-center gap-1"
+          >
+            <Scale className="h-3 w-3 text-amber-400" />
+            Komparasi Emiten
+          </Link>
           <Link
             href="/map"
             className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors flex items-center gap-1"

@@ -6,6 +6,7 @@ import {
   Search,
   Pickaxe,
   MapPin,
+  Scale,
   SlidersHorizontal,
   TrendingDown,
   LineChart,
@@ -31,6 +32,7 @@ const COAL_TITANS = [
 
 const PAGES = [
   { href: "/dashboard", label: "Executive Dashboard", desc: "Terminal analitis fundamental & leaderboard 9 emiten", icon: Pickaxe },
+  { href: "/compare", label: "Peer Comparison Studio", desc: "Head-to-head komparasi 2 emiten batubara IDX", icon: Scale },
   { href: "/", label: "Landing Page", desc: "Beranda publik pengenalan platform & 4 pilar", icon: Sparkles },
   { href: "/map", label: "National Concession Map", desc: "Peta sebaran 52 koordinat situs tambang ber-GPS", icon: MapPin },
   { href: "/scenario", label: "Scenario Studio", desc: "Simulasi stress-test harga batubara & tarif impor", icon: SlidersHorizontal },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import {
@@ -12,6 +12,9 @@ import {
   BarChart3,
   Globe2,
   ShieldAlert,
+  Share2,
+  Download,
+  Check,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -47,10 +50,38 @@ export default function ScenarioStudioPage() {
   const [priceShockPct, setPriceShockPct] = useState(0);
   const [countryShocks, setCountryShocks] = useState<Record<string, number>>({});
   const [licenseCliffShock, setLicenseCliffShock] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const isInitialMount = useRef(true);
 
   const mutation = useMutation({
     mutationFn: (body: ScenarioShockRequest) => api.simulateScenario(body),
   });
+
+  // Read URL query params on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get("price");
+    if (p !== null) {
+      const num = parseFloat(p);
+      if (!isNaN(num)) setPriceShockPct(num);
+    }
+    const c = params.get("cliff");
+    if (c === "1" || c === "true") {
+      setLicenseCliffShock(true);
+    }
+    const initCountryShocks: Record<string, number> = {};
+    COUNTRIES.forEach((country) => {
+      const val = params.get(country.toLowerCase());
+      if (val !== null) {
+        const num = parseFloat(val);
+        if (!isNaN(num)) initCountryShocks[country] = num;
+      }
+    });
+    if (Object.keys(initCountryShocks).length > 0) {
+      setCountryShocks(initCountryShocks);
+    }
+  }, []);
 
   const runScenario = useCallback(() => {
     mutation.mutate({
@@ -69,6 +100,80 @@ export default function ScenarioStudioPage() {
     }, 150);
     return () => clearTimeout(timer);
   }, [runScenario]);
+
+  // Sync state to URL query parameters
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (priceShockPct !== 0) {
+      url.searchParams.set("price", priceShockPct.toString());
+    } else {
+      url.searchParams.delete("price");
+    }
+    if (licenseCliffShock) {
+      url.searchParams.set("cliff", "1");
+    } else {
+      url.searchParams.delete("cliff");
+    }
+    COUNTRIES.forEach((c) => {
+      const v = countryShocks[c];
+      if (v && v > 0) {
+        url.searchParams.set(c.toLowerCase(), v.toString());
+      } else {
+        url.searchParams.delete(c.toLowerCase());
+      }
+    });
+    window.history.replaceState({}, "", url.toString());
+  }, [priceShockPct, licenseCliffShock, countryShocks]);
+
+  function handleCopyLink() {
+    if (typeof window === "undefined") return;
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  }
+
+  function handleExportCSV() {
+    const impacts = mutation.data?.impacts ?? [];
+    if (impacts.length === 0) return;
+
+    const headers = [
+      "Peringkat Akhir",
+      "Simbol",
+      "Baseline RBV ($ USD)",
+      "Post-Shock RBV ($ USD)",
+      "Delta RBV ($ USD)",
+      "Delta RBV (%)",
+      "Peringkat Awal",
+      "Perubahan Peringkat",
+    ];
+
+    const rows = [...impacts]
+      .sort((a, b) => (a.post_shock_rank ?? 99) - (b.post_shock_rank ?? 99))
+      .map((item) => [
+        item.post_shock_rank ?? "",
+        item.symbol,
+        item.baseline_rbv_usd != null ? item.baseline_rbv_usd.toFixed(0) : "",
+        item.post_shock_rbv_usd != null ? item.post_shock_rbv_usd.toFixed(0) : "",
+        item.delta_rbv_usd != null ? item.delta_rbv_usd.toFixed(0) : "",
+        item.delta_rbv_pct != null ? `${(item.delta_rbv_pct * 100).toFixed(2)}%` : "",
+        item.baseline_rank ?? "",
+        item.rank_change ?? ((item.baseline_rank ?? 0) - (item.post_shock_rank ?? 0)),
+      ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `gali_scenario_simulation_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   // Preset Handlers
   function applyPreset(type: "bear" | "china_tariff" | "cliff" | "bull" | "reset") {
@@ -125,59 +230,97 @@ export default function ScenarioStudioPage() {
           </p>
         </div>
 
-        {/* Presets Action Bar */}
+        {/* Action Bar (Share & Export) */}
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => applyPreset("bear")}
-            className="text-rose-400 hover:text-rose-300"
+            onClick={handleCopyLink}
+            className="border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-all font-semibold"
           >
-            <TrendingDown className="h-3.5 w-3.5" />
-            <span>Bear Shock (-25%)</span>
+            {copiedLink ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-emerald-400">Link Tersalin!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="h-3.5 w-3.5" />
+                <span>Salin Skenario</span>
+              </>
+            )}
           </Button>
+
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => applyPreset("china_tariff")}
-            className="text-amber-400 hover:text-amber-300"
+            onClick={handleExportCSV}
+            className="border-slate-700 bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white transition-all font-semibold"
           >
-            <Globe2 className="h-3.5 w-3.5" />
-            <span>Tarif China (30%)</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => applyPreset("cliff")}
-            className="text-cyan-400 hover:text-cyan-300"
-          >
-            <ShieldAlert className="h-3.5 w-3.5" />
-            <span>License Cliff Expiry</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => applyPreset("bull")}
-            className="text-emerald-400 hover:text-emerald-300"
-          >
-            <TrendingUp className="h-3.5 w-3.5" />
-            <span>Bull Shock (+20%)</span>
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => applyPreset("reset")}
-            className="text-slate-400 hover:text-white"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            <span>Reset</span>
+            <Download className="h-3.5 w-3.5" />
+            <span>Export CSV</span>
           </Button>
         </div>
+      </div>
+
+      {/* Presets Quick Selector Strip */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/80 bg-[#080d19]/80 p-3 shadow-lg">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2 flex items-center gap-1.5">
+          <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
+          Preset Skenario Cepat:
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => applyPreset("bear")}
+          className="text-rose-400 hover:text-rose-300 border-rose-500/30 bg-rose-500/10"
+        >
+          <TrendingDown className="h-3.5 w-3.5" />
+          <span>Bear Shock (-25%)</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => applyPreset("china_tariff")}
+          className="text-amber-400 hover:text-amber-300 border-amber-500/30 bg-amber-500/10"
+        >
+          <Globe2 className="h-3.5 w-3.5" />
+          <span>Tarif China (30%)</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => applyPreset("cliff")}
+          className="text-cyan-400 hover:text-cyan-300 border-cyan-500/30 bg-cyan-500/10"
+        >
+          <ShieldAlert className="h-3.5 w-3.5" />
+          <span>License Cliff Expiry</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => applyPreset("bull")}
+          className="text-emerald-400 hover:text-emerald-300 border-emerald-500/30 bg-emerald-500/10"
+        >
+          <TrendingUp className="h-3.5 w-3.5" />
+          <span>Bull Shock (+20%)</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => applyPreset("reset")}
+          className="text-slate-400 hover:text-white"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>Reset</span>
+        </Button>
       </div>
 
       {/* ── 2. Interactive Controls Grid (shadcn Cards) ── */}
@@ -351,7 +494,14 @@ export default function ScenarioStudioPage() {
               return (
                 <TableRow key={item.symbol} className="font-mono">
                   <TableCell className="font-bold text-amber-400">
-                    #{item.post_shock_rank ?? "—"}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">#{item.post_shock_rank ?? "—"}</span>
+                      {item.baseline_rank != null && item.baseline_rank !== item.post_shock_rank && (
+                        <span className="text-[10px] text-slate-500 font-normal">
+                          (awal #{item.baseline_rank})
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="font-bold text-white">{item.symbol}</div>
