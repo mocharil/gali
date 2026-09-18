@@ -12,6 +12,7 @@ import {
   Sparkles,
   Trophy,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -242,8 +243,24 @@ export default function ComparePage() {
                   ? "bg-amber-500 text-slate-950 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)]"
                   : "bg-slate-900/60 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white"
               }`}
+              className="relative rounded-xl px-3.5 py-1.5 text-xs font-bold transition-colors cursor-pointer"
+              className="relative rounded-xl border border-slate-800 bg-slate-900/60 px-3.5 py-1.5 text-xs font-bold transition-colors cursor-pointer"
             >
               {p.label}
+              {isActive && (
+                <motion.div
+                  layoutId="active-preset-pill"
+                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 shadow-[0_0_15px_rgba(245,158,11,0.35)]"
+                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                />
+              )}
+              <span
+                className={`relative z-10 transition-colors ${
+                  isActive ? "text-slate-950 font-black" : "text-slate-300 hover:text-white"
+                }`}
+              >
+                {p.label}
+              </span>
             </button>
           );
         })}

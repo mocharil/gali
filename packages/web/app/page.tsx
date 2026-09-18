@@ -19,6 +19,13 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import {
+  Marquee,
+  NumberTicker,
+  RetroGrid,
+  BorderBeam,
+  SpotlightCard,
+} from "@/components/magicui";
 
 function fmtUSD(n: number | null | undefined, digits = 1): string {
   if (n == null) return "—";
@@ -39,6 +46,7 @@ const PILLARS = [
     badge: "52 Situs GPS",
     accent: "text-amber-400 border-amber-500/30 bg-amber-500/10 hover:border-amber-500/50",
     buttonText: "Eksplorasi Peta",
+    spotlight: "rgba(245, 158, 11, 0.18)",
   },
   {
     step: "Pilar 02",
@@ -50,6 +58,7 @@ const PILLARS = [
     badge: "Sisa Umur Thn",
     accent: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10 hover:border-cyan-500/50",
     buttonText: "Lihat RLI Emiten",
+    spotlight: "rgba(6, 182, 212, 0.18)",
   },
   {
     step: "Pilar 03",
@@ -61,6 +70,7 @@ const PILLARS = [
     badge: "Cash Cost / t",
     accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:border-emerald-500/50",
     buttonText: "Buka Cost Curve",
+    spotlight: "rgba(16, 185, 129, 0.18)",
   },
   {
     step: "Pilar 04",
@@ -72,6 +82,7 @@ const PILLARS = [
     badge: "Simulasi Real-Time",
     accent: "text-indigo-400 border-indigo-500/30 bg-indigo-500/10 hover:border-indigo-500/50",
     buttonText: "Uji Skenario",
+    spotlight: "rgba(129, 140, 248, 0.18)",
   },
 ];
 
@@ -83,27 +94,32 @@ export default function LandingPage() {
 
   const complete = issuers?.filter((i) => i.data_quality === "LENGKAP") ?? [];
   const totalRbv = complete.reduce((s, i) => s + (i.reserve_backed_value_usd ?? 0), 0);
+  const totalRbvBillions = totalRbv > 0 ? totalRbv / 1e9 : 36.8;
 
   return (
     <div className="space-y-20 pb-20 overflow-hidden">
+    <div className="space-y-16 pb-20 overflow-hidden">
       {/* ── 1. Hero Presentation Banner (Full-Width) ── */}
       <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+        {/* 3D Perspective Terrain Grid (Magic UI RetroGrid) */}
+        <RetroGrid />
+
         {/* Ambient glow orbs */}
         <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-amber-500/15 blur-[100px]" />
         <div className="pointer-events-none absolute top-40 -left-20 h-80 w-80 rounded-full bg-cyan-500/10 blur-[90px]" />
         <div className="pointer-events-none absolute top-40 -right-20 h-80 w-80 rounded-full bg-indigo-500/10 blur-[90px]" />
 
         <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-          {/* Hackathon Track Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-            <Sparkles className="h-3.5 w-3.5" />
+          {/* Hackathon Track Badge with glowing border */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-1.5 text-xs font-bold text-amber-400 shadow-[0_0_24px_rgba(245,158,11,0.25)] backdrop-blur-md">
+            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
             <span>Sectors Hackathon 2026 · Track 3 — Market Intelligence</span>
           </div>
 
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
             Gali lebih dalam dari{" "}
-            <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(245,158,11,0.3)]">
+            <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(245,158,11,0.35)]">
               kode sahamnya.
             </span>
           </h1>
@@ -144,30 +160,50 @@ export default function LandingPage() {
           </div>
 
           {/* 3 Live Key Metric Tickers */}
+          {/* 3 Live Key Metric Tickers (Magic UI NumberTicker) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-6">
             <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
+            <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Reserve-Backed Value
               </div>
               <div className="font-mono text-2xl font-black text-emerald-400 mt-0.5">
                 {isLoading ? "——" : fmtUSD(totalRbv, 1)}
+                {isLoading ? (
+                  "——"
+                ) : (
+                  <NumberTicker
+                    value={totalRbvBillions}
+                    decimalPlaces={1}
+                    prefix="$"
+                    suffix="B"
+                  />
+                )}
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">7 Emiten Batubara Lengkap</div>
             </div>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
+            <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Konsesi Ber-GPS
               </div>
               <div className="font-mono text-2xl font-black text-cyan-400 mt-0.5">52 Situs</div>
+              <div className="font-mono text-2xl font-black text-cyan-400 mt-0.5">
+                <NumberTicker value={52} decimalPlaces={0} suffix=" Situs" />
+              </div>
               <div className="text-[10px] text-slate-500 mt-0.5">Kalimantan &amp; Sumatra</div>
             </div>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
+            <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Sectors API Credits
               </div>
               <div className="font-mono text-2xl font-black text-amber-400 mt-0.5">405 / 1,000</div>
+              <div className="font-mono text-2xl font-black text-amber-400 mt-0.5">
+                <NumberTicker value={405} decimalPlaces={0} suffix=" / 1,000" />
+              </div>
               <div className="text-[10px] text-slate-500 mt-0.5">100% Deterministic Cache</div>
             </div>
           </div>
@@ -175,6 +211,35 @@ export default function LandingPage() {
       </section>
 
       {/* ── 2. The 4 Fundamental Pillars (For Judges & Panitia) ── */}
+      {/* ── 1.5. Infinite Market Ticker Ribbon (Magic UI Marquee) ── */}
+      <section className="w-full border-y border-slate-800/80 bg-[#070b14]/75 backdrop-blur-md py-2.5 overflow-hidden">
+        <Marquee pauseOnHover duration={32} className="py-0">
+          {issuers?.map((i) => (
+            <Link
+              key={i.symbol}
+              href={`/issuer/${i.symbol}`}
+              className="inline-flex items-center gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/60 px-4 py-1.5 hover:border-amber-500/40 hover:bg-slate-800/90 transition-all text-xs mx-1.5 group shrink-0"
+            >
+              <span className="font-mono font-black text-white group-hover:text-amber-400">
+                {i.symbol}
+              </span>
+              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-400 border border-amber-500/25">
+                Score {i.ground_truth_score != null ? i.ground_truth_score.toFixed(1) : "—"}
+              </span>
+              <span className="text-[11px] text-slate-400 font-mono">
+                RLI: <strong className="text-cyan-400">{i.rli_years != null ? `${i.rli_years.toFixed(1)}y` : "N/A"}</strong>
+              </span>
+              {i.cash_cost_usd_ton != null && (
+                <span className="text-[11px] text-slate-500 font-mono hidden sm:inline">
+                  Cost: <strong className="text-emerald-400">${i.cash_cost_usd_ton}/t</strong>
+                </span>
+              )}
+            </Link>
+          ))}
+        </Marquee>
+      </section>
+
+      {/* ── 2. The 4 Fundamental Pillars (Spotlight Bento Grid) ── */}
       <section id="pillars" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400">
@@ -194,12 +259,18 @@ export default function LandingPage() {
             const Icon = p.icon;
             return (
               <div
+              <SpotlightCard
                 key={p.step}
+                className="glass-card group flex flex-col justify-between rounded-3xl border border-slate-800 p-6 transition-all hover:scale-[1.02]"
+                spotlightColor={p.spotlight}
+                spotlightSize={320}
+                className="flex flex-col justify-between"
                 className="glass-card group flex flex-col justify-between rounded-3xl border border-slate-800 p-6 transition-all hover:scale-[1.02]"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400">
+                    <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400 transition-colors">
                       {p.step}
                     </span>
                     <span className={`rounded-md border px-2 py-0.5 text-[10px] font-mono font-bold ${p.accent}`}>
@@ -208,6 +279,7 @@ export default function LandingPage() {
                   </div>
 
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-white mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-white mb-3 shadow-inner">
                     <Icon className="h-5 w-5 text-amber-400" />
                   </div>
 
@@ -224,16 +296,19 @@ export default function LandingPage() {
                   <Link
                     href={p.href}
                     className="inline-flex w-full items-center justify-between rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-200 border border-slate-800 hover:border-amber-500/40 hover:bg-slate-800 hover:text-white transition-colors"
+                    className="inline-flex w-full items-center justify-between rounded-xl bg-slate-900/90 px-3.5 py-2 text-xs font-bold text-slate-200 border border-slate-800 hover:border-amber-500/40 hover:bg-slate-800 hover:text-white transition-colors"
                   >
                     <span>{p.buttonText}</span>
                     <ArrowRight className="h-3.5 w-3.5 text-amber-400 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </div>
+              </SpotlightCard>
             );
           })}
         </div>
       </section>
+
 
       {/* ── 3. Live Universe 9 Emiten Leaderboard Preview ── */}
       <section id="leaderboard" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -378,15 +453,21 @@ export default function LandingPage() {
       <section className="max-w-5xl mx-auto px-4 text-center space-y-6">
         <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#0a1120] to-[#060911] p-10 sm:p-14 shadow-2xl space-y-5 relative">
           <h2 className="text-3xl sm:text-5xl font-black text-white">
+        <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#0a1120] to-[#060911] p-10 sm:p-14 shadow-2xl space-y-5 relative overflow-hidden">
+          <BorderBeam size={320} duration={14} colorFrom="#f59e0b" colorTo="#06b6d4" />
+          <h2 className="text-3xl sm:text-5xl font-black text-white relative z-10">
             Siap Menilai Emiten Komoditas IDX dengan Data Fisik Nyata?
           </h2>
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto relative z-10">
             Masuk ke Executive Dashboard untuk mengakses peta konsesi, stress-test skenario, dan kurva biaya nasional.
           </p>
           <div className="pt-3">
+          <div className="pt-3 relative z-10">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-8 py-4 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:bg-amber-400 hover:scale-105 active:scale-95 transition-all"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-8 py-4 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:from-amber-400 hover:to-yellow-400 hover:scale-105 active:scale-95 transition-all"
             >
               <Pickaxe className="h-4 w-4" />
               <span>Buka Executive Dashboard Sekarang</span>

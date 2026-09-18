@@ -54,6 +54,8 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
       map.flyTo({ center: [102.5, -3.2], zoom: 6.2, essential: true });
     } else if (region === "sulawesi") {
       map.flyTo({ center: [121.5, -2.5], zoom: 6.0, essential: true });
+    } else if (region === "tutupan") {
+      map.flyTo({ center: [115.52, -2.15], zoom: 9.8, essential: true });
     }
   }
 
@@ -253,6 +255,15 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
             }`}
           >
             Sulawesi (Nickel Belt)
+          </button>
+          <button
+            onClick={() => flyToRegion("tutupan")}
+            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+              activeRegion === "tutupan" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold" : "text-amber-400/80 hover:text-amber-300"
+            }`}
+            title="Focus ke Tambang Tutupan (ADRO) - Kalimantan Selatan"
+          >
+            🎯 Tutupan (ADRO)
           </button>
         </div>
       )}

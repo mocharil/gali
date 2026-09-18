@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { NumberTicker, BorderBeam } from "@/components/magicui";
 
 function fmtUSD(n: number | null | undefined, digits = 1): string {
   if (n == null) return "—";
@@ -100,6 +101,16 @@ export default function DashboardPage() {
           <CardContent className="p-5 pt-1">
             <div className="font-mono text-3xl font-black tracking-tight text-emerald-400">
               {isLoading ? "——" : fmtUSD(totalRbv, 2)}
+              {isLoading ? (
+                "——"
+              ) : (
+                <NumberTicker
+                  value={totalRbv / 1e9}
+                  decimalPlaces={2}
+                  prefix="$"
+                  suffix="B"
+                />
+              )}
             </div>
             <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
               Valuasi finite annuity DCF cadangan terbukti (hurdle rate 12%).
@@ -126,6 +137,13 @@ export default function DashboardPage() {
           <CardContent className="p-5 pt-1">
             <div className="font-mono text-3xl font-black tracking-tight text-cyan-400">
               {isLoading ? "——" : avgRli != null ? `${avgRli.toFixed(1)} thn` : "—"}
+              {isLoading ? (
+                "——"
+              ) : avgRli != null ? (
+                <NumberTicker value={avgRli} decimalPlaces={1} suffix=" thn" />
+              ) : (
+                "—"
+              )}
             </div>
             <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
               Cadangan terbukti dibagi laju ekstraksi batubara tahunan aktual.
@@ -152,6 +170,20 @@ export default function DashboardPage() {
           <CardContent className="p-5 pt-1">
             <div className="font-mono text-3xl font-black tracking-tight text-amber-400 truncate">
               {isLoading ? "——" : worstCliff ? `${worstCliff.symbol} · ${worstCliff.license_cliff_3y?.toFixed(0)}%` : "—"}
+              {isLoading ? (
+                "——"
+              ) : worstCliff ? (
+                <>
+                  {worstCliff.symbol} ·{" "}
+                  <NumberTicker
+                    value={worstCliff.license_cliff_3y ?? 0}
+                    decimalPlaces={0}
+                    suffix="%"
+                  />
+                </>
+              ) : (
+                "—"
+              )}
             </div>
             <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
               Porsi volume produksi yang izin IUP-nya jatuh tempo dalam ≤ 3 tahun.
@@ -254,12 +286,20 @@ export default function DashboardPage() {
                   <li key={issuer.symbol}>
                     <Link
                       href={`/issuer/${issuer.symbol}`}
-                      className={`group flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-all hover:border-amber-500/40 hover:bg-slate-800/80 ${
+                      className={`group relative overflow-hidden flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-all hover:border-amber-500/40 hover:bg-slate-800/80 ${
                         topThree
                           ? "border-amber-500/20 bg-amber-500/5"
                           : "border-slate-800/70 bg-slate-900/40"
                       }`}
                     >
+                      {idx === 0 && (
+                        <BorderBeam
+                          size={120}
+                          duration={8}
+                          colorFrom="#f59e0b"
+                          colorTo="#fbbf24"
+                        />
+                      )}
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span
                           className={`w-5 text-right text-[11px] font-mono font-bold ${
