@@ -27,14 +27,6 @@ import {
   SpotlightCard,
 } from "@/components/magicui";
 
-function fmtUSD(n: number | null | undefined, digits = 1): string {
-  if (n == null) return "—";
-  const abs = Math.abs(n);
-  if (abs >= 1e9) return `$${(n / 1e9).toFixed(digits)}B`;
-  if (abs >= 1e6) return `$${(n / 1e6).toFixed(digits)}M`;
-  return `$${n.toFixed(0)}`;
-}
-
 const PILLARS = [
   {
     step: "Pilar 01",
@@ -98,7 +90,6 @@ export default function LandingPage() {
 
   return (
     <div className="space-y-20 pb-20 overflow-hidden">
-    <div className="space-y-16 pb-20 overflow-hidden">
       {/* ── 1. Hero Presentation Banner (Full-Width) ── */}
       <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
         {/* 3D Perspective Terrain Grid (Magic UI RetroGrid) */}
@@ -159,16 +150,13 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* 3 Live Key Metric Tickers */}
           {/* 3 Live Key Metric Tickers (Magic UI NumberTicker) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-6">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
             <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Reserve-Backed Value
               </div>
               <div className="font-mono text-2xl font-black text-emerald-400 mt-0.5">
-                {isLoading ? "——" : fmtUSD(totalRbv, 1)}
                 {isLoading ? (
                   "——"
                 ) : (
@@ -183,24 +171,20 @@ export default function LandingPage() {
               <div className="text-[10px] text-slate-500 mt-0.5">7 Emiten Batubara Lengkap</div>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
             <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Konsesi Ber-GPS
               </div>
-              <div className="font-mono text-2xl font-black text-cyan-400 mt-0.5">52 Situs</div>
               <div className="font-mono text-2xl font-black text-cyan-400 mt-0.5">
                 <NumberTicker value={52} decimalPlaces={0} suffix=" Situs" />
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">Kalimantan &amp; Sumatra</div>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3.5 text-center">
             <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Sectors API Credits
               </div>
-              <div className="font-mono text-2xl font-black text-amber-400 mt-0.5">405 / 1,000</div>
               <div className="font-mono text-2xl font-black text-amber-400 mt-0.5">
                 <NumberTicker value={405} decimalPlaces={0} suffix=" / 1,000" />
               </div>
@@ -229,9 +213,9 @@ export default function LandingPage() {
               <span className="text-[11px] text-slate-400 font-mono">
                 RLI: <strong className="text-cyan-400">{i.rli_years != null ? `${i.rli_years.toFixed(1)}y` : "N/A"}</strong>
               </span>
-              {i.cash_cost_usd_ton != null && (
+              {i.cash_cost_per_ton_usd != null && (
                 <span className="text-[11px] text-slate-500 font-mono hidden sm:inline">
-                  Cost: <strong className="text-emerald-400">${i.cash_cost_usd_ton}/t</strong>
+                  Cost: <strong className="text-emerald-400">${i.cash_cost_per_ton_usd}/t</strong>
                 </span>
               )}
             </Link>
@@ -258,18 +242,14 @@ export default function LandingPage() {
           {PILLARS.map((p) => {
             const Icon = p.icon;
             return (
-              <div
               <SpotlightCard
                 key={p.step}
                 className="glass-card group flex flex-col justify-between rounded-3xl border border-slate-800 p-6 transition-all hover:scale-[1.02]"
                 spotlightColor={p.spotlight}
                 spotlightSize={320}
-                className="flex flex-col justify-between"
-                className="glass-card group flex flex-col justify-between rounded-3xl border border-slate-800 p-6 transition-all hover:scale-[1.02]"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400">
                     <span className="font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400 transition-colors">
                       {p.step}
                     </span>
@@ -278,7 +258,6 @@ export default function LandingPage() {
                     </span>
                   </div>
 
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-white mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-white mb-3 shadow-inner">
                     <Icon className="h-5 w-5 text-amber-400" />
                   </div>
@@ -295,14 +274,12 @@ export default function LandingPage() {
                 <div className="mt-6 pt-3 border-t border-slate-800/80">
                   <Link
                     href={p.href}
-                    className="inline-flex w-full items-center justify-between rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-200 border border-slate-800 hover:border-amber-500/40 hover:bg-slate-800 hover:text-white transition-colors"
                     className="inline-flex w-full items-center justify-between rounded-xl bg-slate-900/90 px-3.5 py-2 text-xs font-bold text-slate-200 border border-slate-800 hover:border-amber-500/40 hover:bg-slate-800 hover:text-white transition-colors"
                   >
                     <span>{p.buttonText}</span>
                     <ArrowRight className="h-3.5 w-3.5 text-amber-400 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
-              </div>
               </SpotlightCard>
             );
           })}
@@ -451,22 +428,17 @@ export default function LandingPage() {
 
       {/* ── 5. Bottom Call to Action ── */}
       <section className="max-w-5xl mx-auto px-4 text-center space-y-6">
-        <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#0a1120] to-[#060911] p-10 sm:p-14 shadow-2xl space-y-5 relative">
-          <h2 className="text-3xl sm:text-5xl font-black text-white">
         <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#0a1120] to-[#060911] p-10 sm:p-14 shadow-2xl space-y-5 relative overflow-hidden">
           <BorderBeam size={320} duration={14} colorFrom="#f59e0b" colorTo="#06b6d4" />
           <h2 className="text-3xl sm:text-5xl font-black text-white relative z-10">
             Siap Menilai Emiten Komoditas IDX dengan Data Fisik Nyata?
           </h2>
-          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto relative z-10">
             Masuk ke Executive Dashboard untuk mengakses peta konsesi, stress-test skenario, dan kurva biaya nasional.
           </p>
-          <div className="pt-3">
           <div className="pt-3 relative z-10">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-8 py-4 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:bg-amber-400 hover:scale-105 active:scale-95 transition-all"
               className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-8 py-4 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:from-amber-400 hover:to-yellow-400 hover:scale-105 active:scale-95 transition-all"
             >
               <Pickaxe className="h-4 w-4" />
