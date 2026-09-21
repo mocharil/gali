@@ -5,9 +5,15 @@
   "description": "GALI monorepo root. Frontend is in packages/web. Python packages (core/api/pipeline) are managed separately via pip, see .venv.",
   "scripts": {
     "dev": "npm --prefix packages/web run dev",
-    "build": "npm --prefix packages/web run build",
+    "build": "cd packages/web && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('.next', '../.next', {recursive: true}); if (fs.existsSync('public')) fs.cpSync('public', '../public', {recursive: true});\"",
+    "vercel-build": "cd packages/web && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('.next', '../.next', {recursive: true}); if (fs.existsSync('public')) fs.cpSync('public', '../public', {recursive: true});\"",
     "lint": "npm --prefix packages/web run lint",
     "typecheck": "npm --prefix packages/web run typecheck",
     "gen:api": "npm --prefix packages/web run gen:api"
+  },
+  "dependencies": {
+    "next": "^15.1.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
