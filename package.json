@@ -1,12 +1,12 @@
 {
   "name": "gali",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GALI monorepo root. Frontend is in packages/web. Python packages (core/api/pipeline) are managed separately via pip, see .venv.",
   "scripts": {
     "dev": "npm --prefix packages/web run dev",
-    "build": "cd packages/web && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('.next', '../.next', {recursive: true}); if (fs.existsSync('public')) fs.cpSync('public', '../public', {recursive: true});\"",
-    "vercel-build": "cd packages/web && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('.next', '../.next', {recursive: true}); if (fs.existsSync('public')) fs.cpSync('public', '../public', {recursive: true});\"",
+    "build": "npm --prefix packages/web run build && node -e \"const fs = require('fs'); fs.cpSync('packages/web/.next', '.next', {recursive: true}); if (fs.existsSync('packages/web/public')) fs.cpSync('packages/web/public', 'public', {recursive: true});\"",
+    "vercel-build": "npm --prefix packages/web run build && node -e \"const fs = require('fs'); fs.cpSync('packages/web/.next', '.next', {recursive: true}); if (fs.existsSync('packages/web/public')) fs.cpSync('packages/web/public', 'public', {recursive: true});\"",
     "lint": "npm --prefix packages/web run lint",
     "typecheck": "npm --prefix packages/web run typecheck",
     "gen:api": "npm --prefix packages/web run gen:api"
