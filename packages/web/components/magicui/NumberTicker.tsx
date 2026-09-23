@@ -40,29 +40,26 @@ export function NumberTicker({
     }
   }, [motionValue, isInView, delay, value, direction]);
 
+  // The span's text is owned entirely by this effect (including the initial
+  // paint) so it never conflicts with React's own reconciliation -- rendering
+  // static JSX children *and* mutating textContent imperatively caused the
+  // two to coexist as duplicate text nodes after any re-render.
   useEffect(() => {
-    return springValue.on("change", (latest) => {
-      if (ref.current) {
-        ref.current.textContent = `${prefix}${latest.toLocaleString("en-US", {
-          minimumFractionDigits: decimalPlaces,
-          maximumFractionDigits: decimalPlaces,
-        })}${suffix}`;
-      }
-    });
-  }, [springValue, decimalPlaces, prefix, suffix]);
-
-  return (
-    <span
-      className={cn("inline-block tabular-nums", className)}
-      ref={ref}
-    >
-      {prefix}
-      {(direction === "down" ? value : 0).toLocaleString("en-US", {
+    const format = (n: number) =>
+      `${prefix}${n.toLocaleString("en-US", {
         minimumFractionDigits: decimalPlaces,
         maximumFractionDigits: decimalPlaces,
-      })}
-      {suffix}
-    </span>
-  );
+      })}${suffix}`;
+    if (ref.current) {
+      ref.current.textContent = format(motionValue.get());
+    }
+    return springValue.on("change", (latest) => {
+      if (ref.current) {
+        ref.current.textContent = format(latest);
+      }
+    });
+  }, [springValue, motionValue, decimalPlaces, prefix, suffix]);
+
+  return <span className={cn("inline-block tabular-nums", className)} ref={ref} />;
 }
 

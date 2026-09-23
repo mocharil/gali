@@ -100,7 +100,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="p-5 pt-1">
             <div className="font-mono text-3xl font-black tracking-tight text-emerald-400">
-              {isLoading ? "——" : fmtUSD(totalRbv, 2)}
               {isLoading ? (
                 "——"
               ) : (
@@ -136,7 +135,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="p-5 pt-1">
             <div className="font-mono text-3xl font-black tracking-tight text-cyan-400">
-              {isLoading ? "——" : avgRli != null ? `${avgRli.toFixed(1)} thn` : "—"}
               {isLoading ? (
                 "——"
               ) : avgRli != null ? (
@@ -169,7 +167,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="p-5 pt-1">
             <div className="font-mono text-3xl font-black tracking-tight text-amber-400 truncate">
-              {isLoading ? "——" : worstCliff ? `${worstCliff.symbol} · ${worstCliff.license_cliff_3y?.toFixed(0)}%` : "—"}
               {isLoading ? (
                 "——"
               ) : worstCliff ? (
