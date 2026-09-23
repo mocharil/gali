@@ -5,6 +5,80 @@ Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
 
+## 2026-09-23 — Web app deployment ternyata rusak total sejak beberapa sesi lalu; diperbaiki + 3 bug fungsional ditemukan & diperbaiki (koordinator)
+
+**Konteks:** Aril minta cek "apakah app sudah terdeploy di GitHub yang terhubung dengan Vercel" dan
+pastikan data + UI/UX benar. Gap 22 hari sejak sesi terakhir (1 Sep → 23 Sep) — banyak sesi lain
+sudah bekerja di antaranya (redesign UI besar: sidebar/terminal dashboard, shadcn/ui, Magic UI,
+migrasi pnpm→npm), tanpa saya punya visibility ke situ sebelumnya.
+
+**Temuan #1 — `gali-web.vercel.app` mati total (DEPLOYMENT_NOT_FOUND).** Project Vercel lama
+("gali-web") yang saya setup di sesi Sep 1 **sudah terhapus** entah oleh siapa, kemungkinan saat
+migrasi pnpm→npm mencoba konsolidasi ke project baru bernama "gali" yang terhubung GitHub
+(auto-deploy on push) — tapi 4 komit terakhir sebelum sesi ini ("fix(deploy): ...") semuanya
+**gagal build**, jadi project baru itu juga tidak pernah punya deployment produksi yang hidup.
+Backend `gali-api.vercel.app` (project terpisah, tidak disentuh migrasi) tetap sehat sepanjang waktu.
+
+**Root cause build gagal, ditemukan lewat log build asli (bukan cuma pesan error ringkasan) via
+API internal dashboard Vercel:** `npm install` cuma menginstall **26 paket** — jauh di bawah
+kebutuhan riil (~500+ untuk Next.js 15 + React 19). Diperiksa: `packages/web/package-lock.json`
+yang di-commit saat migrasi npm cuma punya **62 entri total** (harusnya 500+), rusak/tidak lengkap —
+kemungkinan dibuat dengan `--package-lock-only` di environment yang sudah punya sebagian besar
+paket ter-hoist dari pnpm lama, jadi npm cuma mencatat delta-nya. Diperbaiki dengan `npm install`
+sungguhan (524 paket ditambahkan, 599 entri final) setelah membersihkan `node_modules` sisa pnpm
+1.2GB di root repo yang mengganggu install lokal.
+
+**Perbaikan deployment, berurutan:**
+1. Root `package.json`/`package-lock.json`/`vercel.json` (dibuat untuk strategi build-dari-root yang
+   ditinggalkan) dihapus — project Vercel "gali" pakai Root Directory=`packages/web`, dan kombinasi
+   keduanya membuat Vercel salah baca manifest.
+2. Toggle "Include files outside Root Directory" dimatikan (percobaan awal, ternyata bukan akar
+   masalah sebenarnya tapi tidak salah untuk dimatikan).
+3. `package-lock.json` di-regenerate benar (524→599 entri).
+4. Domain `gali-web.vercel.app` ditambahkan ulang ke project "gali" (sempat lowong sejak project
+   lama dihapus) — **berhasil diklaim ulang**, sekarang mengarah ke project yang benar.
+5. `API_URL` (env var yang dibaca `next.config.ts` untuk proxy `/api/*`) di-set — project baru ini
+   genuinely baru, tidak pernah punya env var apa pun sebelumnya, jadi API rewrite gagal
+   (`DNS_HOSTNAME_RESOLVED_PRIVATE`, fallback ke `127.0.0.1:8000`) sampai diperbaiki.
+
+**Setelah deploy hidup, 3 bug fungsional nyata ditemukan lewat pemakaian langsung di browser (bukan
+cuma baca kode):**
+
+1. **Dashboard: nilai duplikat** (`$50.60B$50.60B`, `23.9 thn 23.9 thn`, `GEMS · 100%GE...` terpotong).
+   Dua penyebab bertumpuk: (a) tiga `CardContent` di `dashboard/page.tsx` render teks statis
+   fallback DAN blok `NumberTicker` sebagai sibling JSX sejajar, keduanya muncul begitu data selesai
+   loading; (b) `NumberTicker` sendiri mencampur children JSX statis dengan mutasi `textContent`
+   imperatif di `useEffect` — React reconciliation menduplikasi text node setelah re-render apa pun.
+2. **Scenario Studio: infinite request loop.** `runScenario` (`useCallback`) bergantung pada seluruh
+   objek `mutation` dari `useMutation`, yang identitasnya berubah tiap transisi
+   pending→success/error. Efek yang memanggil `runScenario()` lalu terpicu ulang tiap kali identitas
+   itu berubah → mutation baru → identitas berubah lagi → loop tanpa henti (~150ms/iterasi, sama
+   dengan delay debounce). Terverifikasi: 59+ request POST menumpuk untuk SATU perubahan slider,
+   "Menghitung..." tidak pernah selesai. Diperbaiki: bergantung pada `mutate` (stabil), bukan
+   `mutation`. Terverifikasi ulang: tepat 1 request per aksi, baik lokal maupun production.
+3. **`Button asChild` tidak pernah diimplementasi**, dipakai di 8 tempat
+   (`<Button asChild><Link>...</Link></Button>`), jatuh ke `{...props}` dan ter-spread ke DOM
+   `<button>` — setiap salah satu dari 8 pemakaian ini merender `<a>` di dalam `<button>` sungguhan
+   (HTML tidak valid, merusak navigasi keyboard/screen reader). Diimplementasi lewat
+   `React.cloneElement` (bukan `@radix-ui/react-slot`, sengaja menghindari dependency baru mengingat
+   instabilitas lockfile hari ini).
+
+**Verifikasi data (tidak berubah dari sesi 1 Sep, dicek ulang untuk pastikan tidak drift selama 22
+hari otomatis Hot Refresh berjalan):** `credits_used` tetap 405/1000, GPS 52/57 (91.2%) tetap benar,
+zero-shock invariant tetap persis 0.0%, rate limiter tetap genuinely memblokir (90/150 dapat 429 di
+tes burst).
+
+**Kredit terpakai sesi ini:** 0 (kumulatif tetap: 405 / 1000)
+
+**Next:** review UI/UX redesign yang dibangun sesi-sesi lain (sidebar dashboard, Peer Comparison,
+Command Palette dll) belum menyeluruh — cuma spot-check Executive Dashboard, issuer detail, dan
+Scenario Studio. Landing page `page.tsx` punya 2 nilai `NumberTicker` hardcoded (52 situs GPS, 405
+kredit) yang kebetulan masih akurat tapi akan basi kalau data berubah — pertimbangkan menjadikannya
+live-fetched. Task 6.12 (a11y sistematis, uji mobile menyeluruh) masih belum diaudit ulang setelah
+redesign besar ini.
+
+---
+
 ## 2026-09-01 — UI polish web app (task 6.12 ditutup) + ditemukan regresi GPS 0/57 di produksi (koordinator)
 
 **Konteks:** Aril minta web app "dipercantik" dan ditambah loading state hingga "enterprise ready".
