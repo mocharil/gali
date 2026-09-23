@@ -9,7 +9,7 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", ...props }, ref) => {
+  ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
     const variantStyles = {
       default: "bg-slate-100 text-slate-900 shadow hover:bg-slate-200 active:scale-[0.98]",
       destructive: "bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/40",
@@ -29,17 +29,30 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-9 w-9 p-0",
     }[size];
 
+    const buttonClassName = cn(
+      "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
+      variantStyles,
+      sizeStyles,
+      className
+    );
+
+    // asChild merges our styling onto the single child element (e.g. next/link's
+    // <Link>) instead of wrapping it in a real <button> -- rendering an <a> nested
+    // inside a <button> is invalid HTML and breaks keyboard/screen-reader behavior.
+    const { children, ...restProps } = props;
+    if (asChild && React.isValidElement(children)) {
+      const child = children as React.ReactElement<{ className?: string }>;
+      return React.cloneElement(child, {
+        ...restProps,
+        className: cn(buttonClassName, child.props.className),
+        ref,
+      } as React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> });
+    }
+
     return (
-      <button
-        className={cn(
-          "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
-          variantStyles,
-          sizeStyles,
-          className
-        )}
-        ref={ref}
-        {...props}
-      />
+      <button className={buttonClassName} ref={ref} {...restProps}>
+        {children}
+      </button>
     );
   }
 );

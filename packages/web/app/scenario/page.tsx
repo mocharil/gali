@@ -83,15 +83,20 @@ export default function ScenarioStudioPage() {
     }
   }, []);
 
+  // Depend on `mutate` (stable across renders), not the `mutation` object itself --
+  // `mutation` gets a new identity on every pending/success/error transition, so
+  // including it here retriggered this callback, which retriggered the effect
+  // below that calls it, which started a new mutation... an infinite request loop.
+  const { mutate } = mutation;
   const runScenario = useCallback(() => {
-    mutation.mutate({
+    mutate({
       price_shock_pct: priceShockPct,
       destination_shocks: Object.fromEntries(Object.entries(countryShocks).filter(([, v]) => v > 0)),
       license_cliff_expiry_shock: licenseCliffShock,
       discount_rate: 0.12,
       variable_cost_share: 0.65,
     });
-  }, [priceShockPct, countryShocks, licenseCliffShock, mutation]);
+  }, [priceShockPct, countryShocks, licenseCliffShock, mutate]);
 
   // Auto-run simulation on mount and debounced on parameter changes
   useEffect(() => {
