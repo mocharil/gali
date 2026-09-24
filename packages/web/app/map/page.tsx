@@ -3,8 +3,8 @@ import { MapPin } from "lucide-react";
 
 
 export const metadata = {
-  title: "Peta Nasional Situs Tambang",
-  description: "Sebaran geografis 52 konsesi tambang batubara dan nikel berkoordinat GPS terverifikasi.",
+  title: "National Mining Sites Map",
+  description: "Geographic distribution of 52 coal and nickel mining concessions with verified GPS coordinates.",
 };
 
 export default function MapPage() {
@@ -17,11 +17,11 @@ export default function MapPage() {
             <MapPin className="h-3.5 w-3.5" />
             <span>M1 Geographic Asset Ground Truth</span>
           </div>
-          <h1 className="text-3xl font-black text-white">Peta Nasional Konsesi Tambang</h1>
+          <h1 className="text-3xl font-black text-white">National Mining Concession Map</h1>
           <p className="mt-1 max-w-3xl text-sm text-slate-300">
-            Setiap titik merepresentasikan konsesi tambang fisik nyata dengan koordinat GPS terverifikasi,
-            dihubungkan ke emiten induk di Bursa Efek Indonesia melalui pohon kepemilikan efektif.
-            Ukuran lingkaran sebanding dengan volume produksi tahunan (Mt/thn).
+            Each point represents a real physical mining concession with verified GPS coordinates,
+            linked to its parent issuer on the Indonesia Stock Exchange via the effective ownership tree.
+            Circle size is proportional to annual production volume (Mt/yr).
           </p>
         </div>
       </div>

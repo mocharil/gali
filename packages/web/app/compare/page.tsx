@@ -53,10 +53,10 @@ const ALL_ISSUERS = [
 ];
 
 const PRESETS = [
-  { label: "ADRO vs BYAN", a: "ADRO", b: "BYAN", desc: "Raksasa Termal vs Produsen Biaya Super-Rendah" },
-  { label: "PTBA vs ITMG", a: "PTBA", b: "ITMG", desc: "Dividen BUMN vs Premium Newcastle Exporter" },
-  { label: "ADRO vs ADMR", a: "ADRO", b: "ADMR", desc: "Batubara Termal vs Batubara Metalurgi (Kokas)" },
-  { label: "ITMG vs GEMS", a: "ITMG", b: "GEMS", desc: "Duel Produsen Dividen & Efisiensi Operasional" },
+  { label: "ADRO vs BYAN", a: "ADRO", b: "BYAN", desc: "Thermal Giant vs Ultra-Low-Cost Producer" },
+  { label: "PTBA vs ITMG", a: "PTBA", b: "ITMG", desc: "State-Owned Dividend Play vs Premium Newcastle Exporter" },
+  { label: "ADRO vs ADMR", a: "ADRO", b: "ADMR", desc: "Thermal Coal vs Metallurgical (Coking) Coal" },
+  { label: "ITMG vs GEMS", a: "ITMG", b: "GEMS", desc: "Dividend Producer vs Operational Efficiency" },
 ];
 
 function fmt(n: number | null | undefined, opts: { digits?: number; suffix?: string; usd?: boolean } = {}): string {
@@ -117,22 +117,22 @@ export default function ComparePage() {
   // Radar data mapping
   const radarData = [
     {
-      metric: "Cadangan (RLI)",
+      metric: "Reserves (RLI)",
       [tickerA]: Number(dataA?.component_scores?.rli_score ?? 0),
       [tickerB]: Number(dataB?.component_scores?.rli_score ?? 0),
     },
     {
-      metric: "Izin Tambang",
+      metric: "Mining Licenses",
       [tickerA]: Number(dataA?.component_scores?.license_score ?? 0),
       [tickerB]: Number(dataB?.component_scores?.license_score ?? 0),
     },
     {
-      metric: "Biaya Produksi",
+      metric: "Production Cost",
       [tickerA]: Number(dataA?.component_scores?.cost_score ?? 0),
       [tickerB]: Number(dataB?.component_scores?.cost_score ?? 0),
     },
     {
-      metric: "Diversifikasi Ekspor",
+      metric: "Export Diversification",
       [tickerA]: Number(dataA?.component_scores?.export_score ?? 0),
       [tickerB]: Number(dataB?.component_scores?.export_score ?? 0),
     },
@@ -154,7 +154,7 @@ export default function ComparePage() {
       const loser = a.ground_truth_score >= b.ground_truth_score ? b : a;
       const diff = Math.abs(a.ground_truth_score - b.ground_truth_score).toFixed(1);
       takeaways.push(
-        `${winner.symbol} mengungguli ${loser.symbol} secara komposit (+${diff} poin Ground Truth Score), didorong oleh fundamental fisik dan transparansi data konsesi yang lebih kokoh.`
+        `${winner.symbol} outperforms ${loser.symbol} on the composite score (+${diff} Ground Truth Score points), driven by stronger physical fundamentals and concession data transparency.`
       );
     }
 
@@ -166,7 +166,7 @@ export default function ComparePage() {
         const loseSym = a.rli_years > b.rli_years ? b.symbol : a.symbol;
         const loseVal = Math.min(a.rli_years, b.rli_years);
         takeaways.push(
-          `Ketahanan Cadangan: ${winSym} memiliki sisa umur tambang terbukti yang jauh lebih panjang (${winVal.toFixed(1)} tahun vs ${loseSym} ${loseVal.toFixed(1)} tahun).`
+          `Reserve Resilience: ${winSym} has a much longer proven remaining mine life (${winVal.toFixed(1)} years vs ${loseSym} ${loseVal.toFixed(1)} years).`
         );
       }
     }
@@ -177,7 +177,7 @@ export default function ComparePage() {
       const higherSym = a.cash_cost_per_ton_usd < b.cash_cost_per_ton_usd ? b.symbol : a.symbol;
       const saving = Math.abs(a.cash_cost_per_ton_usd - b.cash_cost_per_ton_usd).toFixed(1);
       takeaways.push(
-        `Efisiensi Operasional: ${lowerSym} menikmati keunggulan biaya kas sebesar $${saving}/ton lebih hemat dibanding ${higherSym}, memberikan margin laba yang lebih terlindungi saat siklus batubara melemah.`
+        `Operational Efficiency: ${lowerSym} enjoys a cash cost advantage of $${saving}/ton over ${higherSym}, giving it better-protected profit margins when the coal cycle weakens.`
       );
     }
 
@@ -189,7 +189,7 @@ export default function ComparePage() {
         const riskierSym = a.license_cliff_3y < b.license_cliff_3y ? b.symbol : a.symbol;
         const riskierVal = Math.max(a.license_cliff_3y, b.license_cliff_3y);
         takeaways.push(
-          `Risiko Lisensi 3-Tahun: ${saferSym} memiliki risiko izin kedaluwarsa yang lebih minim (${saferVal.toFixed(1)}% vs ${riskierSym} ${riskierVal.toFixed(1)}%).`
+          `3-Year License Risk: ${saferSym} has lower license expiry risk (${saferVal.toFixed(1)}% vs ${riskierSym} ${riskierVal.toFixed(1)}%).`
         );
       }
     }
@@ -210,16 +210,16 @@ export default function ComparePage() {
               <span>Head-to-Head Peer Comparison Studio</span>
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-white">Komparasi Emiten Batubara IDX</h1>
+          <h1 className="text-3xl font-black text-white">IDX Coal Issuer Comparison</h1>
           <p className="mt-1 max-w-3xl text-xs sm:text-sm text-slate-300">
-            Bandingkan realitas fisik tambang, umur cadangan terbukti (RLI), struktur biaya tunai, dan ketahanan izin dua emiten secara objektif berbasis data spasial ESDM &amp; laporan resmi.
+            Objectively compare the physical mining reality, proven reserve life (RLI), cash cost structure, and license resilience of two issuers, based on MEMR spatial data &amp; official reports.
           </p>
         </div>
 
         {/* Action button to Scenario */}
         <Button asChild variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 self-start md:self-auto">
           <Link href="/scenario" className="gap-2">
-            <span>Uji Sensitivitas Bersama di Scenario Studio</span>
+            <span>Test Joint Sensitivity in Scenario Studio</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
@@ -229,7 +229,7 @@ export default function ComparePage() {
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/80 bg-[#080d19]/80 p-3 shadow-lg">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2 flex items-center gap-1.5">
           <Zap className="h-3.5 w-3.5 text-amber-400" />
-          Pasangan Komparasi Populer:
+          Popular Comparison Pairs:
         </span>
         {PRESETS.map((p) => {
           const isActive = (tickerA === p.a && tickerB === p.b) || (tickerA === p.b && tickerB === p.a);
@@ -266,7 +266,7 @@ export default function ComparePage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-              Emiten Primer (A)
+              Primary Issuer (A)
             </span>
             {dataA && <ConfidenceBadge dataQuality={dataA.data_quality} />}
           </div>
@@ -286,7 +286,7 @@ export default function ComparePage() {
             {dataA && (
               <Button asChild variant="ghost" size="sm">
                 <Link href={`/issuer/${dataA.symbol}`} className="gap-1 text-amber-400 hover:text-amber-300">
-                  <span>Profil</span>
+                  <span>Profile</span>
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -316,7 +316,7 @@ export default function ComparePage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
-              Emiten Pembanding (B)
+              Comparison Issuer (B)
             </span>
             {dataB && <ConfidenceBadge dataQuality={dataB.data_quality} />}
           </div>
@@ -336,7 +336,7 @@ export default function ComparePage() {
             {dataB && (
               <Button asChild variant="ghost" size="sm">
                 <Link href={`/issuer/${dataB.symbol}`} className="gap-1 text-cyan-400 hover:text-cyan-300">
-                  <span>Profil</span>
+                  <span>Profile</span>
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -376,10 +376,10 @@ export default function ComparePage() {
               <div>
                 <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
                   <Scale className="h-4 w-4 text-amber-400" />
-                  Dual-Radar: Profil Multi-Dimensi Komparatif
+                  Dual-Radar: Comparative Multi-Dimensional Profile
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Perbandingan 5 pilar Ground Truth Score antara <span className="text-amber-400 font-bold">{tickerA}</span> (emas) dan <span className="text-cyan-400 font-bold">{tickerB}</span> (cyan)
+                  Comparison of the 5 Ground Truth Score pillars between <span className="text-amber-400 font-bold">{tickerA}</span> (gold) and <span className="text-cyan-400 font-bold">{tickerB}</span> (cyan)
                 </CardDescription>
               </div>
 
@@ -414,7 +414,7 @@ export default function ComparePage() {
               </div>
 
               <div className="text-[11px] text-slate-500 border-t border-slate-800/60 pt-2 flex items-center justify-between">
-                <span>Skor dinormalisasi 0-100 per pilar metodologi M8</span>
+                <span>Scores normalized 0-100 per M8 methodology pillar</span>
                 <span className="font-mono text-amber-400">GALI M8 Multi-Factor</span>
               </div>
             </Card>
@@ -449,7 +449,7 @@ export default function ComparePage() {
                   </div>
                 ) : (
                   <p className="text-xs text-slate-400 italic">
-                    Memuat sintesis komparatif emiten terpilih...
+                    Loading comparative synthesis for the selected issuers...
                   </p>
                 )}
               </div>
@@ -457,7 +457,7 @@ export default function ComparePage() {
               <div className="pt-3 border-t border-slate-800/80">
                 <Button asChild variant="outline" size="sm" className="w-full text-xs font-bold border-slate-700 bg-slate-900/60 hover:bg-slate-800">
                   <Link href={`/scenario?a=${tickerA}&b=${tickerB}`}>
-                    Uji Ketahanan Makro {tickerA} vs {tickerB} →
+                    Stress-Test {tickerA} vs {tickerB} Macro Resilience →
                   </Link>
                 </Button>
               </div>
@@ -469,10 +469,10 @@ export default function ComparePage() {
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div>
                 <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-                  Tabel Komparasi Metrik Fundamental &amp; Fisik Tambang
+                  Fundamental &amp; Physical Mining Metrics Comparison
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Perbandingan langsung parameter operasional dengan penanda keunggulan komparatif (Advantage)
+                  Direct comparison of operating parameters with a comparative advantage marker
                 </CardDescription>
               </div>
               <Badge variant="outline" className="font-mono text-[11px] text-amber-400 border-amber-500/30">
@@ -483,21 +483,21 @@ export default function ComparePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-1/3">Metrik Fundamental</TableHead>
+                  <TableHead className="w-1/3">Fundamental Metric</TableHead>
                   <TableHead className="text-center font-bold font-mono text-amber-400 w-1/4">
                     {tickerA}
                   </TableHead>
                   <TableHead className="text-center font-bold font-mono text-cyan-400 w-1/4">
                     {tickerB}
                   </TableHead>
-                  <TableHead className="text-right w-1/6">Keunggulan</TableHead>
+                  <TableHead className="text-right w-1/6">Advantage</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {/* 1. Ground Truth Score */}
                 <ComparisonRow
                   label="M8 Ground Truth Score"
-                  tooltip="Skor gabungan transparansi fisik, umur cadangan, risiko perizinan, dan efisiensi biaya (0-100)."
+                  tooltip="Composite score of physical transparency, reserve life, licensing risk, and cost efficiency (0-100)."
                   valA={dataA?.ground_truth_score != null ? `${dataA.ground_truth_score.toFixed(1)} / 100` : "—"}
                   valB={dataB?.ground_truth_score != null ? `${dataB.ground_truth_score.toFixed(1)} / 100` : "—"}
                   winner={
@@ -512,9 +512,9 @@ export default function ComparePage() {
                 {/* 2. RLI */}
                 <ComparisonRow
                   label="Reserve Life Index (RLI)"
-                  tooltip="Sisa umur cadangan terbukti berdasarkan kapasitas penambangan tahunan (tahun)."
-                  valA={dataA?.rli_years != null ? fmt(dataA.rli_years, { suffix: " thn" }) : "—"}
-                  valB={dataB?.rli_years != null ? fmt(dataB.rli_years, { suffix: " thn" }) : "—"}
+                  tooltip="Remaining life of proven reserves based on annual mining capacity (years)."
+                  valA={dataA?.rli_years != null ? fmt(dataA.rli_years, { suffix: " yrs" }) : "—"}
+                  valB={dataB?.rli_years != null ? fmt(dataB.rli_years, { suffix: " yrs" }) : "—"}
                   winner={
                     (dataA?.rli_years ?? 0) > (dataB?.rli_years ?? 0)
                       ? tickerA
@@ -526,16 +526,16 @@ export default function ComparePage() {
 
                 {/* 3. Implied Life Gap */}
                 <ComparisonRow
-                  label="Disparitas Umur Pasar vs Fisik (Gap)"
-                  tooltip="Selisih antara ekspektasi umur tambang tersirat di harga pasar saham vs cadangan terbukti ESDM."
+                  label="Market vs Physical Life Gap"
+                  tooltip="Difference between the mine life implied by the stock's market price and MEMR proven reserves."
                   valA={
                     dataA?.implied_life_years != null && dataA?.rli_years != null
-                      ? `${(dataA.implied_life_years - dataA.rli_years) > 0 ? "+" : ""}${(dataA.implied_life_years - dataA.rli_years).toFixed(1)} thn`
+                      ? `${(dataA.implied_life_years - dataA.rli_years) > 0 ? "+" : ""}${(dataA.implied_life_years - dataA.rli_years).toFixed(1)} yrs`
                       : "—"
                   }
                   valB={
                     dataB?.implied_life_years != null && dataB?.rli_years != null
-                      ? `${(dataB.implied_life_years - dataB.rli_years) > 0 ? "+" : ""}${(dataB.implied_life_years - dataB.rli_years).toFixed(1)} thn`
+                      ? `${(dataB.implied_life_years - dataB.rli_years) > 0 ? "+" : ""}${(dataB.implied_life_years - dataB.rli_years).toFixed(1)} yrs`
                       : "—"
                   }
                   winner="Informational"
@@ -543,8 +543,8 @@ export default function ComparePage() {
 
                 {/* 4. Cash Cost */}
                 <ComparisonRow
-                  label="Cash Cost Penambangan ($/ton)"
-                  tooltip="Biaya tunai operasional untuk menambang 1 ton batubara. Makin rendah makin aman terhadap koreksi harga komoditas."
+                  label="Mining Cash Cost ($/ton)"
+                  tooltip="Operating cash cost to mine 1 ton of coal. Lower is safer against commodity price corrections."
                   valA={dataA?.cash_cost_per_ton_usd != null ? `$${dataA.cash_cost_per_ton_usd.toFixed(2)}/t` : "—"}
                   valB={dataB?.cash_cost_per_ton_usd != null ? `$${dataB.cash_cost_per_ton_usd.toFixed(2)}/t` : "—"}
                   winner={
@@ -558,8 +558,8 @@ export default function ComparePage() {
 
                 {/* 5. Breakeven Benchmark */}
                 <ComparisonRow
-                  label="Harga Acuan Impas (Breakeven)"
-                  tooltip="Harga patokan batubara internasional agar emiten mencapai titik impas operasional."
+                  label="Breakeven Benchmark Price"
+                  tooltip="International coal benchmark price at which the issuer reaches operating breakeven."
                   valA={dataA?.breakeven_benchmark_price_usd != null ? `$${dataA.breakeven_benchmark_price_usd.toFixed(2)}/t` : "—"}
                   valB={dataB?.breakeven_benchmark_price_usd != null ? `$${dataB.breakeven_benchmark_price_usd.toFixed(2)}/t` : "—"}
                   winner={
@@ -573,8 +573,8 @@ export default function ComparePage() {
 
                 {/* 6. License Cliff 3-Yr */}
                 <ComparisonRow
-                  label="Risiko License Cliff (3 Tahun)"
-                  tooltip="Persentase izin IUP/IUPK yang akan kedaluwarsa dalam jangka pendek. Nilai lebih rendah = risiko regulasi lebih minim."
+                  label="License Cliff Risk (3 Years)"
+                  tooltip="Percentage of IUP/IUPK licenses expiring in the short term. Lower value = lower regulatory risk."
                   valA={dataA?.license_cliff_3y != null ? `${dataA.license_cliff_3y.toFixed(1)}%` : "—"}
                   valB={dataB?.license_cliff_3y != null ? `${dataB.license_cliff_3y.toFixed(1)}%` : "—"}
                   winner={
@@ -589,7 +589,7 @@ export default function ComparePage() {
                 {/* 7. Reserve-Backed Value */}
                 <ComparisonRow
                   label="Reserve-Backed Value (RBV)"
-                  tooltip="Valuasi DCF berbasis cadangan terbukti dan finite annuity."
+                  tooltip="DCF valuation based on proven reserves and a finite annuity."
                   valA={fmt(dataA?.reserve_backed_value_usd, { usd: true, digits: 2 })}
                   valB={fmt(dataB?.reserve_backed_value_usd, { usd: true, digits: 2 })}
                   winner="Informational"
@@ -597,8 +597,8 @@ export default function ComparePage() {
 
                 {/* 8. Calorific Value */}
                 <ComparisonRow
-                  label="Rata-rata Nilai Kalori (CV)"
-                  tooltip="Kualitas energi batubara (kcal/kg). Kalori lebih tinggi umumnya diperdagangkan dengan harga premium."
+                  label="Average Calorific Value (CV)"
+                  tooltip="Coal energy quality (kcal/kg). Higher calorific value generally trades at a premium."
                   valA={dataA?.weighted_cv_kcal != null ? `${dataA.weighted_cv_kcal.toFixed(0)} kcal/kg` : "—"}
                   valB={dataB?.weighted_cv_kcal != null ? `${dataB.weighted_cv_kcal.toFixed(0)} kcal/kg` : "—"}
                   winner={
@@ -612,8 +612,8 @@ export default function ComparePage() {
 
                 {/* 9. Top Export Destination */}
                 <ComparisonRow
-                  label="Pasar Ekspor Utama &amp; Porsi"
-                  tooltip="Negara tujuan pengapalan batubara terbesar dan persentase volumenya."
+                  label="Top Export Market &amp; Share"
+                  tooltip="Largest coal shipment destination country and its share of volume."
                   valA={dataA?.top_destination ? `${dataA.top_destination} (${dataA.top_destination_pct?.toFixed(0)}%)` : "—"}
                   valB={dataB?.top_destination ? `${dataB.top_destination} (${dataB.top_destination_pct?.toFixed(0)}%)` : "—"}
                   winner="Informational"
@@ -621,14 +621,14 @@ export default function ComparePage() {
 
                 {/* 10. Data Provenance */}
                 <ComparisonRow
-                  label="Kualitas &amp; Transparansi Data"
-                  tooltip="Tingkat kelengkapan data (Full, Partial, Minimal) berdasarkan audit silang ESDM vs Laporan Tahunan."
-                  valA={dataA?.data_quality ? dataA.data_quality.toUpperCase() : "—"}
-                  valB={dataB?.data_quality ? dataB.data_quality.toUpperCase() : "—"}
+                  label="Data Quality &amp; Transparency"
+                  tooltip="Data completeness level (Complete, Partial) based on a cross-audit of MEMR data vs annual reports."
+                  valA={dataA?.data_quality ? (dataA.data_quality === "LENGKAP" ? "COMPLETE" : dataA.data_quality === "PARSIAL" ? "PARTIAL" : dataA.data_quality.toUpperCase()) : "—"}
+                  valB={dataB?.data_quality ? (dataB.data_quality === "LENGKAP" ? "COMPLETE" : dataB.data_quality === "PARSIAL" ? "PARTIAL" : dataB.data_quality.toUpperCase()) : "—"}
                   winner={
-                    dataA?.data_quality === "full" && dataB?.data_quality !== "full"
+                    dataA?.data_quality === "LENGKAP" && dataB?.data_quality !== "LENGKAP"
                       ? tickerA
-                      : dataB?.data_quality === "full" && dataA?.data_quality !== "full"
+                      : dataB?.data_quality === "LENGKAP" && dataA?.data_quality !== "LENGKAP"
                       ? tickerB
                       : "Tie"
                   }
@@ -677,7 +677,7 @@ function ComparisonRow({
       <TableCell className="text-right">
         {winner === "Tie" ? (
           <Badge variant="secondary" className="font-sans text-[10px]">
-            Setara
+            Tie
           </Badge>
         ) : winner === "Informational" ? (
           <span className="text-slate-500 text-[10px] font-sans">—</span>

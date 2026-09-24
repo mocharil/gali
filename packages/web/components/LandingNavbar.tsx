@@ -55,33 +55,33 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
             href="#pillars"
             className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors"
           >
-            4 Pilar Fundamental
+            4 Fundamental Pillars
           </a>
           <a
             href="#leaderboard"
             className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors"
           >
-            Leaderboard 9 Emiten
+            9-Issuer Leaderboard
           </a>
           <Link
             href="/compare"
             className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors flex items-center gap-1"
           >
             <Scale className="h-3 w-3 text-amber-400" />
-            Komparasi Emiten
+            Issuer Comparison
           </Link>
           <Link
             href="/map"
             className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors flex items-center gap-1"
           >
             <MapPin className="h-3 w-3 text-cyan-400" />
-            Peta 52 Tambang
+            Map of 52 Mines
           </Link>
           <Link
             href="/methodology"
             className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors"
           >
-            Rumus M1–M9
+            M1–M9 Formulas
           </Link>
         </nav>
 
@@ -119,7 +119,7 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-2 text-xs font-black text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-[0_0_28px_rgba(245,158,11,0.5)] active:scale-95"
           >
             <Pickaxe className="h-3.5 w-3.5" />
-            <span>Buka Dashboard App</span>
+            <span>Open Dashboard App</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
 
@@ -145,7 +145,7 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
           >
             <div className="flex items-center gap-2">
               <Pickaxe className="h-4 w-4" />
-              <span>Masuk ke Executive Dashboard</span>
+              <span>Enter Executive Dashboard</span>
             </div>
             <ArrowRight className="h-4 w-4" />
           </Link>
@@ -154,14 +154,14 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
             onClick={() => setMobileOpen(false)}
             className="block rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
           >
-            4 Pilar Fundamental Tambang
+            4 Mining Fundamental Pillars
           </a>
           <a
             href="#leaderboard"
             onClick={() => setMobileOpen(false)}
             className="block rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
           >
-            Leaderboard 9 Emiten
+            9-Issuer Leaderboard
           </a>
           <Link
             href="/map"
@@ -169,7 +169,7 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
             className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
           >
             <MapPin className="h-3.5 w-3.5 text-cyan-400" />
-            Peta Konsesi 52 Tambang
+            Map of 52 Mine Concessions
           </Link>
           <Link
             href="/scenario"
@@ -184,7 +184,7 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
             onClick={() => setMobileOpen(false)}
             className="block rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
           >
-            Rumus Matematis &amp; Metodologi
+            Mathematical Formulas &amp; Methodology
           </Link>
           <a
             href="https://github.com/mocharil/gali"

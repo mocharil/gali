@@ -31,15 +31,15 @@ const COAL_TITANS = [
 ];
 
 const PAGES = [
-  { href: "/dashboard", label: "Executive Dashboard", desc: "Terminal analitis fundamental & leaderboard 9 emiten", icon: Pickaxe },
-  { href: "/compare", label: "Peer Comparison Studio", desc: "Head-to-head komparasi 2 emiten batubara IDX", icon: Scale },
-  { href: "/", label: "Landing Page", desc: "Beranda publik pengenalan platform & 4 pilar", icon: Sparkles },
-  { href: "/map", label: "National Concession Map", desc: "Peta sebaran 52 koordinat situs tambang ber-GPS", icon: MapPin },
-  { href: "/scenario", label: "Scenario Studio", desc: "Simulasi stress-test harga batubara & tarif impor", icon: SlidersHorizontal },
-  { href: "/cost-curve", label: "National Cost Curve", desc: "Tangga biaya tunai (cash cost) vs harga acuan ICI", icon: TrendingDown },
-  { href: "/divergence", label: "Market Divergence", desc: "Matriks valuasi cadangan fisik vs harga pasar", icon: LineChart },
-  { href: "/coverage", label: "Truth Audit & Ledger", desc: "Audit kejujuran data & pengeluaran kredit API", icon: ShieldCheck },
-  { href: "/methodology", label: "Metodologi & Formula", desc: "Transparansi rumus matematis M1–M9 & disclaimer", icon: BookOpen },
+  { href: "/dashboard", label: "Executive Dashboard", desc: "Fundamental analytics terminal & 9-issuer leaderboard", icon: Pickaxe },
+  { href: "/compare", label: "Peer Comparison Studio", desc: "Head-to-head comparison of 2 IDX coal issuers", icon: Scale },
+  { href: "/", label: "Landing Page", desc: "Public home introducing the platform & 4 pillars", icon: Sparkles },
+  { href: "/map", label: "National Concession Map", desc: "Distribution map of 52 GPS-coordinated mining sites", icon: MapPin },
+  { href: "/scenario", label: "Scenario Studio", desc: "Stress-test simulation of coal prices & import tariffs", icon: SlidersHorizontal },
+  { href: "/cost-curve", label: "National Cost Curve", desc: "Cash cost ladder vs ICI benchmark price", icon: TrendingDown },
+  { href: "/divergence", label: "Market Divergence", desc: "Physical reserve valuation matrix vs market price", icon: LineChart },
+  { href: "/coverage", label: "Truth Audit & Ledger", desc: "Data honesty audit & API credit spending", icon: ShieldCheck },
+  { href: "/methodology", label: "Methodology & Formulas", desc: "Transparency of M1–M9 formulas & disclaimer", icon: BookOpen },
 ];
 
 export function CommandPalette({
@@ -98,7 +98,7 @@ export function CommandPalette({
           <Search className="h-4 w-4 text-amber-400 shrink-0" />
           <input
             type="text"
-            placeholder="Ketik simbol emiten (ADRO, BYAN) atau navigasi halaman..."
+            placeholder="Type an issuer symbol (ADRO, BYAN) or navigate to a page..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
@@ -125,7 +125,7 @@ export function CommandPalette({
           <div>
             <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
               <Pickaxe className="h-3 w-3" />
-              <span>Emiten Pertambangan Batubara ({filteredIssuers.length})</span>
+              <span>Coal Mining Issuers ({filteredIssuers.length})</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1">
               {filteredIssuers.map((i) => (
@@ -143,7 +143,7 @@ export function CommandPalette({
                         {i.symbol}
                       </span>
                       <span className="text-[10px] font-mono text-slate-500">
-                        Skor: {i.score.toFixed(1)}
+                        Score: {i.score.toFixed(1)}
                       </span>
                     </div>
                     <div className="text-[11px] text-slate-400 truncate">{i.name}</div>
@@ -158,7 +158,7 @@ export function CommandPalette({
           <div>
             <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
-              <span>Halaman &amp; Alat Analisis ({filteredPages.length})</span>
+              <span>Pages &amp; Analysis Tools ({filteredPages.length})</span>
             </div>
             <div className="space-y-1 mt-1">
               {filteredPages.map((p) => {
@@ -197,7 +197,7 @@ export function CommandPalette({
             <span className="flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 border border-slate-800 font-mono text-[10px] text-slate-400">
               <Keyboard className="h-3 w-3" /> Esc
             </span>
-            <span>untuk menutup</span>
+            <span>to close</span>
           </div>
           <span className="font-mono text-slate-400">GALI Fast Navigator</span>
         </div>

@@ -173,9 +173,9 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
                <div style="color:#94a3b8; font-size:10px; margin-top:2px;">${p.province ?? ""} · <span style="color:#f59e0b; font-weight:700;">${p.commodity ?? ""}</span></div>
                <div style="margin-top:4px; padding-top:4px; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
                  <span style="font-family:var(--font-mono); font-weight:800; color:#38bdf8; font-size:11px;">${p.issuer_symbol ?? p.company_name ?? "—"}</span>
-                 ${p.production_volume_mt ? `<span style="font-size:10px; font-family:var(--font-mono); color:#cbd5e1;">${Number(p.production_volume_mt).toFixed(1)} Mt/thn</span>` : ""}
+                 ${p.production_volume_mt ? `<span style="font-size:10px; font-family:var(--font-mono); color:#cbd5e1;">${Number(p.production_volume_mt).toFixed(1)} Mt/yr</span>` : ""}
                </div>
-               <div style="font-size:9px; color:#a855f7; margin-top:3px; font-weight:600;">Klik titik untuk detail lengkap ↗</div>
+               <div style="font-size:9px; color:#a855f7; margin-top:3px; font-weight:600;">Click point for full detail ↗</div>
              </div>`
           )
           .addTo(map);
@@ -200,7 +200,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
         });
 
         setSelectedSite({
-          name: String(p.name ?? "Konsesi Tambang"),
+          name: String(p.name ?? "Mining Concession"),
           slug: p.slug ? String(p.slug) : undefined,
           commodity: String(p.commodity ?? "Coal"),
           company_name: String(p.company_name ?? ""),
@@ -230,7 +230,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
               activeRegion === "all" ? "bg-slate-800 text-amber-400 font-bold" : "text-slate-400 hover:text-white"
             }`}
           >
-            Nasional
+            National
           </button>
           <button
             onClick={() => flyToRegion("kalimantan")}
@@ -246,7 +246,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
               activeRegion === "sumatra" ? "bg-slate-800 text-amber-400 font-bold" : "text-slate-400 hover:text-white"
             }`}
           >
-            Sumatra Selatan
+            South Sumatra
           </button>
           <button
             onClick={() => flyToRegion("sulawesi")}
@@ -261,7 +261,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
             className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
               activeRegion === "tutupan" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold" : "text-amber-400/80 hover:text-amber-300"
             }`}
-            title="Focus ke Tambang Tutupan (ADRO) - Kalimantan Selatan"
+            title="Focus on Tutupan Mine (ADRO) - South Kalimantan"
           >
             🎯 Tutupan (ADRO)
           </button>
@@ -270,13 +270,13 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 text-xs text-slate-300 font-medium backdrop-blur-sm">
-          Memuat koordinat 52 situs tambang…
+          Loading coordinates for 52 mining sites…
         </div>
       )}
 
       {loadError && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 p-4 text-center text-xs text-rose-300">
-          Peta gagal dimuat: {loadError}
+          Map failed to load: {loadError}
         </div>
       )}
 
@@ -284,23 +284,23 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
       {!isLoading && geojson && (
         <div className="absolute bottom-3 left-3 z-10 hidden sm:flex flex-col gap-2 rounded-xl border border-slate-800/90 bg-[#060911]/95 p-3 text-xs text-slate-300 backdrop-blur-xl shadow-2xl max-w-xs">
           <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
-            <span>Legenda Peta</span>
-            <span className="font-mono text-amber-400 font-semibold">{geojson.features.length} Situs</span>
+            <span>Map Legend</span>
+            <span className="font-mono text-amber-400 font-semibold">{geojson.features.length} Sites</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-              <span>Batubara (Coal)</span>
+              <span>Coal</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-              <span>Nikel (Nickel)</span>
+              <span>Nickel</span>
             </div>
           </div>
 
           <div className="border-t border-slate-800/60 pt-1.5 space-y-1 text-[10px] text-slate-400">
-            <span className="text-slate-500 font-medium block">Skala Radius (Produksi Tahunan):</span>
+            <span className="text-slate-500 font-medium block">Radius Scale (Annual Production):</span>
             <div className="flex items-center justify-between font-mono">
               <span className="flex items-center gap-1">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" /> &lt;5 Mt
@@ -345,7 +345,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
             <button
               onClick={() => setSelectedSite(null)}
               className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-              aria-label="Tutup detail situs"
+              aria-label="Close site detail"
             >
               <X className="h-4 w-4" />
             </button>
@@ -357,22 +357,22 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
               <div className="flex items-center justify-between text-slate-400">
                 <span className="flex items-center gap-1.5 font-medium">
                   <Compass className="h-3.5 w-3.5 text-cyan-400" />
-                  Koordinat GPS Terverifikasi
+                  Verified GPS Coordinates
                 </span>
                 <button
                   onClick={() => handleCopyCoordinates(selectedSite.coordinates)}
                   className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
-                  title="Salin Latitude, Longitude"
+                  title="Copy Latitude, Longitude"
                 >
                   {copiedCoords ? (
                     <>
                       <Check className="h-3 w-3 text-emerald-400" />
-                      <span className="text-emerald-400">Tersalin!</span>
+                      <span className="text-emerald-400">Copied!</span>
                     </>
                   ) : (
                     <>
                       <Copy className="h-3 w-3" />
-                      <span>Salin</span>
+                      <span>Copy</span>
                     </>
                   )}
                 </button>
@@ -385,7 +385,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
             {/* Location & Operator info */}
             <div className="space-y-2.5">
               <div className="flex items-start justify-between">
-                <span className="text-slate-400">Wilayah / Provinsi:</span>
+                <span className="text-slate-400">Region / Province:</span>
                 <span className="font-semibold text-slate-200 text-right">
                   {selectedSite.city ? `${selectedSite.city}, ` : ""}
                   {selectedSite.province || "—"}
@@ -393,18 +393,18 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
               </div>
 
               <div className="flex items-start justify-between">
-                <span className="text-slate-400">Perusahaan Operasi:</span>
+                <span className="text-slate-400">Operating Company:</span>
                 <span className="font-semibold text-slate-200 text-right max-w-[190px]">
                   {selectedSite.company_name || "—"}
                 </span>
               </div>
 
               <div className="flex items-center justify-between border-t border-slate-800/60 pt-2.5">
-                <span className="text-slate-400">Laju Produksi:</span>
+                <span className="text-slate-400">Production Rate:</span>
                 <span className="font-mono font-bold text-amber-400">
                   {selectedSite.production_volume_mt != null
-                    ? `${selectedSite.production_volume_mt.toFixed(1)} Mt/thn`
-                    : "Belum dilaporkan"}
+                    ? `${selectedSite.production_volume_mt.toFixed(1)} Mt/yr`
+                    : "Not yet reported"}
                 </span>
               </div>
             </div>
@@ -413,25 +413,25 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
             {selectedSite.issuer_symbol ? (
               <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/90 p-3.5 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-slate-300">Emiten Induk Terdaftar</span>
+                  <span className="text-[11px] font-medium text-slate-300">Listed Parent Issuer</span>
                   <span className="font-mono text-sm font-black text-amber-400">
                     {selectedSite.issuer_symbol}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Konsesi tambang ini dihubungkan secara deterministik ke neraca keuangan emiten {selectedSite.issuer_symbol} di BEI melalui graf kepemilikan efektif.
+                  This mining concession is deterministically linked to {selectedSite.issuer_symbol}'s financial statements on the IDX via the effective ownership graph.
                 </p>
                 <Link
                   href={`/issuer/${selectedSite.issuer_symbol}`}
                   className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 transition-colors shadow-lg"
                 >
-                  <span>Analisis Fundamental {selectedSite.issuer_symbol}</span>
+                  <span>Fundamental Analysis for {selectedSite.issuer_symbol}</span>
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
               </div>
             ) : (
               <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-[11px] text-slate-400">
-                Konsesi ini dioperasikan oleh entitas swasta non-listed di luar 9 universe emiten fokus hackathon.
+                This concession is operated by a non-listed private entity outside the hackathon's 9-issuer focus universe.
               </div>
             )}
           </div>
@@ -443,7 +443,7 @@ export function MiningSitesMap({ compact = false, className = "" }: MiningSitesM
           href="/map"
           className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-400 backdrop-blur-xl hover:bg-amber-500/20 transition-colors shadow-lg"
         >
-          <Maximize2 className="h-3 w-3" /> Peta Penuh →
+          <Maximize2 className="h-3 w-3" /> Full Map →
         </Link>
       )}
     </div>

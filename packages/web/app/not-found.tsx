@@ -7,17 +7,17 @@ export default function NotFound() {
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10">
         <Compass className="h-7 w-7 text-amber-400" />
       </div>
-      <h1 className="mt-6 text-xl font-bold text-white">Halaman tidak ditemukan</h1>
+      <h1 className="mt-6 text-xl font-bold text-white">Page not found</h1>
       <p className="mt-2 max-w-md text-sm text-slate-400">
-        Halaman yang Anda cari tidak ada — atau mungkin simbol emiten yang dimaksud di luar in-scope
-        universe (lihat <code className="text-slate-300">/coverage</code> untuk daftar lengkap).
+        The page you're looking for doesn't exist — or the issuer symbol you meant may be outside the
+        in-scope universe (see <code className="text-slate-300">/coverage</code> for the full list).
       </p>
       <Link
         href="/"
         className="mt-8 flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-400"
       >
         <Home className="h-4 w-4" />
-        Kembali ke beranda
+        Back to home
       </Link>
     </div>
   );

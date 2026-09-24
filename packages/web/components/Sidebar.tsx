@@ -34,28 +34,28 @@ interface SidebarProps {
 
 const MENU_GROUPS = [
   {
-    title: "Dashboard & Peta",
+    title: "Dashboard & Map",
     items: [
       {
         href: "/dashboard",
         label: "Executive Dashboard",
-        desc: "Leaderboard & ringkasan",
+        desc: "Leaderboard & summary",
         icon: Pickaxe,
-        badge: "Utama",
+        badge: "Main",
         badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
       },
       {
         href: "/compare",
         label: "Peer Comparison",
-        desc: "Head-to-head emiten",
+        desc: "Head-to-head issuers",
         icon: Scale,
-        badge: "Baru",
+        badge: "New",
         badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
       },
       {
         href: "/map",
-        label: "Peta Konsesi Nasional",
-        desc: "52 situs tambang GPS",
+        label: "National Concession Map",
+        desc: "52 GPS mining sites",
         icon: MapPin,
         badge: "52 GPS",
         badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
@@ -63,28 +63,28 @@ const MENU_GROUPS = [
     ],
   },
   {
-    title: "Analisis Geologis & Pasar",
+    title: "Geological & Market Analysis",
     items: [
       {
         href: "/scenario",
         label: "Scenario Studio",
-        desc: "Simulasi stress-test makro",
+        desc: "Macro stress-test simulation",
         icon: SlidersHorizontal,
-        badge: "Simulasi",
+        badge: "Simulation",
         badgeColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30",
       },
       {
         href: "/cost-curve",
-        label: "Kurva Biaya Nasional",
-        desc: "Cash cost vs acuan ICI",
+        label: "National Cost Curve",
+        desc: "Cash cost vs ICI benchmark",
         icon: TrendingDown,
         badge: "M5",
         badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
       },
       {
         href: "/divergence",
-        label: "Matriks Divergensi",
-        desc: "Cadangan fisik vs pasar",
+        label: "Divergence Matrix",
+        desc: "Physical reserves vs market",
         icon: LineChart,
         badge: "M8 vs Cap",
         badgeColor: "bg-violet-500/10 text-violet-400 border-violet-500/30",
@@ -92,20 +92,20 @@ const MENU_GROUPS = [
     ],
   },
   {
-    title: "Tata Kelola & Metodologi",
+    title: "Governance & Methodology",
     items: [
       {
         href: "/coverage",
         label: "Truth Audit & Ledger",
-        desc: "Audit data mentah & kredit",
+        desc: "Raw data audit & credits",
         icon: ShieldCheck,
-        badge: "405 Krd",
+        badge: "405 Crd",
         badgeColor: "bg-slate-700/60 text-slate-300 border-slate-600",
       },
       {
         href: "/methodology",
-        label: "Rumus & Metodologi",
-        desc: "Formula matematis M1–M9",
+        label: "Formulas & Methodology",
+        desc: "M1–M9 mathematical formulas",
         icon: BookOpen,
         badge: "Docs",
         badgeColor: "bg-slate-700/60 text-slate-300 border-slate-600",
@@ -194,8 +194,8 @@ export function Sidebar({
             <button
               onClick={onToggleCollapse}
               className="hidden lg:flex rounded-lg p-1.5 text-slate-400 hover:bg-slate-800/80 hover:text-white transition-colors"
-              title="Lipat Sidebar (Ctrl+B)"
-              aria-label="Lipat sidebar"
+              title="Collapse Sidebar (Ctrl+B)"
+              aria-label="Collapse sidebar"
             >
               <PanelLeftClose className="h-4 w-4" />
             </button>
@@ -205,7 +205,7 @@ export function Sidebar({
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden"
-            aria-label="Tutup sidebar"
+            aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
           </button>
@@ -220,13 +220,13 @@ export function Sidebar({
                 if (onClose) onClose();
               }}
               className="relative flex h-10 w-full items-center justify-center rounded-xl border border-slate-800 bg-slate-900/90 text-amber-400 hover:border-amber-500/40 hover:bg-slate-800 transition-all group"
-              title="Cari emiten atau fitur (⌘K)"
-              aria-label="Buka pencarian"
+              title="Search issuers or features (⌘K)"
+              aria-label="Open search"
             >
               <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
               {/* Tooltip on folded hover */}
               <span className="pointer-events-none absolute left-full ml-3 hidden rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white shadow-2xl group-hover:block z-50 whitespace-nowrap">
-                Cari (⌘K)
+                Search (⌘K)
               </span>
             </button>
           ) : (
@@ -239,7 +239,7 @@ export function Sidebar({
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <Search className="h-3.5 w-3.5 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
-                <span className="font-medium truncate">Cari emiten / fitur...</span>
+                <span className="font-medium truncate">Search issuer / feature...</span>
               </div>
               <kbd className="flex items-center rounded border border-slate-700 bg-slate-950 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 shrink-0">
                 ⌘K
@@ -327,9 +327,9 @@ export function Sidebar({
                 <div className="flex items-center justify-between px-3 py-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/90 flex items-center gap-1.5">
                     <Flame className="h-3 w-3 text-amber-400" />
-                    Universe 9 Emiten IDX
+                    9-Issuer IDX Universe
                   </span>
-                  <span className="text-[9px] font-mono text-slate-500">Skor M8</span>
+                  <span className="text-[9px] font-mono text-slate-500">M8 Score</span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-1 px-1">
@@ -357,14 +357,14 @@ export function Sidebar({
               <div className="relative group flex justify-center py-1">
                 <div
                   className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 cursor-pointer transition-colors"
-                  title="Universe 9 Emiten Tambang"
+                  title="9-Issuer Mining Universe"
                 >
                   <Flame className="h-4 w-4" />
                 </div>
                 {/* Popover on folded hover */}
                 <div className="pointer-events-none absolute left-full ml-3 hidden rounded-xl border border-slate-700 bg-[#0c1322] p-2.5 shadow-2xl group-hover:block z-50 w-52">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400 mb-1.5">
-                    9 Emiten Batubara IDX
+                    9 IDX Coal Issuers
                   </div>
                   <div className="grid grid-cols-3 gap-1">
                     {EMITEN_LIST.map((e) => (
@@ -436,8 +436,8 @@ export function Sidebar({
               <button
                 onClick={onToggleCollapse}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-amber-400 hover:bg-slate-800 transition-colors"
-                title="Buka Sidebar Penuh (Ctrl+B)"
-                aria-label="Buka sidebar penuh"
+                title="Expand Sidebar (Ctrl+B)"
+                aria-label="Expand sidebar"
               >
                 <PanelLeftOpen className="h-4 w-4" />
               </button>

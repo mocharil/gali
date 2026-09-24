@@ -29,51 +29,51 @@ import {
 
 const PILLARS = [
   {
-    step: "Pilar 01",
-    title: "Peta Konsesi Fisik Ber-GPS",
+    step: "Pillar 01",
+    title: "GPS-Tagged Physical Concession Map",
     metric: "M1 Asset Ground Truth",
-    desc: "Menghubungkan kode saham di BEI ke 52 konsesi tambang fisik nyata dengan koordinat GPS terverifikasi di Kalimantan dan Sumatra.",
+    desc: "Links IDX stock tickers to 52 real physical mining concessions with verified GPS coordinates in Kalimantan and Sumatra.",
     icon: MapPin,
     href: "/map",
-    badge: "52 Situs GPS",
+    badge: "52 GPS Sites",
     accent: "text-amber-400 border-amber-500/30 bg-amber-500/10 hover:border-amber-500/50",
-    buttonText: "Eksplorasi Peta",
+    buttonText: "Explore Map",
     spotlight: "rgba(245, 158, 11, 0.18)",
   },
   {
-    step: "Pilar 02",
+    step: "Pillar 02",
     title: "Reserve Life Index (RLI)",
-    metric: "M2 Sisa Umur Tambang",
-    desc: "Menghitung sisa tahun cadangan terbukti berdasarkan laju produksi tahunan aktual. Mengungkap gap antara ekspektasi pasar modal vs umur tambang fisik.",
+    metric: "M2 Remaining Mine Life",
+    desc: "Calculates the remaining years of proven reserves based on the actual annual production rate. Reveals the gap between capital-market expectations and physical mine life.",
     icon: Clock,
     href: "/issuer/ADRO",
-    badge: "Sisa Umur Thn",
+    badge: "Remaining Life (Yrs)",
     accent: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10 hover:border-cyan-500/50",
-    buttonText: "Lihat RLI Emiten",
+    buttonText: "View Issuer RLI",
     spotlight: "rgba(6, 182, 212, 0.18)",
   },
   {
-    step: "Pilar 03",
-    title: "Kurva Biaya Nasional",
+    step: "Pillar 03",
+    title: "National Cost Curve",
     metric: "M5 Cash Cost Breakeven",
-    desc: "Memetakan cumulative cash cost per ton terhadap harga acuan pasar ICI-4 ($85/t). Mengidentifikasi produsen Q1 terendah dan emiten yang merugi tunai.",
+    desc: "Maps cumulative cash cost per ton against the ICI-4 benchmark price ($85/t). Identifies the lowest-cost Q1 producers and issuers running at a cash loss.",
     icon: TrendingDown,
     href: "/cost-curve",
     badge: "Cash Cost / t",
     accent: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:border-emerald-500/50",
-    buttonText: "Buka Cost Curve",
+    buttonText: "Open Cost Curve",
     spotlight: "rgba(16, 185, 129, 0.18)",
   },
   {
-    step: "Pilar 04",
+    step: "Pillar 04",
     title: "Scenario Stress-Test Studio",
     metric: "M9 Live Shock Engine",
-    desc: "Simulasi real-time dampak shock harga batubara, tarif impor China (+30%), dan diskon kedaluwarsa izin ESDM langsung ke valuasi Reserve-Backed Value.",
+    desc: "Real-time simulation of the impact of coal price shocks, China import tariffs (+30%), and MEMR license expiry discounts directly on Reserve-Backed Value.",
     icon: SlidersHorizontal,
     href: "/scenario",
-    badge: "Simulasi Real-Time",
+    badge: "Real-Time Simulation",
     accent: "text-indigo-400 border-indigo-500/30 bg-indigo-500/10 hover:border-indigo-500/50",
-    buttonText: "Uji Skenario",
+    buttonText: "Test Scenario",
     spotlight: "rgba(129, 140, 248, 0.18)",
   },
 ];
@@ -109,17 +109,17 @@ export default function LandingPage() {
 
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
-            Gali lebih dalam dari{" "}
+            Dig deeper than the{" "}
             <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(245,158,11,0.35)]">
-              kode sahamnya.
+              ticker symbol.
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed font-medium">
-            Platform intelijen fundamental komoditas pertama yang menghubungkan neraca keuangan emiten tambang
-            IDX langsung ke <strong className="text-amber-400">52 konsesi tambang fisik ber-GPS</strong>, sisa
-            umur cadangan geologis (RLI), estimasi cash cost per ton, dan simulasi stress-test makro real-time.
+            The first commodity fundamentals intelligence platform that connects the financials of IDX mining
+            issuers directly to <strong className="text-amber-400">52 GPS-tagged physical mining concessions</strong>,
+            remaining geological reserve life (RLI), cash cost per ton estimates, and real-time macro stress-test simulation.
           </p>
 
           {/* Action CTAs */}
@@ -129,7 +129,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-7 py-3.5 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:scale-105 active:scale-95"
             >
               <Pickaxe className="h-4 w-4" />
-              <span>Buka Executive Dashboard</span>
+              <span>Open Executive Dashboard</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
 
@@ -138,7 +138,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-bold text-slate-200 shadow-lg backdrop-blur-xl transition-all hover:border-cyan-500/50 hover:bg-slate-800 hover:text-white active:scale-95"
             >
               <MapPin className="h-4 w-4 text-cyan-400" />
-              <span>Peta 52 Konsesi Tambang</span>
+              <span>Map of 52 Mining Concessions</span>
             </Link>
 
             <Link
@@ -168,15 +168,15 @@ export default function LandingPage() {
                   />
                 )}
               </div>
-              <div className="text-[10px] text-slate-500 mt-0.5">7 Emiten Batubara Lengkap</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">7 Complete Coal Issuers</div>
             </div>
 
             <div className="rounded-2xl border border-slate-800/90 bg-slate-900/70 backdrop-blur-md p-4 text-center shadow-lg transition-transform hover:scale-[1.02]">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Konsesi Ber-GPS
+                GPS-Tagged Concessions
               </div>
               <div className="font-mono text-2xl font-black text-cyan-400 mt-0.5">
-                <NumberTicker value={52} decimalPlaces={0} suffix=" Situs" />
+                <NumberTicker value={52} decimalPlaces={0} suffix=" Sites" />
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">Kalimantan &amp; Sumatra</div>
             </div>
@@ -228,13 +228,13 @@ export default function LandingPage() {
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400">
             <Compass className="h-4 w-4" />
-            <span>Panduan Evaluasi Juri · 4 Modul Inti</span>
+            <span>Judging Guide · 4 Core Modules</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white">
             4 Pilar Ground-Truth Intelligence
           </h2>
           <p className="text-sm text-slate-400">
-            Arsitektur analitis deterministik yang dirancang untuk menjawab pertanyaan kritis investor institusional.
+            A deterministic analytical architecture designed to answer the critical questions of institutional investors.
           </p>
         </div>
 
@@ -287,19 +287,19 @@ export default function LandingPage() {
       </section>
 
 
-      {/* ── 3. Live Universe 9 Emiten Leaderboard Preview ── */}
+      {/* ── 3. Live Universe 9 Issuers Leaderboard Preview ── */}
       <section id="leaderboard" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
               <Flame className="h-4 w-4" />
-              <span>Universe Emiten Terverifikasi</span>
+              <span>Verified Issuer Universe</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white">
               Ground Truth Composite Leaderboard (M8)
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Peringkat fundamental 9 raksasa batubara IDX berdasarkan integritas data geologis dan operasional.
+              Fundamental ranking of 9 IDX coal giants based on geological and operational data integrity.
             </p>
           </div>
 
@@ -307,7 +307,7 @@ export default function LandingPage() {
             href="/dashboard"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors shrink-0"
           >
-            Buka Leaderboard Lengkap di Dashboard <ArrowRight className="h-3.5 w-3.5" />
+            Open Full Leaderboard on Dashboard <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
@@ -333,16 +333,16 @@ export default function LandingPage() {
 
               <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-slate-500">Skor Ground Truth</div>
+                  <div className="text-[10px] text-slate-500">Ground Truth Score</div>
                   <div className="font-mono text-base font-black text-amber-400">
                     {i.ground_truth_score != null ? i.ground_truth_score.toFixed(1) : "—"}
                     <span className="text-[10px] text-slate-600 font-bold"> / 100</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] text-slate-500">Sisa Umur (RLI)</div>
+                  <div className="text-[10px] text-slate-500">Remaining Life (RLI)</div>
                   <div className="font-mono text-xs font-bold text-cyan-400">
-                    {i.rli_years != null ? `${i.rli_years.toFixed(1)} thn` : "N/A"}
+                    {i.rli_years != null ? `${i.rli_years.toFixed(1)} yrs` : "N/A"}
                   </div>
                 </div>
               </div>
@@ -358,16 +358,16 @@ export default function LandingPage() {
             <div className="lg:col-span-7 space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>100% Transparansi &amp; Audit Trail</span>
+                <span>100% Transparency &amp; Audit Trail</span>
               </div>
               <h2 className="text-2xl sm:text-4xl font-black text-white">
-                Zero Black-Box Intelligence. Setiap Angka Bisa Diaudit.
+                Zero Black-Box Intelligence. Every Number Is Auditable.
               </h2>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Platform keuangan konvensional seringkali menjadi black-box. GALI menyajikan{" "}
-                <strong className="text-white">Evidence Drawer</strong> di setiap halaman emiten, memungkinkan
-                investor dan juri menginspeksi payload mentah Sectors API, formula DCF finite annuity (M6), dan
-                pohon kepemilikan efektif hingga ke entitas pemegang IUP.
+                Conventional financial platforms are often black boxes. GALI provides an{" "}
+                <strong className="text-white">Evidence Drawer</strong> on every issuer page, letting
+                investors and judges inspect raw Sectors API payloads, the finite-annuity DCF formula (M6), and
+                the effective ownership tree down to the entity holding the IUP.
               </p>
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="flex items-center gap-2 text-xs text-slate-300">
@@ -376,11 +376,11 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Formula Deterministik M1–M9</span>
+                  <span>Deterministic Formulas M1–M9</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Ledger Kredit API Publik</span>
+                  <span>Public API Credit Ledger</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
@@ -392,33 +392,33 @@ export default function LandingPage() {
             <div className="lg:col-span-5 flex flex-col gap-3">
               <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5 space-y-3 shadow-inner">
                 <div className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                  Dokumentasi Rumus &amp; Metodologi
+                  Formula &amp; Methodology Documentation
                 </div>
                 <p className="text-xs text-slate-400">
-                  Pelajari rumus matematis M1 hingga M9, parameter diskon kalori Newcastle, dan asumsi hurdle rate 12%.
+                  Explore the mathematical formulas M1 through M9, the Newcastle calorific discount parameters, and the 12% hurdle rate assumption.
                 </p>
                 <Link
                   href="/methodology"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-colors"
                 >
                   <BookOpen className="h-3.5 w-3.5 text-amber-400" />
-                  Baca Metodologi M1–M9 →
+                  Read Methodology M1–M9 →
                 </Link>
               </div>
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5 space-y-3 shadow-inner">
                 <div className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                  Audit Saldo Kredit API
+                  API Credit Balance Audit
                 </div>
                 <p className="text-xs text-slate-400">
-                  Lihat rekapitulasi 405 kredit Sectors API yang dikeluarkan secara efisien dan deterministik.
+                  See the recap of the 405 Sectors API credits spent efficiently and deterministically.
                 </p>
                 <Link
                   href="/coverage"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-colors"
                 >
                   <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
-                  Cek Truth Audit &amp; Ledger →
+                  Check Truth Audit &amp; Ledger →
                 </Link>
               </div>
             </div>
@@ -431,10 +431,10 @@ export default function LandingPage() {
         <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#0a1120] to-[#060911] p-10 sm:p-14 shadow-2xl space-y-5 relative overflow-hidden">
           <BorderBeam size={320} duration={14} colorFrom="#f59e0b" colorTo="#06b6d4" />
           <h2 className="text-3xl sm:text-5xl font-black text-white relative z-10">
-            Siap Menilai Emiten Komoditas IDX dengan Data Fisik Nyata?
+            Ready to Value IDX Commodity Issuers with Real Physical Data?
           </h2>
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto relative z-10">
-            Masuk ke Executive Dashboard untuk mengakses peta konsesi, stress-test skenario, dan kurva biaya nasional.
+            Enter the Executive Dashboard to access the concession map, scenario stress tests, and the national cost curve.
           </p>
           <div className="pt-3 relative z-10">
             <Link
@@ -442,7 +442,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-8 py-4 text-sm font-black text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:from-amber-400 hover:to-yellow-400 hover:scale-105 active:scale-95 transition-all"
             >
               <Pickaxe className="h-4 w-4" />
-              <span>Buka Executive Dashboard Sekarang</span>
+              <span>Open Executive Dashboard Now</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

@@ -159,10 +159,10 @@ export function Navbar() {
             <button
               onClick={() => setPaletteOpen(true)}
               className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-1.5 text-xs text-slate-400 transition-all hover:border-amber-500/40 hover:text-slate-200 group"
-              aria-label="Buka Command Palette (Ctrl+K)"
+              aria-label="Open Command Palette (Ctrl+K)"
             >
               <Search className="h-3.5 w-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline">Cari...</span>
+              <span className="hidden sm:inline">Search...</span>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-slate-800 bg-slate-950 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
                 ⌘K
               </kbd>
@@ -226,7 +226,7 @@ export function Navbar() {
             >
               <div className="flex items-center gap-2">
                 <Search className="h-4 w-4 text-amber-400" />
-                <span>Cari emiten atau halaman…</span>
+                <span>Search issuers or pages…</span>
               </div>
               <span className="font-mono text-xs text-slate-500">⌘K</span>
             </button>

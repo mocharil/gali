@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import { ShieldAlert } from "lucide-react";
 
 export const metadata = {
-  title: "Metodologi & Disclaimer",
+  title: "Methodology & Disclaimer",
 };
 
 function readMetricsDoc(): string {
@@ -20,7 +20,7 @@ function readMetricsDoc(): string {
   for (const p of candidates) {
     if (fs.existsSync(p)) return fs.readFileSync(p, "utf-8");
   }
-  return "# Metodologi\n\n_docs/METRICS.md tidak ditemukan di build ini._";
+  return "# Methodology\n\n_docs/METRICS.md was not found in this build._";
 }
 
 export default function MethodologyPage() {
@@ -31,11 +31,11 @@ export default function MethodologyPage() {
       <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
         <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
         <p className="text-sm leading-relaxed text-amber-100">
-          <strong>GALI adalah alat informasi dan analisis, bukan nasihat investasi.</strong> Seluruh
-          metrik di bawah ini adalah turunan matematis dari data publik, disajikan untuk riset dan
-          transparansi — bukan rekomendasi beli/jual. GALI tidak memiliki mekanisme eksekusi
-          perdagangan dalam bentuk apa pun. Lakukan riset independen dan konsultasi dengan penasihat
-          keuangan berlisensi sebelum mengambil keputusan finansial.
+          <strong>GALI is an information and analysis tool, not investment advice.</strong> All
+          metrics below are mathematical derivations of public data, presented for research and
+          transparency — not buy/sell recommendations. GALI has no trade execution mechanism of any
+          kind. Do your own independent research and consult a licensed financial advisor before
+          making any financial decision.
         </p>
       </div>
 

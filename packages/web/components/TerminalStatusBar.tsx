@@ -22,7 +22,7 @@ export function TerminalStatusBar({ apiOnline }: TerminalStatusBarProps) {
           <span className="hidden text-slate-700 sm:inline">|</span>
           <div className="hidden items-center gap-1.5 text-slate-400 sm:flex">
             <Layers className="h-3 w-3 text-cyan-400" />
-            <span>9 Emiten Batubara IDX · 52 Konsesi GPS</span>
+            <span>9 IDX Coal Issuers · 52 GPS Concessions</span>
           </div>
         </div>
 

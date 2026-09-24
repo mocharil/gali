@@ -22,43 +22,43 @@ interface HeaderProps {
 const ROUTE_CONTEXTS: Record<string, { title: string; category: string; desc: string }> = {
   "/dashboard": {
     title: "Executive Dashboard",
-    category: "Ringkasan Eksekutif",
-    desc: "Leaderboard skor fundamental tambang & peta nasional 52 konsesi",
+    category: "Executive Summary",
+    desc: "Mining fundamental score leaderboard & national map of 52 concessions",
   },
   "/": {
     title: "Landing Page",
-    category: "Beranda Publik",
-    desc: "Pengenalan platform intelijen fundamental komoditas IDX",
+    category: "Public Home",
+    desc: "Introduction to the IDX commodity fundamental intelligence platform",
   },
   "/map": {
-    title: "Peta Konsesi Tambang",
-    category: "Spasial & Geologis",
-    desc: "Visualisasi 52 situs tambang fisik berkoordinat GPS di Kalimantan & Sumatra",
+    title: "Mining Concession Map",
+    category: "Spatial & Geological",
+    desc: "Visualization of 52 physical mining sites with GPS coordinates in Kalimantan & Sumatra",
   },
   "/scenario": {
     title: "Scenario Studio",
-    category: "Simulasi Finansial",
-    desc: "Stress-test real-time terhadap shock harga batubara, tarif impor, dan kepatuhan CNC",
+    category: "Financial Simulation",
+    desc: "Real-time stress-test against coal price shocks, import tariffs, and CNC compliance",
   },
   "/cost-curve": {
-    title: "Kurva Biaya Nasional",
-    category: "Analisis Margin",
-    desc: "Kumulatif cash cost per ton terhadap harga acuan pasar komoditas ICI",
+    title: "National Cost Curve",
+    category: "Margin Analysis",
+    desc: "Cumulative cash cost per ton against ICI commodity benchmark prices",
   },
   "/divergence": {
-    title: "Matriks Divergensi Pasar",
-    category: "Valuasi Cadangan",
-    desc: "Membandingkan Reserve-Backed Value (RBV) vs Market Cap & Foreign Flow",
+    title: "Market Divergence Matrix",
+    category: "Reserve Valuation",
+    desc: "Comparing Reserve-Backed Value (RBV) vs Market Cap & Foreign Flow",
   },
   "/coverage": {
     title: "Truth Audit & Ledger",
-    category: "Transparansi Data",
-    desc: "Audit data mentah Sectors API dan saldo pengeluaran kredit API",
+    category: "Data Transparency",
+    desc: "Raw Sectors API data audit and API credit spending balance",
   },
   "/methodology": {
-    title: "Rumus & Metodologi",
-    category: "Dokumentasi Teknis",
-    desc: "Transparansi formula matematis M1 hingga M9 serta batasan metodologis",
+    title: "Formulas & Methodology",
+    category: "Technical Documentation",
+    desc: "Transparency of M1 through M9 mathematical formulas and methodological limitations",
   },
 };
 
@@ -75,17 +75,17 @@ export function Header({
   // Derive title from pathname, handling /issuer/[symbol]
   let context = ROUTE_CONTEXTS[pathname];
   if (!context && pathname.startsWith("/issuer/")) {
-    const symbol = pathname.split("/")[2]?.toUpperCase() || "EMITEN";
+    const symbol = pathname.split("/")[2]?.toUpperCase() || "ISSUER";
     context = {
       title: `${symbol} — Deep-Dive Fundamental`,
-      category: "Emiten Batubara IDX",
-      desc: `Analisis cadangan fisik, RLI, license cliff, dan cash cost ${symbol}`,
+      category: "IDX Coal Issuer",
+      desc: `Analysis of physical reserves, RLI, license cliff, and cash cost for ${symbol}`,
     };
   }
   if (!context) {
     context = {
       title: "GALI Analytics",
-      category: "Platform Intelligence",
+      category: "Intelligence Platform",
       desc: "Ground-Truth Intelligence for IDX Mining",
     };
   }
@@ -101,7 +101,7 @@ export function Header({
             type="button"
             onClick={onToggleSidebar}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 hover:text-white lg:hidden"
-            aria-label="Buka navigasi menu (mobile)"
+            aria-label="Open navigation menu (mobile)"
           >
             <PanelLeft className="h-5 w-5 text-amber-400" />
           </button>
@@ -111,7 +111,7 @@ export function Header({
             type="button"
             onClick={onToggleCollapse}
             className="hidden lg:flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-400 hover:border-amber-500/40 hover:bg-slate-800 hover:text-amber-400 transition-all group"
-            title={isCollapsed ? "Buka Sidebar Penuh (Ctrl+B)" : "Lipat Sidebar (Ctrl+B)"}
+            title={isCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
             aria-label="Toggle sidebar fold"
           >
             <PanelLeft className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -151,10 +151,10 @@ export function Header({
           <button
             onClick={() => setMacroOpen(!macroOpen)}
             className="hidden md:flex xl:hidden items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 px-2.5 py-1.5 text-xs text-slate-300 hover:border-slate-700"
-            title="Lihat asumsi makro"
+            title="View macro assumptions"
           >
             <Sliders className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-[11px] font-mono">Asumsi</span>
+            <span className="text-[11px] font-mono">Assumptions</span>
             {macroOpen ? <ChevronUp className="h-3 w-3 text-slate-500" /> : <ChevronDown className="h-3 w-3 text-slate-500" />}
           </button>
 
@@ -162,10 +162,10 @@ export function Header({
           <button
             onClick={onOpenSearch}
             className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-1.5 text-xs text-slate-400 transition-all hover:border-amber-500/40 hover:text-slate-200 shadow-sm group"
-            aria-label="Cari emiten atau fitur (Ctrl+K)"
+            aria-label="Search issuers or features (Ctrl+K)"
           >
             <Search className="h-3.5 w-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-            <span className="hidden sm:inline">Cari...</span>
+            <span className="hidden sm:inline">Search...</span>
             <kbd className="hidden sm:inline-flex items-center rounded border border-slate-800 bg-slate-950 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
               ⌘K
             </kbd>
@@ -198,7 +198,7 @@ export function Header({
               <strong className="text-amber-400 font-mono">$135.00/t</strong>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">ICI-4 Acuan:</span>
+              <span className="text-slate-500">ICI-4 Benchmark:</span>
               <strong className="text-emerald-400 font-mono">$85.00/t</strong>
             </div>
             <div className="flex items-center gap-1.5">

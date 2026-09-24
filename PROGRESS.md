@@ -4,6 +4,23 @@ Log kerja. **Satu entri per sesi.** Format wajib seperti di bawah; jangan diubah
 Aturan lengkapnya ada di `BUILD_PLAN.md` §0.
 
 
+## 2026-09-24 — Seluruh UI web diterjemahkan ke bahasa Inggris (koordinator)
+
+**Konteks:** Aril meminta seluruh komponen frontend diubah ke bahasa Inggris.
+
+**Selesai:** semua teks user-facing di `packages/web` (semua halaman + komponen) dan `docs/METRICS.md` (dirender di `/methodology`) kini berbahasa Inggris. `npx tsc --noEmit` bersih, `npm run build` sukses (13 halaman).
+
+**Keputusan:**
+1. Nilai data dari backend (`data_quality` = `LENGKAP`/`PARSIAL`) **tidak diubah**, karena itu kontrak API dan dipakai di test API; frontend hanya menampilkannya sebagai `COMPLETE`/`PARTIAL` (`ConfidenceBadge`, `/compare`).
+2. `GATE_DECISION` di `gali_core/config.py` diubah ke bahasa Inggris. API (`gali-api`) di-deploy manual, jadi `/coverage` baru menampilkan teks Inggris setelah API di-redeploy.
+3. Sekalian memperbaiki bug kecil di `/compare`: perbandingan `data_quality === "full"` tidak pernah cocok dengan nilai API `LENGKAP`.
+
+**Belum dikerjakan:** `packages/web/e2e/gali.spec.ts` sudah usang sejak redesign UI (teks lama, bukan hanya bahasa) dan perlu ditulis ulang terhadap UI sekarang.
+
+**Kredit terpakai sesi ini:** 0
+
+**Next:** verifikasi live di `https://gali-web.vercel.app`; redeploy `gali-api` agar teks `/coverage` ikut berubah; tulis ulang e2e.
+
 
 ## 2026-09-23 — Web app deployment ternyata rusak total sejak beberapa sesi lalu; diperbaiki + 3 bug fungsional ditemukan & diperbaiki (koordinator)
 

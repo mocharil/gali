@@ -60,11 +60,11 @@ export default function CostCurvePage() {
               <span>M5 National Cash Cost Curve</span>
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-white">Kurva Biaya Nasional — Batubara</h1>
+          <h1 className="text-3xl font-black text-white">National Cost Curve — Coal</h1>
           <p className="mt-1 max-w-3xl text-xs sm:text-sm text-slate-300">
-            Setiap tangga merepresentasikan emiten batubara IDX, diurutkan dari cash cost per ton termurah.
-            Lebar tangga mencerminkan volume produksi tahunan (Mt). Emiten di bawah garis harga benchmark
-            memiliki margin tunai positif.
+            Each step represents an IDX coal issuer, sorted from lowest to highest cash cost per ton.
+            Step width reflects annual production volume (Mt). Issuers below the benchmark price line
+            have a positive cash margin.
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function CostCurvePage() {
         <Card className="p-5 border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 hover:border-emerald-500/30 transition-all">
           <CardHeader className="p-0 pb-2">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Produsen Biaya Terendah (Q1)
+              Lowest-Cost Producer (Q1)
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -86,35 +86,35 @@ export default function CostCurvePage() {
                 {lowestCost ? `$${lowestCost.cash_cost_per_ton_usd.toFixed(2)}/t` : ""}
               </span>
             </div>
-            <p className="mt-2 text-[11px] text-slate-500">Margin tunai tertinggi di harga pasar berjalan</p>
+            <p className="mt-2 text-[11px] text-slate-500">Highest cash margin at the current market price</p>
           </CardContent>
         </Card>
 
         <Card className="p-5 border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 hover:border-amber-500/30 transition-all">
           <CardHeader className="p-0 pb-2">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Harga Acuan Benchmark (ICI-4 / FOB)
+              Benchmark Reference Price (ICI-4 / FOB)
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="mt-1 font-mono text-2xl font-black text-amber-400">
               ${benchmark.toFixed(2)}/t
             </div>
-            <p className="mt-2 text-[11px] text-slate-500">Garis batas impas operasional (cash breakeven)</p>
+            <p className="mt-2 text-[11px] text-slate-500">Operating breakeven line (cash breakeven)</p>
           </CardContent>
         </Card>
 
         <Card className="p-5 border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 hover:border-cyan-500/30 transition-all">
           <CardHeader className="p-0 pb-2">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Total Kapasitas Teranalisis
+              Total Capacity Analyzed
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="mt-1 font-mono text-2xl font-black text-cyan-400">
-              {totalCapacity.toFixed(1)} Mt/thn
+              {totalCapacity.toFixed(1)} Mt/yr
             </div>
-            <p className="mt-2 text-[11px] text-slate-500">Volume produksi tahunan kumulatif 7 emiten lengkap</p>
+            <p className="mt-2 text-[11px] text-slate-500">Cumulative annual production of the 7 complete issuers</p>
           </CardContent>
         </Card>
       </div>
@@ -124,10 +124,10 @@ export default function CostCurvePage() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
             <Layers className="h-4 w-4 text-amber-400" />
-            Visualisasi Tangga Biaya Kumulatif (Cumulative Step Curve)
+            Cumulative Cost Step Curve
           </CardTitle>
           <Badge variant="secondary" className="font-mono text-[10px]">
-            X: Kapasitas Kumulatif (Mt) | Y: Cash Cost ($/t)
+            X: Cumulative Capacity (Mt) | Y: Cash Cost ($/t)
           </Badge>
         </div>
 
@@ -138,7 +138,7 @@ export default function CostCurvePage() {
         ) : points.length === 0 ? (
           <div className="h-80 flex flex-col items-center justify-center text-slate-500">
             <AlertCircle className="h-8 w-8 mb-2 opacity-50" />
-            <span>Data kurva biaya belum tersedia</span>
+            <span>Cost curve data is not available yet</span>
           </div>
         ) : (
           <div className="h-80 w-full pt-4">
@@ -150,7 +150,7 @@ export default function CostCurvePage() {
                   stroke="#64748b"
                   tick={{ fill: "#94a3b8", fontSize: 11 }}
                   label={{
-                    value: "Kapasitas Kumulatif Produksi Batubara (Juta Ton / Tahun)",
+                    value: "Cumulative Coal Production Capacity (Million Tons / Year)",
                     position: "insideBottom",
                     offset: -10,
                     fill: "#94a3b8",
@@ -181,10 +181,10 @@ export default function CostCurvePage() {
                             Cash Cost: <span className="font-bold text-white">${d.cash_cost_per_ton_usd.toFixed(2)}/t</span>
                           </div>
                           <div className="text-slate-400">
-                            Volume: <span className="text-white">{d.production_mt.toFixed(1)} Mt</span> (Kumulatif: {d.cumulative_volume_mt.toFixed(1)} Mt)
+                            Volume: <span className="text-white">{d.production_mt.toFixed(1)} Mt</span> (Cumulative: {d.cumulative_volume_mt.toFixed(1)} Mt)
                           </div>
                           <div className={margin >= 0 ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
-                            Margin Bersih: ${margin.toFixed(2)}/t ({margin >= 0 ? "PROFIT" : "LOSS"})
+                            Net Margin: ${margin.toFixed(2)}/t ({margin >= 0 ? "PROFIT" : "LOSS"})
                           </div>
                         </div>
                       );
@@ -221,10 +221,10 @@ export default function CostCurvePage() {
       <Card className="border-slate-800/80 bg-[#080d19]/90 p-5 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-            Tabel Rincian Cash Cost &amp; Margin Per Emiten
+            Cash Cost &amp; Margin Breakdown by Issuer
           </CardTitle>
           <Badge variant="secondary" className="font-mono text-[11px]">
-            {points.length} Emiten
+            {points.length} Issuers
           </Badge>
         </div>
 
@@ -232,13 +232,13 @@ export default function CostCurvePage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">#</TableHead>
-              <TableHead>Emiten</TableHead>
+              <TableHead>Issuer</TableHead>
               <TableHead className="text-right">Volume (Mt)</TableHead>
-              <TableHead className="text-right">Kumulatif (Mt)</TableHead>
+              <TableHead className="text-right">Cumulative (Mt)</TableHead>
               <TableHead className="text-right">Cash Cost ($/t)</TableHead>
               <TableHead className="text-right">Margin vs Benchmark</TableHead>
-              <TableHead className="text-center">Status Kuartil</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
+              <TableHead className="text-center">Quartile Status</TableHead>
+              <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -271,7 +271,7 @@ export default function CostCurvePage() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={margin >= 0 ? "success" : "destructive"}>
-                      {margin >= 0 ? "Margin Positif" : "Di Bawah Air"}
+                      {margin >= 0 ? "Positive Margin" : "Underwater"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

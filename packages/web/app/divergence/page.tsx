@@ -50,8 +50,8 @@ export default function DivergencePage() {
           </div>
           <h1 className="text-3xl font-black text-white">Market Divergence Engine</h1>
           <p className="mt-1 max-w-3xl text-xs sm:text-sm text-slate-300">
-            Membandingkan Ground Truth Score (kondisi cadangan fisik dan fundamental tambang) dengan valuasi pasar modal
-            dan arus dana asing (foreign flow), untuk mengidentifikasi emiten yang mengalami mispricing atau diskon fundamental.
+            Compares the Ground Truth Score (the state of physical reserves and mining fundamentals) against capital-market
+            valuation and foreign fund flow, to identify issuers that are mispriced or trading at a fundamental discount.
           </p>
         </div>
       </div>
@@ -60,45 +60,45 @@ export default function DivergencePage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-emerald-500/30 bg-emerald-500/5 p-5 space-y-2 hover:border-emerald-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Kuadran I</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Quadrant I</span>
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="font-bold text-white text-sm">Fundamental Kuat / Terdiskon</div>
+          <div className="font-bold text-white text-sm">Strong Fundamentals / Discounted</div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Skor cadangan &gt; 50, umur tambang panjang, valuasi pasar masih di bawah intrinsic Reserve-Backed Value.
+            Reserve score &gt; 50, long mine life, market valuation still below intrinsic Reserve-Backed Value.
           </p>
         </Card>
 
         <Card className="border-cyan-500/30 bg-cyan-500/5 p-5 space-y-2 hover:border-cyan-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Kuadran II</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Quadrant II</span>
             <TrendingUp className="h-4 w-4 text-cyan-400" />
           </div>
           <div className="font-bold text-white text-sm">Premium / Fair Valued</div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Fundamental tinggi dan pasar mengapresiasi dengan valuasi wajar atau sedikit premium.
+            High fundamentals, and the market rewards them with a fair or slightly premium valuation.
           </p>
         </Card>
 
         <Card className="border-amber-500/30 bg-amber-500/5 p-5 space-y-2 hover:border-amber-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Kuadran III</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Quadrant III</span>
             <TrendingDown className="h-4 w-4 text-amber-400" />
           </div>
-          <div className="font-bold text-white text-sm">Spekulatif / Overvalued</div>
+          <div className="font-bold text-white text-sm">Speculative / Overvalued</div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Harga saham tinggi namun cadangan menipis atau risiko perizinan (license cliff) tinggi.
+            High share price but depleting reserves or high licensing risk (license cliff).
           </p>
         </Card>
 
         <Card className="border-rose-500/30 bg-rose-500/5 p-5 space-y-2 hover:border-rose-500/50 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Kuadran IV</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Quadrant IV</span>
             <Info className="h-4 w-4 text-rose-400" />
           </div>
-          <div className="font-bold text-white text-sm">Menipis / High Risk</div>
+          <div className="font-bold text-white text-sm">Depleting / High Risk</div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Cadangan fisik rendah, umur tambang &lt; 10 thn, biaya operasional di atas kuartil 3.
+            Low physical reserves, mine life &lt; 10 yrs, operating costs above the 3rd quartile.
           </p>
         </Card>
       </div>
@@ -107,10 +107,10 @@ export default function DivergencePage() {
       <Card className="border-slate-800/80 bg-[#080d19]/90 p-5 space-y-4 shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-            Matriks Divergensi Emiten Batubara IDX
+            IDX Coal Issuer Divergence Matrix
           </CardTitle>
           <Badge variant="secondary" className="font-mono text-[11px]">
-            Diurutkan berdasarkan Ground Truth Score
+            Sorted by Ground Truth Score
           </Badge>
         </div>
 
@@ -125,19 +125,19 @@ export default function DivergencePage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>Emiten</TableHead>
-                <TableHead className="text-right">Skor Fisik (M8)</TableHead>
+                <TableHead>Issuer</TableHead>
+                <TableHead className="text-right">Physical Score (M8)</TableHead>
                 <TableHead className="text-right">Market Cap (IDR)</TableHead>
-                <TableHead className="text-right">Gap RBV vs Mkt (%)</TableHead>
-                <TableHead className="text-right">Foreign Flow (30H)</TableHead>
-                <TableHead className="text-center">Kuadran Divergensi</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
+                <TableHead className="text-right">RBV vs Mkt Gap (%)</TableHead>
+                <TableHead className="text-right">Foreign Flow (30D)</TableHead>
+                <TableHead className="text-center">Divergence Quadrant</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.map((item, idx) => {
                 const score = item.ground_truth_score ?? 0;
-                const quadrant = item.quadrant ?? "Kuadran II (Fair)";
+                const quadrant = item.quadrant ?? "Quadrant II (Fair)";
                 const gap = item.rbv_gap_pct;
                 const flow = item.net_foreign_flow_30d_idr;
 
@@ -177,7 +177,7 @@ export default function DivergencePage() {
                     <TableCell className="text-right">
                       <Button asChild variant="ghost" size="xs">
                         <Link href={`/issuer/${item.symbol}`} className="gap-1 font-sans">
-                          <span>Analisis</span>
+                          <span>Analyze</span>
                           <ArrowRight className="h-3 w-3" />
                         </Link>
                       </Button>

@@ -46,7 +46,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
       <button
         onClick={() => setIsOpen(true)}
         className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400 transition-all hover:bg-amber-500/20"
-        title="Lihat provenance dan bukti perhitungan mentah"
+        title="View provenance and raw calculation evidence"
       >
         <ShieldCheck className="h-3.5 w-3.5" />
         <span>Evidence &amp; Provenance</span>
@@ -60,7 +60,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={`Evidence dan provenance untuk ${symbol}`}
+            aria-label={`Evidence and provenance for ${symbol}`}
             className="flex h-full w-full max-w-xl flex-col justify-between overflow-y-auto border-l border-slate-800 bg-[#0e1420] p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -74,13 +74,13 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-slate-400">
-                    Setiap angka bisa ditelusuri ke respons API mentah yang mendasarinya.
+                    Every number can be traced back to the raw API response that underlies it.
                   </p>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
-                  aria-label="Tutup"
+                  aria-label="Close"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -90,9 +90,9 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
                 <div className="flex items-start gap-2.5">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" />
                   <div>
-                    <div className="text-[11px] text-slate-400">Dihitung pada</div>
+                    <div className="text-[11px] text-slate-400">Computed at</div>
                     <div className="text-xs font-mono text-slate-200">
-                      {evidence.derived_at ? new Date(evidence.derived_at).toLocaleString("id-ID") : "—"}
+                      {evidence.derived_at ? new Date(evidence.derived_at).toLocaleString("en-US") : "—"}
                     </div>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
                 <div className="space-y-2">
                   <h4 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300">
                     <AlertTriangle className="h-4 w-4" />
-                    <span>Field kosong &amp; alasannya ({nullFields.length})</span>
+                    <span>Empty fields &amp; reasons ({nullFields.length})</span>
                   </h4>
                   <div className="space-y-2">
                     {nullFields.map((nf) => (
@@ -130,7 +130,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
               <div className="space-y-2">
                 <h4 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-300">
                   <FileText className="h-4 w-4 text-amber-400" />
-                  <span>Konteks perhitungan</span>
+                  <span>Calculation context</span>
                 </h4>
                 <pre className="overflow-x-auto whitespace-pre-wrap rounded border border-slate-800/60 bg-slate-950 p-2.5 font-mono text-[11px] text-slate-300">
                   {JSON.stringify(provenance, null, 2)}
@@ -138,7 +138,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Asumsi finansial</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Financial assumptions</h4>
                 <pre className="overflow-x-auto whitespace-pre-wrap rounded border border-slate-800/60 bg-slate-950 p-2.5 font-mono text-[11px] text-slate-300">
                   {JSON.stringify(assumptions, null, 2)}
                 </pre>
@@ -146,7 +146,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
 
               {sourceIds.length > 0 && (
                 <div className="text-[11px] text-slate-500">
-                  Ditelusuri dari {sourceIds.length} respons API mentah (raw.responses id:{" "}
+                  Traced from {sourceIds.length} raw API responses (raw.responses id:{" "}
                   {sourceIds.slice(0, 8).join(", ")}
                   {sourceIds.length > 8 ? ", …" : ""}).
                 </div>
@@ -158,7 +158,7 @@ export function EvidenceDrawer({ symbol, runId, evidence }: EvidenceDrawerProps)
                 onClick={() => setIsOpen(false)}
                 className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-700"
               >
-                Tutup
+                Close
               </button>
             </div>
           </div>

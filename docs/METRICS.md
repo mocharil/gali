@@ -1,39 +1,39 @@
 # GALI METRICS METHODOLOGY & GROUND TRUTH SPECIFICATION
 
-> **Dokumentasi Resmi Metodologi Metrik M1–M9, Mesin Skenario, & Provenance Audit**
-> Versi Metodologi: `2.0-verified` · Tanggal: **29 Agustus 2026**
+> **Official Documentation of the M1–M9 Metrics Methodology, Scenario Engine, & Provenance Audit**
+> Methodology Version: `2.0-verified` · Date: **29 August 2026**
 
 ---
 
-## 1. Ikhtisar Metodologi & Prinsip Dasar
+## 1. Methodology Overview & Core Principles
 
-GALI (**Ground-truth Analytics for Listed Issuers**) memadukan data bursa publik (IDX) dengan data operasional fisik, geospasial, dan perizinan hulu (Kementerian ESDM & Sectors Mining Intelligence) untuk membongkar realitas fundamental emiten sumber daya alam Indonesia.
+GALI (**Ground-truth Analytics for Listed Issuers**) combines public exchange data (IDX) with upstream physical operational, geospatial, and licensing data (Indonesia's Ministry of Energy and Mineral Resources & Sectors Mining Intelligence) to expose the fundamental reality of Indonesian natural-resource issuers.
 
-### Prinsip Utama Integritas Data GALI:
-1. **Zero Guesswork / No Proxy Hallucination**: Field yang bernilai `NULL` di data hulu tetap bernilai `NULL` di output. Dilarang menggunakan rata-rata industri, estimasi tebakan, atau imputasi tanpa dasar.
-2. **Audit Provenance**: Setiap angka yang dihasilkan terhubung langsung ke ID respons mentah (`raw.responses.id`) dan mencatat alasan eksplisit untuk field yang kosong.
-3. **Weight Re-normalization**: Jika data komponen pada suatu emiten tidak tersedia, bobot komponen tersebut diabaikan (*dropped*) dan bobot komponen yang tersedia dinormalisasi ulang hingga berjumlah 100%, dengan mencatat bobot efektif pada skor kepercayaan (*confidence*).
-4. **Blue/Green Atomic Publishing**: Metrik dihitung dalam status `building`, divalidasi melalui gerbang integritas (*sanity gate*), dan dipublikasikan secara atomik tanpa *downtime*.
+### Core Data Integrity Principles of GALI:
+1. **Zero Guesswork / No Proxy Hallucination**: A field that is `NULL` in the upstream data stays `NULL` in the output. Using industry averages, guessed estimates, or unfounded imputation is prohibited.
+2. **Audit Provenance**: Every number produced links directly to a raw response ID (`raw.responses.id`) and records an explicit reason for any empty field.
+3. **Weight Re-normalization**: If a component's data is unavailable for an issuer, that component's weight is dropped and the weights of the available components are re-normalized to sum to 100%, with the effective weight recorded in the confidence score.
+4. **Blue/Green Atomic Publishing**: Metrics are computed in a `building` state, validated through a sanity gate, and published atomically with no downtime.
 
 ---
 
-## 2. Spesifikasi Metrik Fundamental & Operasional (M1–M9)
+## 2. Fundamental & Operational Metric Specifications (M1–M9)
 
 ### M1 — Reserve Life Index (RLI)
 
-- **Deskripsi**: Mengukur sisa umur operasional cadangan tambang (dalam tahun) berdasarkan tingkat produksi saat ini dan porsi kepemilikan efektif emiten atas entitas operasional.
+- **Description**: Measures the remaining operational life of a mine's reserves (in years) based on the current production rate and the issuer's effective ownership share of the operating entities.
 - **Formula**:
   $$\text{reserves}(s) = \sum_{c} \text{eff\_own}(s,c) \times \text{total\_reserves\_Mt}(c)$$
   $$\text{production}(s) = \sum_{c} \text{eff\_own}(s,c) \times \text{production\_volume}(c)$$
   $$\text{RLI}(s) = \frac{\text{reserves}(s)}{\text{production}(s)}$$
-- **Golden Test Benchmark**: Adaro (AADI) = $819.0\text{ Mt} / 48.11\text{ Mt} = 17.02 \pm 0.05$ tahun.
-- **Batasan Data**: Jika cadangan tambang tidak dilaporkan (misal DSSA), RLI bernilai `NULL`.
+- **Golden Test Benchmark**: Adaro (AADI) = $819.0\text{ Mt} / 48.11\text{ Mt} = 17.02 \pm 0.05$ years.
+- **Data Limitation**: If a mine's reserves are not reported (e.g. DSSA), RLI is `NULL`.
 
 ---
 
 ### M2 — Reserve-Backed Value (RBV) & Implied Life
 
-- **Deskripsi**: Menghitung nilai wajar aset cadangan menggunakan diskonto arus kas laba kotor anuitas selama sisa umur tambang, membandingkannya dengan kapitalisasi pasar bursa (*RBV Gap*), dan memecahkan umur tambang tersirat (*Implied Life*).
+- **Description**: Computes the fair value of reserve assets by discounting an annuity of gross-profit cash flows over the remaining mine life, compares it against exchange market capitalization (*RBV Gap*), and solves for the market-implied mine life (*Implied Life*).
 - **Formula**:
   $$\text{GP}(c) = \text{revenue\_usd}(c) - \text{cost\_of\_revenue\_usd}(c)$$
   $$\text{attributable\_GP}(s) = \sum_{c} \text{eff\_own}(s,c) \times \text{GP}(c)$$
@@ -41,17 +41,17 @@ GALI (**Ground-truth Analytics for Listed Issuers**) memadukan data bursa publik
   $$\text{rbv\_gap\_pct}(s) = \frac{\text{market\_cap\_usd}(s) - \text{RBV}(s)}{\text{RBV}(s)} \times 100$$
   $$\text{implied\_life}(s) = \frac{-\ln\left(1 - \frac{\text{market\_cap\_usd}(s) \times r}{\text{attributable\_GP}(s)}\right)}{\ln(1+r)}$$
   $$\text{reserve\_life\_gap}(s) = \text{implied\_life}(s) - \text{RLI}(s)$$
-- **Asumsi Parameter**:
-  - `discount_rate` ($r$): Default $0.12$ (12% hurdle rate untuk ekuitas sumber daya alam Indonesia).
+- **Parameter Assumptions**:
+  - `discount_rate` ($r$): Default $0.12$ (12% hurdle rate for Indonesian natural-resource equities).
   - `fx_idr_usd`: Default $16,200.0$ IDR/USD.
-  - `max_annuity_years`: 30 tahun.
-- **Kasus Unbounded**: Jika $\text{market\_cap\_usd} \times r \ge \text{attributable\_GP}$, pasar mengasumsikan umur tambang tak terhingga $\implies \text{implied\_life} = \text{NULL}$ dengan flag `"unbounded": true`.
+  - `max_annuity_years`: 30 years.
+- **Unbounded Case**: If $\text{market\_cap\_usd} \times r \ge \text{attributable\_GP}$, the market is assuming an infinite mine life $\implies \text{implied\_life} = \text{NULL}$ with the flag `"unbounded": true`.
 
 ---
 
 ### M3 — License Cliff
 
-- **Deskripsi**: Mengidentifikasi risiko kedaluwarsa konsesi tambang (IUP/IUPK) dalam horizon waktu 1, 3, dan 5 tahun ke depan, rasio sertifikasi Clean and Clear (CNC), serta sisa hari rata-rata tertimbang.
+- **Description**: Identifies the risk of mining concessions (IUP/IUPK) expiring within 1-, 3-, and 5-year horizons, the Clean and Clear (CNC) certification ratio, and the weighted average days remaining.
 - **Formula**:
   $$\text{cliff}_{Ny}(s) = \frac{\sum \{ l \in L(s) : l.\text{expiry} \le \text{today} + N\text{y} \land l.\text{activity} = \text{'Operasi Produksi'} \} \text{licensed\_area\_ha}}{\sum \{ l \in L(s) \} \text{licensed\_area\_ha}}$$
   $$\text{cnc\_coverage\_pct}(s) = \frac{\sum_{l \in L(s), l.\text{cnc} = \text{'CNC'}} \text{licensed\_area\_ha}}{\sum_{l \in L(s)} \text{licensed\_area\_ha}} \times 100$$
@@ -61,7 +61,7 @@ GALI (**Ground-truth Analytics for Listed Issuers**) memadukan data bursa publik
 
 ### M4 — Cash Cost Curve & Breakeven
 
-- **Deskripsi**: Menghitung biaya tunai penambangan per ton (FOB Cash Cost), harga realisasi penjualan rata-rata, margin unit, posisi persentil pada kurva biaya nasional kumulatif, dan harga titik impas (*breakeven*).
+- **Description**: Computes the cash cost of mining per ton (FOB cash cost), the average realized selling price, the unit margin, the percentile position on the cumulative national cost curve, and the breakeven price.
 - **Formula**:
   $$\text{mining\_cost}(c) = \text{cost\_of\_revenue\_usd}(c) - \text{cost\_of\_revenue\_breakdown}.\text{get}('purchased\_coal', 0)$$
   $$\text{tons}(c) = \text{sales\_volume} \times 10^6$$
@@ -69,26 +69,26 @@ GALI (**Ground-truth Analytics for Listed Issuers**) memadukan data bursa publik
   $$\text{realized\_price\_per\_ton}(c) = \frac{\text{mining\_revenue}(c)}{\text{tons}(c)}$$
   $$\text{unit\_margin}(c) = \text{realized\_price\_per\_ton} - \text{cash\_cost\_per\_ton}$$
   $$\text{breakeven\_benchmark\_price}(c) = \text{benchmark\_price} \times \frac{\text{cash\_cost}}{\text{realized}}$$
-- **Kurva Biaya Nasional**: Seluruh emiten batubara diurutkan menaik berdasarkan `cash_cost_per_ton`. Sumbu-X merepresentasikan produksi kumulatif (Mt). `cost_curve_percentile` merepresentasikan titik tengah volume kumulatif terhadap total volume industri.
+- **National Cost Curve**: All coal issuers are sorted ascending by `cash_cost_per_ton`. The X-axis represents cumulative production (Mt). `cost_curve_percentile` represents the midpoint of cumulative volume relative to total industry volume.
 
 ---
 
 ### M5 — Quality-Adjusted Realization
 
-- **Deskripsi**: Memetakan rata-rata nilai kalori (Calorific Value / CV kcal/kg GAR) produk batubara emiten ke dalam standar acuan industri (Indonesian Coal Index / Newcastle).
-- **Klasifikasi Grade Batubara**:
+- **Description**: Maps the issuer's average coal calorific value (CV kcal/kg GAR) to industry benchmark standards (Indonesian Coal Index / Newcastle).
+- **Coal Grade Classification**:
   - $\text{CV} < 4200\text{ kcal/kg} \implies \text{ICI-4 (4200 GAR)}$
   - $4200 \le \text{CV} < 5000\text{ kcal/kg} \implies \text{ICI-3 (5000 GAR)}$
   - $5000 \le \text{CV} < 5800\text{ kcal/kg} \implies \text{ICI-2 (5800 GAR)}$
   - $\text{CV} \ge 5800\text{ kcal/kg} \implies \text{ICI-1 / Newcastle (6000 GAR)}$
-- **Diskon/Premi Kualitas**:
+- **Quality Discount/Premium**:
   $$\text{quality\_discount\_pct} = \frac{\text{benchmark\_price} - \text{realized\_price\_per\_ton}}{\text{benchmark\_price}} \times 100$$
 
 ---
 
 ### M6 — Destination Stress Test & Concentration HHI
 
-- **Deskripsi**: Mengukur konsentrasi pasar ekspor emiten menggunakan Herfindahl-Hirschman Index (HHI) dan mengidentifikasi porsi negara tujuan utama.
+- **Description**: Measures the issuer's export-market concentration using the Herfindahl-Hirschman Index (HHI) and identifies the share of the top destination country.
 - **Formula**:
   $$\text{destination\_hhi}(s) = \sum_{\text{country}} (\text{pct\_of\_sales\_volume}(s, \text{country}))^2 \quad [0 - 10000]$$
 
@@ -96,23 +96,23 @@ GALI (**Ground-truth Analytics for Listed Issuers**) memadukan data bursa publik
 
 ### M7 — Contractor / Supply-Chain Graph
 
-- **Deskripsi**: Mengevaluasi ketergantungan pada kontraktor jasa penambangan tunggal dan proporsi kontrak operasional yang jatuh tempo dalam kurun 12 bulan ke depan.
+- **Description**: Evaluates dependence on a single mining-services contractor and the proportion of operating contracts expiring within the next 12 months.
 - **Formula**:
   $$\text{contractor\_hhi}(s) = \sum_{\text{contractor}} (\text{share of owner's contracts})^2 \quad [0 - 10000]$$
-  $$\text{contract\_cliff\_12m}(s) = \frac{\text{jumlah kontrak dengan end\_date} \le \text{today} + 1\text{y}}{\text{total kontrak}} \times 100$$
+  $$\text{contract\_cliff\_12m}(s) = \frac{\text{number of contracts with end\_date} \le \text{today} + 1\text{y}}{\text{total contracts}} \times 100$$
 
 ---
 
 ### M8 — Ground Truth Score (0–100)
 
-- **Deskripsi**: Skor komposit fundamental aset (bukan sinyal beli/jual teknikal) yang menggabungkan 5 pilar utama melalui ranking persentil lintas universe.
-- **Struktur Bobot Dasar & Arah**:
-  1. **RLI** (Bobot 25%, arah: tinggi lebih baik)
-  2. **License Cliff 3y** (Bobot 20%, arah: rendah/minim risiko lebih baik)
-  3. **Cost Curve Percentile** (Bobot 25%, arah: biaya murah lebih baik)
-  4. **Destination HHI** (Bobot 15%, arah: diversifikasi lebih baik)
-  5. **Contractor Risk** (Bobot 15%, arah: minim risiko kontrak lebih baik)
-- **Normalisasi Ulang Dinamis**:
+- **Description**: A composite fundamental asset score (not a technical buy/sell signal) that combines 5 main pillars through percentile ranking across the universe.
+- **Base Weight Structure & Direction**:
+  1. **RLI** (Weight 25%, direction: higher is better)
+  2. **License Cliff 3y** (Weight 20%, direction: lower / less risk is better)
+  3. **Cost Curve Percentile** (Weight 25%, direction: lower cost is better)
+  4. **Destination HHI** (Weight 15%, direction: more diversification is better)
+  5. **Contractor Risk** (Weight 15%, direction: lower contract risk is better)
+- **Dynamic Re-normalization**:
   $$\text{norm\_weight}_i = \frac{\text{base\_weight}_i}{\sum_{j \in \text{Available}} \text{base\_weight}_j}$$
   $$\text{Ground Truth Score}(s) = \sum_{i \in \text{Available}} \text{percentile\_score}_i(s) \times \text{norm\_weight}_i$$
   $$\text{confidence}(s) = \sum_{j \in \text{Available}} \text{base\_weight}_j$$
@@ -121,30 +121,30 @@ GALI (**Ground-truth Analytics for Listed Issuers**) memadukan data bursa publik
 
 ### M9 — Market Divergence
 
-- **Deskripsi**: Mengukur disparitas antara valuasi pasar (persentil RBV Gap) dan kualitas aset dasar (persentil Ground Truth Score), dilengkapi overlay arus dana investor asing (*Foreign Flow*) dan sentimen transaksi orang dalam (*Insider Filings*).
+- **Description**: Measures the disparity between market valuation (RBV Gap percentile) and underlying asset quality (Ground Truth Score percentile), complemented by an overlay of foreign investor fund flows (*Foreign Flow*) and insider transaction sentiment (*Insider Filings*).
 - **Formula**:
   $$\text{divergence}(s) = \text{percentile}(\text{rbv\_gap\_pct}) - \text{percentile}(\text{ground\_truth\_score})$$
-- **Kuadran Interpretasi**:
-  - `Overvalued Premia / Weak Ground Truth`: Valuasi pasar tinggi di atas nilai aset dasar.
-  - `Deep Value Discount / Strong Ground Truth`: Valuasi pasar terdiskon relatif terhadap kekuatan fundamental cadangan dan biaya operasional.
+- **Interpretation Quadrants**:
+  - `Overvalued Premia / Weak Ground Truth`: Market valuation is high above underlying asset value.
+  - `Deep Value Discount / Strong Ground Truth`: Market valuation is discounted relative to the strength of reserve fundamentals and operating costs.
 
 ---
 
-## 3. Mesin Simulasi Skenario Parametrik (Scenario Studio)
+## 3. Parametric Scenario Simulation Engine (Scenario Studio)
 
-Mesin simulasi in-memory berkinerja tinggi ($< 50$ ms) untuk mengevaluasi dampak makroekonomi secara live:
-1. **Shock Harga Komoditas** ($\pm \Delta\%$).
-2. **Shock Pembatasan Impor Negara Tujuan** ($\Delta\%$ volume per negara, misal China $-30\%$).
-3. **Kegagalan Perpanjangan Izin Konsesi** (*License Cliff Drop*).
-4. **Penyesuaian Parameter Diskonto & Biaya Variabel** (`discount_rate` dan `variable_cost_share` default $0.65$).
-5. **Output**: Perhitungan ulang instan atas laba kotor, RBV pasca-shock, dan pergeseran peringkat emiten (*Rank Change*).
+A high-performance in-memory simulation engine ($< 50$ ms) for evaluating macroeconomic impact live:
+1. **Commodity Price Shock** ($\pm \Delta\%$).
+2. **Destination-Country Import Restriction Shock** ($\Delta\%$ of volume per country, e.g. China $-30\%$).
+3. **Concession License Renewal Failure** (*License Cliff Drop*).
+4. **Discount Rate & Variable Cost Parameter Adjustment** (`discount_rate` and `variable_cost_share`, default $0.65$).
+5. **Output**: Instant recomputation of gross profit, post-shock RBV, and issuer ranking shifts (*Rank Change*).
 
 ---
 
-## 4. Batasan Metodologi & Disclaimer Hukum
+## 4. Methodological Limitations & Legal Disclaimer
 
 > [!IMPORTANT]
-> **DISCLAIMER RESMI:**
-> Seluruh metrik, skor, estimasi valuasi berbasis cadangan (RBV), dan simulasi skenario yang dihasilkan oleh platform GALI disajikan secara eksklusif untuk tujuan informasi analitis, riset akademik, dan pemahaman operasional industri pertambangan.
+> **OFFICIAL DISCLAIMER:**
+> All metrics, scores, reserve-backed valuation (RBV) estimates, and scenario simulations produced by the GALI platform are presented exclusively for analytical information, academic research, and understanding of mining-industry operations.
 > 
-> GALI **BUKAN** merupakan lembaga penasihat investasi berlisensi, dan konten dalam platform ini **TIDAK** dapat ditafsirkan sebagai rekomendasi, tawaran, atau ajakan untuk membeli, menjual, atau memegang efek saham manapun di Bursa Efek Indonesia (IDX). Keputusan investasi sepenuhnya merupakan tanggung jawab independen pengguna.
+> GALI is **NOT** a licensed investment advisory institution, and the content on this platform **CANNOT** be construed as a recommendation, offer, or solicitation to buy, sell, or hold any security listed on the Indonesia Stock Exchange (IDX). Investment decisions are entirely the independent responsibility of the user.

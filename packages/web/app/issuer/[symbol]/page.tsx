@@ -75,27 +75,27 @@ function generateExecutiveBrief(data: IssuerDetail) {
     const gap = data.implied_life_years - data.rli_years;
     if (gap > 5) {
       points.push({
-        title: "Disparitas Valuasi Cadangan (Implied Gap)",
-        desc: `Pasar saat ini menilai saham ${data.symbol} dengan asumsi umur operasional tambang ${data.implied_life_years.toFixed(1)} tahun (implied life). Ini menciptakan gap +${gap.toFixed(1)} tahun di atas cadangan fisik terbukti ESDM (${data.rli_years.toFixed(1)} tahun), mengindikasikan ekspektasi premi tinggi yang menuntut penambahan izin baru atau ekspansi M&A.`,
+        title: "Reserve Valuation Gap (Implied Gap)",
+        desc: `The market currently prices ${data.symbol} assuming a mine operating life of ${data.implied_life_years.toFixed(1)} years (implied life). This creates a +${gap.toFixed(1)}-year gap above the proven physical reserves per MEMR (${data.rli_years.toFixed(1)} years), indicating a high premium expectation that requires new licenses or M&A expansion.`,
         type: "warning",
       });
     } else if (gap < -3) {
       points.push({
-        title: "Diskon Cadangan Fisik (Deep Value)",
-        desc: `Valuasi pasar (${data.implied_life_years.toFixed(1)} tahun implied) berada di bawah potensi cadangan fisik tambang terbukti (${data.rli_years.toFixed(1)} tahun). Terdapat diskon sisa umur cadangan sebesar ${Math.abs(gap).toFixed(1)} tahun yang berpotensi menjadi margin of safety tebal bagi investor jangka panjang.`,
+        title: "Physical Reserve Discount (Deep Value)",
+        desc: `Market valuation (${data.implied_life_years.toFixed(1)} years implied) is below the proven physical reserve potential (${data.rli_years.toFixed(1)} years). There is a remaining-reserve-life discount of ${Math.abs(gap).toFixed(1)} years, which could provide a thick margin of safety for long-term investors.`,
         type: "success",
       });
     } else {
       points.push({
-        title: "Valuasi Cadangan Seimbang",
-        desc: `Valuasi pasar saat ini terkalibrasi secara rasional dengan umur cadangan fisik terbukti (${data.rli_years.toFixed(1)} thn fisik vs ${data.implied_life_years.toFixed(1)} thn implied), mencerminkan ekspektasi konsensus yang realistis.`,
+        title: "Balanced Reserve Valuation",
+        desc: `Current market valuation is rationally calibrated to proven physical reserve life (${data.rli_years.toFixed(1)} yrs physical vs ${data.implied_life_years.toFixed(1)} yrs implied), reflecting realistic consensus expectations.`,
         type: "neutral",
       });
     }
   } else if (data.rli_years != null) {
     points.push({
-      title: "Umur Cadangan Fisik (RLI)",
-      desc: `Emiten memiliki sisa umur cadangan batubara terbukti sebesar ${data.rli_years.toFixed(1)} tahun berdasarkan kapasitas produksi tahunan saat ini.`,
+      title: "Physical Reserve Life (RLI)",
+      desc: `The issuer has ${data.rli_years.toFixed(1)} years of proven coal reserve life remaining based on current annual production capacity.`,
       type: "neutral",
     });
   }
@@ -104,20 +104,20 @@ function generateExecutiveBrief(data: IssuerDetail) {
   if (data.cash_cost_per_ton_usd != null) {
     if (data.cash_cost_per_ton_usd <= 45) {
       points.push({
-        title: "Keunggulan Biaya Tunai Rendah (Cost Advantage)",
-        desc: `Cash cost penambangan berada di level $${data.cash_cost_per_ton_usd.toFixed(1)}/t (kuartil bawah industri), memberikan bantalan margin EBITDA yang sangat kuat terhadap risiko penurunan harga acuan komoditas dunia.`,
+        title: "Low Cash Cost Advantage",
+        desc: `Mining cash cost sits at $${data.cash_cost_per_ton_usd.toFixed(1)}/t (bottom industry quartile), providing a very strong EBITDA margin cushion against a decline in global commodity benchmark prices.`,
         type: "success",
       });
     } else if (data.cash_cost_per_ton_usd >= 65) {
       points.push({
-        title: "Sensitivitas Biaya Tinggi",
-        desc: `Cash cost penambangan relatif tinggi di level $${data.cash_cost_per_ton_usd.toFixed(1)}/t, membuat profitabilitas emiten ini lebih sensitif jika indeks harga batubara ICI melemah.`,
+        title: "High Cost Sensitivity",
+        desc: `Mining cash cost is relatively high at $${data.cash_cost_per_ton_usd.toFixed(1)}/t, making this issuer's profitability more sensitive if the ICI coal price index weakens.`,
         type: "warning",
       });
     } else {
       points.push({
-        title: "Struktur Biaya Industri Rata-Rata",
-        desc: `Cash cost penambangan berada pada rentang wajar industri ($${data.cash_cost_per_ton_usd.toFixed(1)}/t) dengan ketahanan margin yang moderat.`,
+        title: "Industry-Average Cost Structure",
+        desc: `Mining cash cost is within the normal industry range ($${data.cash_cost_per_ton_usd.toFixed(1)}/t) with moderate margin resilience.`,
         type: "neutral",
       });
     }
@@ -127,14 +127,14 @@ function generateExecutiveBrief(data: IssuerDetail) {
   if (data.license_cliff_3y != null) {
     if (data.license_cliff_3y > 20) {
       points.push({
-        title: "Perhatian Risiko Perizinan (License Cliff)",
-        desc: `Sebanyak ${data.license_cliff_3y.toFixed(1)}% konsesi operasi tambang akan kedaluwarsa dalam jangka waktu 3 tahun ke depan. Kepastian perpanjangan IUP/IUPK oleh Kementerian ESDM menjadi katalis kunci yang wajib dipantau.`,
+        title: "Licensing Risk Watch (License Cliff)",
+        desc: `${data.license_cliff_3y.toFixed(1)}% of operating mining concessions will expire within the next 3 years. Confirmation of IUP/IUPK renewals by the Ministry of Energy and Mineral Resources is a key catalyst to monitor.`,
         type: "warning",
       });
     } else {
       points.push({
-        title: "Landasan Perizinan Aman",
-        desc: `Risiko kedaluwarsa izin 3-tahun sangat rendah (${data.license_cliff_3y.toFixed(1)}%), memastikan kepastian operasional jangka menengah tanpa gangguan legalitas konsesi.`,
+        title: "Secure Licensing Foundation",
+        desc: `3-year license expiry risk is very low (${data.license_cliff_3y.toFixed(1)}%), ensuring medium-term operational certainty without concession legality disruptions.`,
         type: "success",
       });
     }
@@ -144,8 +144,8 @@ function generateExecutiveBrief(data: IssuerDetail) {
   if (data.top_destination && data.top_destination_pct != null) {
     if (data.top_destination_pct >= 40) {
       points.push({
-        title: `Ketergantungan Ekspor ${data.top_destination}`,
-        desc: `Porsi penjualan ekspor terkonsentrasi sebesar ${data.top_destination_pct.toFixed(1)}% ke ${data.top_destination}, sehingga volume penjualan memiliki eksposur tinggi terhadap kebijakan proteksionisme/kuota negara tersebut.`,
+        title: `${data.top_destination} Export Dependence`,
+        desc: `Export sales are concentrated at ${data.top_destination_pct.toFixed(1)}% to ${data.top_destination}, so sales volume is highly exposed to that country's protectionist policies and quotas.`,
         type: "neutral",
       });
     }
@@ -166,7 +166,7 @@ export default function IssuerDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-6" aria-busy="true" aria-label={`Memuat data ${sym}`}>
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-6" aria-busy="true" aria-label={`Loading ${sym} data`}>
         <Skeleton className="h-4 w-28" />
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -194,15 +194,15 @@ export default function IssuerDetailPage() {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 mb-4">
           <AlertTriangle className="h-8 w-8" />
         </div>
-        <h2 className="text-xl font-bold text-white">Emiten &quot;{sym}&quot; Tidak Ditemukan</h2>
+        <h2 className="text-xl font-bold text-white">Issuer &quot;{sym}&quot; Not Found</h2>
         <p className="mt-2 text-sm text-slate-400 max-w-md mx-auto">
-          Simbol ini tidak terdaftar dalam universe 9 emiten batubara in-scope Sectors Hackathon 2026.
+          This symbol is not in the universe of 9 in-scope coal issuers for Sectors Hackathon 2026.
         </p>
         <Link
           href="/"
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-amber-400 hover:bg-slate-700 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> Kembali ke Leaderboard
+          <ArrowLeft className="h-4 w-4" /> Back to Leaderboard
         </Link>
       </div>
     );
@@ -219,10 +219,10 @@ export default function IssuerDetailPage() {
 
   // Radar data for M8 Ground Truth Score
   const radarData = [
-    { subject: "Cadangan (RLI)", score: Number(data.component_scores?.rli_score ?? 0), fullMark: 100 },
-    { subject: "Izin (License)", score: Number(data.component_scores?.license_score ?? 0), fullMark: 100 },
-    { subject: "Biaya (Cost)", score: Number(data.component_scores?.cost_score ?? 0), fullMark: 100 },
-    { subject: "Pasar Ekspor", score: Number(data.component_scores?.export_score ?? 0), fullMark: 100 },
+    { subject: "Reserves (RLI)", score: Number(data.component_scores?.rli_score ?? 0), fullMark: 100 },
+    { subject: "License", score: Number(data.component_scores?.license_score ?? 0), fullMark: 100 },
+    { subject: "Cost", score: Number(data.component_scores?.cost_score ?? 0), fullMark: 100 },
+    { subject: "Export Market", score: Number(data.component_scores?.export_score ?? 0), fullMark: 100 },
     { subject: "Supply Chain", score: Number(data.component_scores?.contract_score ?? 0), fullMark: 100 },
   ];
 
@@ -234,12 +234,12 @@ export default function IssuerDetailPage() {
           href="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Beranda Executive
+          <ArrowLeft className="h-3.5 w-3.5" /> Executive Home
         </Link>
 
         {/* Quick Ticker Switcher Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          <span className="text-[11px] font-medium text-slate-500 mr-1 hidden sm:inline">Pilih emiten:</span>
+          <span className="text-[11px] font-medium text-slate-500 mr-1 hidden sm:inline">Select issuer:</span>
           {ALL_ISSUERS.map((i) => (
             <button
               key={i.symbol}
@@ -275,7 +275,7 @@ export default function IssuerDetailPage() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1 text-[11px] font-medium text-slate-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                Sektor Energi · Pertambangan Batubara IDX
+                Energy Sector · IDX Coal Mining
               </span>
               {data.ground_truth_score != null && (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-400">
@@ -290,13 +290,13 @@ export default function IssuerDetailPage() {
               href={`/compare?a=${data.symbol}`}
               className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 text-xs font-bold text-amber-400 hover:bg-amber-500/20 transition-all shadow-lg"
             >
-              <Scale className="h-3.5 w-3.5" /> Bandingkan
+              <Scale className="h-3.5 w-3.5" /> Compare
             </Link>
             <button
               onClick={() => window.print()}
               className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700 px-3.5 py-2 text-xs font-bold text-slate-300 hover:border-slate-600 hover:bg-slate-800 hover:text-white transition-all shadow-lg"
             >
-              <Printer className="h-3.5 w-3.5" /> Cetak One-Pager
+              <Printer className="h-3.5 w-3.5" /> Print One-Pager
             </button>
             <Link
               href="/scenario"
@@ -320,7 +320,7 @@ export default function IssuerDetailPage() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
-                GALI Executive Intelligence Brief · Realitas Geologis vs Pasar
+                GALI Executive Intelligence Brief · Geological Reality vs Market
               </h2>
             </div>
             <span className="text-[10px] font-mono text-amber-400/80 border border-amber-500/20 bg-amber-500/5 px-2 py-0.5 rounded-full font-semibold">
@@ -365,40 +365,40 @@ export default function IssuerDetailPage() {
         <MetricTile
           icon={Clock}
           label="Reserve Life Index (RLI)"
-          tooltip="Sisa umur cadangan tambang fisik terbukti (tahun) jika laju produksi tahunan konstan berlanjut."
-          value={data.rli_years != null ? fmt(data.rli_years, { suffix: " thn" }) : "null"}
+          tooltip="Remaining life of proven physical mine reserves (years) if the annual production rate continues unchanged."
+          value={data.rli_years != null ? fmt(data.rli_years, { suffix: " yrs" }) : "null"}
           sub={
             data.rli_years == null
-              ? "Cadangan tidak dilaporkan di laporan resmi"
+              ? "Reserves not reported in official filings"
               : gapYears != null
-                ? `Pasar menyiratkan ${fmt(data.implied_life_years, { suffix: " thn" })} (gap ${gapYears > 0 ? "+" : ""}${fmt(gapYears, { suffix: " thn" })})`
-                : "Market cap belum ter-ingest"
+                ? `Market implies ${fmt(data.implied_life_years, { suffix: " yrs" })} (gap ${gapYears > 0 ? "+" : ""}${fmt(gapYears, { suffix: " yrs" })})`
+                : "Market cap not yet ingested"
           }
           accent={data.rli_years == null ? "text-slate-500" : "text-cyan-400"}
-          badge={data.rli_years != null ? `${data.rli_years.toFixed(1)} Tahun Aktual` : undefined}
+          badge={data.rli_years != null ? `${data.rli_years.toFixed(1)} Yrs Actual` : undefined}
         />
 
         {/* License Cliff */}
         <MetricTile
           icon={AlertTriangle}
-          label="License Cliff (3 Tahun)"
-          tooltip="Persentase luas konsesi tambang yang masa berlaku izin IUP/IUPK-nya akan kedaluwarsa dalam 3 tahun ke depan."
+          label="License Cliff (3 Years)"
+          tooltip="Percentage of mining concession area whose IUP/IUPK license will expire within the next 3 years."
           value={data.license_cliff_3y != null ? fmt(data.license_cliff_3y, { suffix: "%" }) : "—"}
           sub={`Clean & Clear (CNC) coverage: ${fmt(data.cnc_coverage_pct, { suffix: "%" })}`}
           accent={data.license_cliff_3y && data.license_cliff_3y > 30 ? "text-rose-400" : "text-amber-400"}
-          badge={data.license_cliff_3y != null ? (data.license_cliff_3y > 30 ? "Risiko Tinggi" : "Terkendali") : undefined}
+          badge={data.license_cliff_3y != null ? (data.license_cliff_3y > 30 ? "High Risk" : "Contained") : undefined}
         />
 
         {/* Cash Cost */}
         <MetricTile
           icon={Ship}
           label="Cash Cost / Breakeven"
-          tooltip="Estimasi biaya tunai penambangan per ton. Makin rendah, makin tebal bantalan margin jika harga acuan batubara anjlok."
+          tooltip="Estimated mining cash cost per ton. The lower it is, the thicker the margin cushion if the coal benchmark price plunges."
           value={data.cash_cost_per_ton_usd != null ? `$${data.cash_cost_per_ton_usd.toFixed(2)}/t` : "null"}
           sub={
             data.breakeven_benchmark_price_usd != null
-              ? `Harga acuan impas: $${data.breakeven_benchmark_price_usd.toFixed(2)}/t`
-              : "Finansial tidak dilaporkan"
+              ? `Breakeven benchmark price: $${data.breakeven_benchmark_price_usd.toFixed(2)}/t`
+              : "Financials not reported"
           }
           accent={data.cash_cost_per_ton_usd == null ? "text-slate-500" : "text-emerald-400"}
         />
@@ -407,12 +407,12 @@ export default function IssuerDetailPage() {
         <MetricTile
           icon={Network}
           label="Reserve-Backed Value"
-          tooltip="Nilai wajar berbasis nilai tunai arus kas terdiskonto (DCF finite annuity) dari sisa cadangan fisik terbukti."
+          tooltip="Fair value based on the present value of discounted cash flows (finite-annuity DCF) of the remaining proven physical reserves."
           value={data.reserve_backed_value_usd != null ? fmt(data.reserve_backed_value_usd, { usd: true, digits: 2 }) : "null"}
           sub={
             data.rbv_gap_pct != null
               ? `Gap vs market cap: ${data.rbv_gap_pct > 0 ? "+" : ""}${data.rbv_gap_pct.toFixed(1)}%`
-              : "Market cap belum ter-ingest"
+              : "Market cap not yet ingested"
           }
           accent={data.reserve_backed_value_usd == null ? "text-slate-500" : "text-indigo-400"}
         />
@@ -424,31 +424,31 @@ export default function IssuerDetailPage() {
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
               <Pickaxe className="h-4 w-4 text-amber-400" />
-              Profil Kualitas Geologis &amp; Pasar Ekspor
+              Geological Quality &amp; Export Market Profile
             </h2>
-            <span className="text-[11px] font-mono text-slate-500">M4 &amp; M7 Metrik</span>
+            <span className="text-[11px] font-mono text-slate-500">M4 &amp; M7 Metrics</span>
           </div>
 
           <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-            <Field label="Grade Benchmark" value={data.benchmark_grade ?? "—"} />
+            <Field label="Benchmark Grade" value={data.benchmark_grade ?? "—"} />
             <Field
-              label="Diskon Kualitas"
+              label="Quality Discount"
               value={data.quality_discount_pct != null ? `${data.quality_discount_pct.toFixed(1)}%` : "—"}
             />
             <Field
-              label="Kalori Rata-rata"
+              label="Average Calorific Value"
               value={data.weighted_cv_kcal != null ? `${data.weighted_cv_kcal.toFixed(0)} kcal/kg` : "—"}
             />
-            <Field label="Negara Tujuan Terbesar" value={data.top_destination ?? "—"} />
+            <Field label="Top Destination Country" value={data.top_destination ?? "—"} />
             <Field
-              label="Porsi Volume Ekspor"
+              label="Export Volume Share"
               value={data.top_destination_pct != null ? `${data.top_destination_pct.toFixed(1)}%` : "—"}
             />
             <Field
               label="Destination HHI"
-              tooltip="Indeks Herfindahl-Hirschman konsentrasi pasar (>2500 menunjukkan ketergantungan ekspor tinggi)."
+              tooltip="Herfindahl-Hirschman market concentration index (>2500 indicates high export dependence)."
               value={data.destination_hhi != null ? data.destination_hhi.toFixed(0) : "—"}
-              sub={data.destination_hhi != null ? (data.destination_hhi > 2500 ? "Konsentrasi Tinggi" : "Terdiversifikasi") : undefined}
+              sub={data.destination_hhi != null ? (data.destination_hhi > 2500 ? "High Concentration" : "Diversified") : undefined}
             />
           </dl>
         </div>
@@ -458,7 +458,7 @@ export default function IssuerDetailPage() {
           <div>
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">Ground Truth Score</h2>
-              <span className="text-[11px] font-mono text-amber-400 font-bold">M8 Komposit</span>
+              <span className="text-[11px] font-mono text-amber-400 font-bold">M8 Composite</span>
             </div>
 
             <div className="mt-4 flex items-baseline gap-2">
@@ -515,7 +515,7 @@ export default function IssuerDetailPage() {
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-800/80 text-[10px] text-slate-500">
-            Skor dinormalisasi otomatis jika komponen parsial tidak dilaporkan.
+            Score is automatically re-normalized when partial components are not reported.
           </div>
         </div>
       </div>
@@ -526,10 +526,10 @@ export default function IssuerDetailPage() {
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
               <Network className="h-4 w-4 text-cyan-400" />
-              Entitas Tambang &amp; Konsesi Operasi Terhubung ({data.linked_entities?.length ?? 0})
+              Linked Mining Entities &amp; Operating Concessions ({data.linked_entities?.length ?? 0})
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Graf kepemilikan efektif dan entitas pemegang IUP/IUPK yang diatribusikan ke emiten ini
+              Effective ownership graph and IUP/IUPK-holding entities attributed to this issuer
             </p>
           </div>
         </div>
@@ -545,10 +545,10 @@ export default function IssuerDetailPage() {
                 <span className="font-mono text-cyan-400 font-semibold">
                   {e.effective_ownership_pct != null ? `${Number(e.effective_ownership_pct).toFixed(1)}%` : "—"}
                 </span>
-                <span>Kepemilikan Efektif</span>
+                <span>Effective Ownership</span>
               </div>
               <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-800/60">
-                <span>Keyakinan Linkage:</span>
+                <span>Linkage Confidence:</span>
                 <span className="font-mono text-slate-300">
                   {e.confidence != null ? `${(Number(e.confidence) * 100).toFixed(0)}%` : "—"}
                 </span>
@@ -557,7 +557,7 @@ export default function IssuerDetailPage() {
           ))}
           {(!data.linked_entities || data.linked_entities.length === 0) && (
             <div className="col-span-full py-6 text-center text-xs text-slate-500">
-              Tidak ada entitas operasi terpisah (operasi langsung oleh induk emiten).
+              No separate operating entities (operated directly by the issuer parent).
             </div>
           )}
         </div>
@@ -595,9 +595,9 @@ function MetricTile({
           </div>
           {badge && (
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold border ${
-              badge.includes('Tinggi') || badge.includes('High')
+              badge.includes('High')
                 ? 'text-rose-400 border-rose-500/30 bg-rose-500/10'
-                : badge.includes('Aktual') || badge.includes('Thn')
+                : badge.includes('Actual')
                 ? 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10'
                 : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
             }`}>

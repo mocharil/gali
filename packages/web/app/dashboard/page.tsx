@@ -95,7 +95,7 @@ export default function DashboardPage() {
               Reserve-Backed Value
             </CardTitle>
             <CardDescription className="text-[11px] text-slate-400">
-              7 emiten LENGKAP · Nilai wajar fisik
+              7 COMPLETE issuers · Physical fair value
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 pt-1">
@@ -112,7 +112,7 @@ export default function DashboardPage() {
               )}
             </div>
             <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
-              Valuasi finite annuity DCF cadangan terbukti (hurdle rate 12%).
+              Finite-annuity DCF valuation of proven reserves (12% hurdle rate).
             </p>
           </CardContent>
         </Card>
@@ -127,10 +127,10 @@ export default function DashboardPage() {
               <Badge variant="cyan">Geologi M2</Badge>
             </div>
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-3">
-              Rata-rata Sisa Umur (RLI)
+              Average Remaining Life (RLI)
             </CardTitle>
             <CardDescription className="text-[11px] text-slate-400">
-              Produksi tahunan vs cadangan terbukti
+              Annual production vs proven reserves
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 pt-1">
@@ -138,13 +138,13 @@ export default function DashboardPage() {
               {isLoading ? (
                 "——"
               ) : avgRli != null ? (
-                <NumberTicker value={avgRli} decimalPlaces={1} suffix=" thn" />
+                <NumberTicker value={avgRli} decimalPlaces={1} suffix=" yrs" />
               ) : (
                 "—"
               )}
             </div>
             <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
-              Cadangan terbukti dibagi laju ekstraksi batubara tahunan aktual.
+              Proven reserves divided by the actual annual coal extraction rate.
             </p>
           </CardContent>
         </Card>
@@ -156,13 +156,13 @@ export default function DashboardPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
                 <ShieldAlert className="h-4 w-4" />
               </div>
-              <Badge variant="warning">Izin ESDM M3</Badge>
+              <Badge variant="warning">MEMR License M3</Badge>
             </div>
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-3">
-              License Cliff 3-Thn Terbesar
+              Largest 3-Year License Cliff
             </CardTitle>
             <CardDescription className="text-[11px] text-slate-400">
-              Risiko kedaluwarsa izin konsesi
+              Concession license expiry risk
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 pt-1">
@@ -183,7 +183,7 @@ export default function DashboardPage() {
               )}
             </div>
             <p className="border-t border-slate-800/70 pt-2.5 mt-3 text-[11px] text-slate-400 leading-relaxed">
-              Porsi volume produksi yang izin IUP-nya jatuh tempo dalam ≤ 3 tahun.
+              Share of production volume whose IUP license expires within ≤ 3 years.
             </p>
           </CardContent>
         </Card>
@@ -197,17 +197,17 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-amber-400" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-                Peta Sebaran Konsesi Tambang
+                Mining Concession Distribution Map
               </h2>
               <Badge variant="secondary" className="font-mono text-[10px]">
-                52 situs GPS
+                52 GPS sites
               </Badge>
             </div>
             <Link
               href="/map"
               className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
             >
-              Peta penuh <ArrowRight className="h-3.5 w-3.5" />
+              Full map <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
           <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl" style={{ minHeight: 400 }}>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                   Ground Truth Leaderboard
                 </CardTitle>
                 <CardDescription className="mt-0.5 text-[11px] text-slate-400">
-                  Skor komposit fundamental tambang 0–100 (M8)
+                  Composite mining fundamentals score 0–100 (M8)
                 </CardDescription>
               </div>
               <Link
@@ -240,7 +240,7 @@ export default function DashboardPage() {
             <div className="mb-3 flex items-center gap-2">
               <div className="flex rounded-xl border border-slate-800 bg-slate-950/80 p-0.5 text-[11px]">
                 {(["all", "complete", "partial"] as const).map((f) => {
-                  const labels = { all: `Semua (${issuers?.length ?? 9})`, complete: "Lengkap (7)", partial: "Parsial (2)" };
+                  const labels = { all: `All (${issuers?.length ?? 9})`, complete: "Complete (7)", partial: "Partial (2)" };
                   return (
                     <button
                       key={f}
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
                 <Input
                   type="text"
-                  placeholder="Filter emiten..."
+                  placeholder="Filter issuers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 h-8 text-[11px]"
@@ -335,8 +335,8 @@ export default function DashboardPage() {
             </ol>
 
             <div className="mt-3 flex items-center justify-between border-t border-slate-800/60 pt-3 text-[11px] text-slate-400">
-              <span>Klik baris untuk rincian RLI &amp; Evidence</span>
-              <span className="font-mono text-slate-400">9 Emiten · IDX Mining</span>
+              <span>Click a row for RLI &amp; Evidence details</span>
+              <span className="font-mono text-slate-400">9 Issuers · IDX Mining</span>
             </div>
           </Card>
         </div>
@@ -347,36 +347,36 @@ export default function DashboardPage() {
         <div className="mb-4 flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-400" />
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
-            Alat Analisis Lanjutan
+            Advanced Analysis Tools
           </h2>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <NavCard
             href="/cost-curve"
             icon={TrendingDown}
-            title="Kurva Biaya Nasional"
-            desc="Cash cost per ton vs harga pasar acuan ICI-4 ($85/t)"
+            title="National Cost Curve"
+            desc="Cash cost per ton vs ICI-4 benchmark market price ($85/t)"
             accent="emerald"
           />
           <NavCard
             href="/scenario"
             icon={SlidersHorizontal}
             title="Scenario Studio"
-            desc="Simulasi shock harga & tarif impor batubara real-time"
+            desc="Real-time coal price shock & import tariff simulation"
             accent="cyan"
           />
           <NavCard
             href="/divergence"
             icon={Activity}
-            title="Matriks Divergensi"
-            desc="RBV vs Market Cap — temukan emiten undervalued"
+            title="Divergence Matrix"
+            desc="RBV vs Market Cap — find undervalued issuers"
             accent="indigo"
           />
           <NavCard
             href="/coverage"
             icon={FileSpreadsheet}
-            title="Audit Kejujuran"
-            desc="Data provenance & audit saldo kredit API (405/1000)"
+            title="Honesty Audit"
+            desc="Data provenance & API credit balance audit (405/1000)"
             accent="amber"
           />
         </div>
@@ -391,15 +391,15 @@ export default function DashboardPage() {
           <div>
             <h3 className="text-sm font-bold text-white">100% Data Provenance · Zero Black-Box</h3>
             <p className="mt-0.5 text-xs text-slate-400">
-              Setiap metrik dihitung deterministik dari respon mentah Sectors API dan dapat diverifikasi via{" "}
-              <span className="text-amber-400 font-semibold">Evidence Drawer</span> di halaman emiten.
+              Every metric is computed deterministically from raw Sectors API responses and can be verified via the{" "}
+              <span className="text-amber-400 font-semibold">Evidence Drawer</span> on each issuer page.
             </p>
           </div>
         </div>
         <Button asChild variant="secondary" size="sm" className="shrink-0 gap-2 font-bold">
           <Link href="/methodology">
             <Pickaxe className="h-3.5 w-3.5 text-amber-400" />
-            <span>Lihat Rumus Matematis M1–M9</span>
+            <span>View M1–M9 Formulas</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </Button>

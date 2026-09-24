@@ -20,10 +20,10 @@ export default function GlobalError({
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-500/20 bg-rose-500/10">
         <AlertOctagon className="h-7 w-7 text-rose-400" />
       </div>
-      <h1 className="mt-6 text-xl font-bold text-white">Ada yang tidak beres di halaman ini</h1>
+      <h1 className="mt-6 text-xl font-bold text-white">Something went wrong on this page</h1>
       <p className="mt-2 max-w-md text-sm text-slate-400">
-        Terjadi error saat merender halaman. Ini bukan investasi yang buruk — ini bug. Coba muat ulang;
-        kalau berulang, laporkan lewat GitHub Issues.
+        An error occurred while rendering this page. Not a bad investment — just a bug. Try reloading;
+        if it keeps happening, report it via GitHub Issues.
       </p>
       {error.digest && (
         <p className="mt-3 font-mono text-[11px] text-slate-600">Error digest: {error.digest}</p>
@@ -34,14 +34,14 @@ export default function GlobalError({
           className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-400"
         >
           <RotateCcw className="h-4 w-4" />
-          Coba lagi
+          Try again
         </button>
         <Link
           href="/"
           className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
         >
           <Home className="h-4 w-4" />
-          Kembali ke beranda
+          Back to home
         </Link>
       </div>
     </div>

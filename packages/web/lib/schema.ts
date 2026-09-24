@@ -304,7 +304,7 @@ export interface components {
         DataCoverageResponse: {
             /**
              * Gate Decision
-             * @default GO MENYEMPIT (Coal Titans — 9 Emiten)
+             * @default GO NARROWED (Coal Titans — 9 Issuers: 7 complete + 2 partial)
              */
             gate_decision: string;
             /**

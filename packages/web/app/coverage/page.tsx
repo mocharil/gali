@@ -36,12 +36,12 @@ export default function CoveragePage() {
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 mb-2">
             <ShieldCheck className="h-3.5 w-3.5" />
-            <span>Audit Kejujuran &amp; Kelengkapan Data</span>
+            <span>Data Honesty &amp; Completeness Audit</span>
           </div>
           <h1 className="text-3xl font-black text-white">Truth Audit &amp; Credit Ledger</h1>
           <p className="mt-1 max-w-3xl text-sm text-slate-300">
-            Halaman integritas data. Setiap metrik dihitung langsung dari basis data produksi saat halaman dimuat —
-            termasuk data yang kosong. Bukan target, melainkan kondisi faktual apa adanya.
+            The data integrity page. Every metric is computed directly from the production database when the page
+            loads — including the empty data. Not a target, but the factual state as it is.
           </p>
         </div>
       </div>
@@ -57,31 +57,31 @@ export default function CoveragePage() {
             <div className="mt-1 font-mono text-2xl font-black text-emerald-400">
               {data.gate_decision}
             </div>
-            <p className="mt-2 text-[11px] text-slate-500">Memenuhi standar kelayakan data untuk evaluasi</p>
+            <p className="mt-2 text-[11px] text-slate-500">Meets the data-eligibility standard for evaluation</p>
           </div>
 
           <div className="glass-card rounded-2xl border border-slate-800 p-5">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-semibold uppercase tracking-wider">Anggaran Kredit Sectors</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Sectors Credit Budget</span>
               <Coins className="h-4 w-4 text-amber-400" />
             </div>
             <div className="mt-1 font-mono text-2xl font-black text-amber-400">
               {data.credits_used} <span className="text-sm text-slate-500">/ {data.credits_cap}</span>
             </div>
             <p className="mt-2 text-[11px] text-slate-500">
-              {data.credits_cap - data.credits_used} kredit tersisa (hemat 59.5% dari batas 1.000)
+              {data.credits_cap - data.credits_used} credits remaining (59.5% saved of the 1,000 cap)
             </p>
           </div>
 
           <div className="glass-card rounded-2xl border border-slate-800 p-5">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-semibold uppercase tracking-wider">Universe Emiten</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Issuer Universe</span>
               <Database className="h-4 w-4 text-cyan-400" />
             </div>
             <div className="mt-1 font-mono text-2xl font-black text-cyan-400">
-              {data.in_universe_issuers?.length ?? 9} Emiten
+              {data.in_universe_issuers?.length ?? 9} Issuers
             </div>
-            <p className="mt-2 text-[11px] text-slate-500">7 emiten lengkap + 2 emiten parsial</p>
+            <p className="mt-2 text-[11px] text-slate-500">7 complete issuers + 2 partial issuers</p>
           </div>
         </div>
       )}
@@ -89,7 +89,7 @@ export default function CoveragePage() {
       {/* Coverage Progress Bars */}
       <div className="glass-card rounded-2xl border border-slate-800 p-6 space-y-5">
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-          Cakupan Kelengkapan Komponen Data Mentah
+          Raw Data Component Completeness Coverage
         </h2>
 
         <div className="space-y-4">
@@ -119,7 +119,7 @@ export default function CoveragePage() {
       {/* In-Universe Issuers Table */}
       <div className="glass-card rounded-2xl border border-slate-800 p-6 space-y-4">
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-          Daftar Emiten In-Universe ({data?.in_universe_issuers.length ?? 0})
+          In-Universe Issuer List ({data?.in_universe_issuers.length ?? 0})
         </h2>
 
         <div className="overflow-x-auto">
@@ -127,9 +127,9 @@ export default function CoveragePage() {
             <thead className="border-b border-slate-800 bg-slate-900/60 text-[11px] uppercase tracking-wider text-slate-400">
               <tr>
                 <th className="px-4 py-3">Symbol</th>
-                <th className="px-4 py-3">Nama Perusahaan</th>
-                <th className="px-4 py-3">Status Kelengkapan</th>
-                <th className="px-4 py-3">Aksi</th>
+                <th className="px-4 py-3">Company Name</th>
+                <th className="px-4 py-3">Completeness Status</th>
+                <th className="px-4 py-3">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">

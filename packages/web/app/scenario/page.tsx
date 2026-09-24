@@ -147,14 +147,14 @@ export default function ScenarioStudioPage() {
     if (impacts.length === 0) return;
 
     const headers = [
-      "Peringkat Akhir",
-      "Simbol",
+      "Final Rank",
+      "Symbol",
       "Baseline RBV ($ USD)",
       "Post-Shock RBV ($ USD)",
       "Delta RBV ($ USD)",
       "Delta RBV (%)",
-      "Peringkat Awal",
-      "Perubahan Peringkat",
+      "Initial Rank",
+      "Rank Change",
     ];
 
     const rows = [...impacts]
@@ -230,8 +230,8 @@ export default function ScenarioStudioPage() {
           </div>
           <h1 className="text-3xl font-black text-white">Scenario Studio &amp; Stress Testing</h1>
           <p className="mt-1 max-w-3xl text-xs sm:text-sm text-slate-300">
-            Simulasikan shock makroekonomi (penurunan harga acuan komoditas, tarif impor bilateral, atau berakhirnya izin IUP)
-            secara deterministik terhadap Reserve-Backed Value (RBV) seluruh 9 emiten batubara IDX.
+            Deterministically simulate macroeconomic shocks (a drop in the commodity benchmark price, bilateral import tariffs, or IUP license expiry)
+            against the Reserve-Backed Value (RBV) of all 9 IDX coal issuers.
           </p>
         </div>
 
@@ -247,12 +247,12 @@ export default function ScenarioStudioPage() {
             {copiedLink ? (
               <>
                 <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="text-emerald-400">Link Tersalin!</span>
+                <span className="text-emerald-400">Link Copied!</span>
               </>
             ) : (
               <>
                 <Share2 className="h-3.5 w-3.5" />
-                <span>Salin Skenario</span>
+                <span>Copy Scenario</span>
               </>
             )}
           </Button>
@@ -274,7 +274,7 @@ export default function ScenarioStudioPage() {
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/80 bg-[#080d19]/80 p-3 shadow-lg">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2 flex items-center gap-1.5">
           <SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />
-          Preset Skenario Cepat:
+          Quick Scenario Presets:
         </span>
         <Button
           type="button"
@@ -294,7 +294,7 @@ export default function ScenarioStudioPage() {
           className="text-amber-400 hover:text-amber-300 border-amber-500/30 bg-amber-500/10"
         >
           <Globe2 className="h-3.5 w-3.5" />
-          <span>Tarif China (30%)</span>
+          <span>China Tariff (30%)</span>
         </Button>
         <Button
           type="button"
@@ -334,17 +334,17 @@ export default function ScenarioStudioPage() {
         <Card className="lg:col-span-5 p-5 border-slate-800/80 bg-[#080d19]/90 space-y-6 shadow-2xl">
           <div>
             <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-              Parameter Shock Makro
+              Macro Shock Parameters
             </CardTitle>
             <CardDescription className="mt-0.5 text-[11px] text-slate-400">
-              Geser slider untuk melihat dampak sensitivitas valuasi secara instan
+              Move the sliders to see the valuation sensitivity impact instantly
             </CardDescription>
           </div>
 
           {/* Slider 1: Global Price Shock */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-slate-300">Shock Harga Batubara (ICI-4):</span>
+              <span className="text-slate-300">Coal Price Shock (ICI-4):</span>
               <span className={`font-mono text-sm font-black ${priceShockPct < 0 ? "text-rose-400" : priceShockPct > 0 ? "text-emerald-400" : "text-slate-400"}`}>
                 {priceShockPct > 0 ? `+${(priceShockPct * 100).toFixed(0)}%` : `${(priceShockPct * 100).toFixed(0)}%`}
               </span>
@@ -359,7 +359,7 @@ export default function ScenarioStudioPage() {
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 accent-amber-400"
             />
             <div className="flex justify-between text-[10px] font-mono text-slate-500">
-              <span>-50% (Depresi)</span>
+              <span>-50% (Depression)</span>
               <span>0% (Baseline)</span>
               <span>+50% (Supercycle)</span>
             </div>
@@ -368,9 +368,9 @@ export default function ScenarioStudioPage() {
           {/* Toggle: License Cliff Shock */}
           <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 flex items-center justify-between">
             <div className="space-y-0.5">
-              <div className="text-xs font-bold text-slate-200">Simulasi License Cliff Expiry</div>
+              <div className="text-xs font-bold text-slate-200">License Cliff Expiry Simulation</div>
               <p className="text-[10px] text-slate-400 max-w-[260px]">
-                Asumsikan konsesi yang jatuh tempo dalam ≤ 3 tahun tidak diperpanjang oleh Kementerian ESDM.
+                Assume concessions expiring within ≤ 3 years are not renewed by the Ministry of Energy and Mineral Resources.
               </p>
             </div>
             <button
@@ -392,7 +392,7 @@ export default function ScenarioStudioPage() {
           <div className="space-y-3 pt-2 border-t border-slate-800/70">
             <div className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
               <Globe2 className="h-3.5 w-3.5 text-cyan-400" />
-              <span>Shock Tarif / Kuota Negara Tujuan Ekspor</span>
+              <span>Export Destination Country Tariff / Quota Shock</span>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               {COUNTRIES.map((c) => {
@@ -430,15 +430,15 @@ export default function ScenarioStudioPage() {
             <div>
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-amber-400" />
-                Dampak Valuasi: Baseline RBV vs Post-Shock RBV ($B)
+                Valuation Impact: Baseline RBV vs Post-Shock RBV ($B)
               </CardTitle>
               <CardDescription className="text-[11px] text-slate-400">
-                Nilai wajar DCF cadangan sebelum &amp; sesudah shock
+                DCF fair value of reserves before &amp; after the shock
               </CardDescription>
             </div>
             {mutation.isPending && (
               <Badge variant="amber" className="animate-pulse">
-                Menghitung...
+                Calculating...
               </Badge>
             )}
           </div>
@@ -448,7 +448,7 @@ export default function ScenarioStudioPage() {
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                 <XAxis dataKey="symbol" stroke="#64748b" tick={{ fill: "#cbd5e1", fontSize: 11, fontWeight: "bold" }} />
-                <YAxis stroke="#64748b" tick={{ fill: "#94a3b8", fontSize: 11 }} label={{ value: "Valuasi ($ Miliar USD)", angle: -90, position: "insideLeft", fill: "#94a3b8", fontSize: 12 }} />
+                <YAxis stroke="#64748b" tick={{ fill: "#94a3b8", fontSize: 11 }} label={{ value: "Valuation ($ Billion USD)", angle: -90, position: "insideLeft", fill: "#94a3b8", fontSize: 12 }} />
                 <Tooltip
                   contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "12px", fontSize: "12px", fontFamily: "monospace" }}
                 />
@@ -470,10 +470,10 @@ export default function ScenarioStudioPage() {
       <Card className="border-slate-800/80 bg-[#080d19]/90 p-5 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-            Tabel Dampak Sensitivitas &amp; Perubahan Peringkat Finansial
+            Sensitivity Impact &amp; Financial Rank Change Table
           </CardTitle>
           <Badge variant="secondary" className="font-mono text-[11px]">
-            {sorted.length} Emiten Terhitung
+            {sorted.length} Issuers Calculated
           </Badge>
         </div>
 
@@ -481,13 +481,13 @@ export default function ScenarioStudioPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">Rank</TableHead>
-              <TableHead>Emiten</TableHead>
+              <TableHead>Issuer</TableHead>
               <TableHead className="text-right">Baseline RBV</TableHead>
               <TableHead className="text-right">Post-Shock RBV</TableHead>
-              <TableHead className="text-right">Delta Valuasi ($)</TableHead>
+              <TableHead className="text-right">Valuation Delta ($)</TableHead>
               <TableHead className="text-right">Delta %</TableHead>
-              <TableHead className="text-center">Dampak Peringkat</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
+              <TableHead className="text-center">Rank Impact</TableHead>
+              <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -503,7 +503,7 @@ export default function ScenarioStudioPage() {
                       <span className="text-sm">#{item.post_shock_rank ?? "—"}</span>
                       {item.baseline_rank != null && item.baseline_rank !== item.post_shock_rank && (
                         <span className="text-[10px] text-slate-500 font-normal">
-                          (awal #{item.baseline_rank})
+                          (initial #{item.baseline_rank})
                         </span>
                       )}
                     </div>
@@ -527,15 +527,15 @@ export default function ScenarioStudioPage() {
                     {rankDiff > 0 ? (
                       <Badge variant="success" className="gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        <span>Naik +{rankDiff}</span>
+                        <span>Up +{rankDiff}</span>
                       </Badge>
                     ) : rankDiff < 0 ? (
                       <Badge variant="destructive" className="gap-1">
                         <TrendingDown className="h-3 w-3" />
-                        <span>Turun {rankDiff}</span>
+                        <span>Down {rankDiff}</span>
                       </Badge>
                     ) : (
-                      <Badge variant="secondary">Tetap</Badge>
+                      <Badge variant="secondary">Unchanged</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">

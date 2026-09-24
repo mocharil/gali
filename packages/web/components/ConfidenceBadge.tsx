@@ -17,10 +17,10 @@ export function ConfidenceBadge({ dataQuality, confidencePct, className = "" }: 
     return (
       <div
         className={`inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 ${className}`}
-        title={`Data lengkap di seluruh endpoint yang relevan${pctLabel}`}
+        title={`Complete data across all relevant endpoints${pctLabel}`}
       >
         <CheckCircle className="h-3 w-3" />
-        <span>LENGKAP{pctLabel}</span>
+        <span>COMPLETE{pctLabel}</span>
       </div>
     );
   }
@@ -28,10 +28,10 @@ export function ConfidenceBadge({ dataQuality, confidencePct, className = "" }: 
   return (
     <div
       className={`inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-400 ${className}`}
-      title={`Sebagian field bernilai null -- lihat Evidence untuk daftarnya${pctLabel}`}
+      title={`Some fields are null -- see Evidence for the list${pctLabel}`}
     >
       <AlertTriangle className="h-3 w-3" />
-      <span>{dataQuality || "PARSIAL"}{pctLabel}</span>
+      <span>{dataQuality === "PARSIAL" ? "PARTIAL" : dataQuality || "PARTIAL"}{pctLabel}</span>
     </div>
   );
 }

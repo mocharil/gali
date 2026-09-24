@@ -92,7 +92,7 @@ ASSUMPTIONS = Assumptions()
 # recommendation (NO_GO, 7 clean issuers) was relaxed to include two partial issuers.
 # See BUILD_PLAN.md Fase 1 "KEPUTUSAN RESMI" for the full reasoning. Defined once here
 # so no router or page hardcodes this string independently.
-GATE_DECISION = "GO MENYEMPIT (Coal Titans — 9 Emiten: 7 lengkap + 2 parsial)"
+GATE_DECISION = "GO NARROWED (Coal Titans — 9 Issuers: 7 complete + 2 partial)"
 IN_UNIVERSE_SYMBOLS: tuple[str, ...] = (
     "AADI",
     "ADMR",
