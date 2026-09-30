@@ -16,6 +16,12 @@ import {
   Search,
   Pickaxe,
   Zap,
+  ArrowUpDown,
+  Download,
+  Scale,
+  Sparkles,
+  Trophy,
+  ExternalLink,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { MiningSitesMap } from "@/components/MiningSitesMap";
@@ -31,6 +37,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { NumberTicker, BorderBeam } from "@/components/magicui";
 
 function fmtUSD(n: number | null | undefined, digits = 1): string {
@@ -63,6 +77,62 @@ export default function DashboardPage() {
         .sort((a, b) => (b.license_cliff_3y ?? 0) - (a.license_cliff_3y ?? 0))[0]
     : null;
 
+  const [tableSortField, setTableSortField] = useState<
+    "ground_truth_score" | "rli_years" | "reserve_backed_value_usd" | "market_cap_usd" | "rbv_gap_pct" | "cash_cost_per_ton_usd" | "license_cliff_3y"
+  >("ground_truth_score");
+  const [tableSortOrder, setTableSortOrder] = useState<"asc" | "desc">("desc");
+
+  const handleSort = (field: typeof tableSortField) => {
+    if (tableSortField === field) {
+      setTableSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setTableSortField(field);
+      setTableSortOrder("desc");
+    }
+  };
+
+  const exportUniverseCSV = () => {
+    if (!issuers || issuers.length === 0) return;
+    const headers = [
+      "Ticker",
+      "Company Name",
+      "Data Quality",
+      "Ground Truth Score",
+      "RLI (Years)",
+      "Reserve-Backed Value (USD)",
+      "Market Cap (USD)",
+      "RBV Gap (%)",
+      "Cash Cost / Ton (USD)",
+      "3Y License Cliff (%)",
+      "Top Export Destination",
+      "Top Export Share (%)",
+    ];
+    const rows = issuers.map((i) => [
+      i.symbol,
+      `"${i.name.replace(/"/g, '""')}"`,
+      i.data_quality,
+      i.ground_truth_score ?? "",
+      i.rli_years ? i.rli_years.toFixed(2) : "",
+      i.reserve_backed_value_usd ? i.reserve_backed_value_usd.toFixed(0) : "",
+      i.market_cap_usd ? i.market_cap_usd.toFixed(0) : "",
+      i.rbv_gap_pct ? i.rbv_gap_pct.toFixed(2) : "",
+      i.cash_cost_per_ton_usd ? i.cash_cost_per_ton_usd.toFixed(2) : "",
+      i.license_cliff_3y ? i.license_cliff_3y.toFixed(2) : "",
+      i.top_destination ?? "",
+      i.top_destination_pct ? i.top_destination_pct.toFixed(2) : "",
+    ]);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `gali_idx_mining_universe_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   let filteredLeaderboard = issuers ? [...issuers] : [];
   if (filterType === "complete") {
     filteredLeaderboard = filteredLeaderboard.filter((i) => i.data_quality === "LENGKAP");
@@ -77,6 +147,15 @@ export default function DashboardPage() {
     );
   }
   filteredLeaderboard.sort((a, b) => (b.ground_truth_score ?? -1) - (a.ground_truth_score ?? -1));
+
+  const sortedTableData = [...filteredLeaderboard].sort((a, b) => {
+    const valA = a[tableSortField] ?? (tableSortOrder === "asc" ? Infinity : -Infinity);
+    const valB = b[tableSortField] ?? (tableSortOrder === "asc" ? Infinity : -Infinity);
+    if (typeof valA === "number" && typeof valB === "number") {
+      return tableSortOrder === "asc" ? valA - valB : valB - valA;
+    }
+    return 0;
+  });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 animate-fade-up">
@@ -339,6 +418,302 @@ export default function DashboardPage() {
               <span className="font-mono text-slate-400">9 Issuers · IDX Mining</span>
             </div>
           </Card>
+        </div>
+      </section>
+
+      {/* ── 2.5. Master Ground-Truth Universe Matrix (Financial & Geological Terminal) ── */}
+      <section className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-400" />
+              <h2 className="text-base font-bold uppercase tracking-wider text-slate-100">
+                Ground-Truth Valuation &amp; Risk Matrix
+              </h2>
+              <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[10px]">
+                Deterministic M1–M8
+              </Badge>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Side-by-side reconciliation of IDX market valuations against physical mine concessions, RLI, and extraction costs.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={exportUniverseCSV}
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 border-slate-700 bg-slate-900/80 text-xs font-semibold text-slate-200 hover:border-amber-500/40 hover:text-white"
+            >
+              <Download className="h-3.5 w-3.5 text-amber-400" />
+              <span>Export CSV</span>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 border-slate-700 bg-slate-900/80 text-xs font-semibold text-slate-200 hover:border-cyan-500/40 hover:text-white"
+            >
+              <Link href="/compare">
+                <Scale className="h-3.5 w-3.5 text-cyan-400" />
+                <span>Peer Studio</span>
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800/80 bg-[#080d19]/90 shadow-2xl overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-800/80 bg-slate-950/60">
+                <TableHead className="w-12 text-center">#</TableHead>
+                <TableHead className="min-w-[170px]">
+                  <button
+                    onClick={() => handleSort("ground_truth_score")}
+                    className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
+                  >
+                    <span>Issuer</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("ground_truth_score")}
+                    className="inline-flex items-center gap-1 hover:text-amber-400 transition-colors"
+                  >
+                    <span>GT Score (M8)</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("rli_years")}
+                    className="inline-flex items-center gap-1 hover:text-cyan-400 transition-colors"
+                  >
+                    <span>Mine Life (RLI)</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("reserve_backed_value_usd")}
+                    className="inline-flex items-center gap-1 hover:text-emerald-400 transition-colors"
+                  >
+                    <span>Reserve Value (M6)</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("market_cap_usd")}
+                    className="inline-flex items-center gap-1 hover:text-slate-200 transition-colors"
+                  >
+                    <span>Market Cap</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("rbv_gap_pct")}
+                    className="inline-flex items-center gap-1 hover:text-amber-400 transition-colors"
+                  >
+                    <span>RBV Gap %</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("cash_cost_per_ton_usd")}
+                    className="inline-flex items-center gap-1 hover:text-emerald-400 transition-colors"
+                  >
+                    <span>Cash Cost / t</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <button
+                    onClick={() => handleSort("license_cliff_3y")}
+                    className="inline-flex items-center gap-1 hover:text-rose-400 transition-colors"
+                  >
+                    <span>3Y Cliff Risk</span>
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-right">Top Destination</TableHead>
+                <TableHead className="w-20 text-center">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading &&
+                Array.from({ length: 9 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={11} className="h-12 text-center text-slate-500">
+                      Loading real-time ground truth metrics...
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+              {!isLoading &&
+                sortedTableData.map((item, idx) => {
+                  const score = item.ground_truth_score;
+                  const scorePct = score != null ? Math.min(100, Math.max(0, score)) : 0;
+                  const rli = item.rli_years;
+                  const rbvGap = item.rbv_gap_pct;
+                  const cost = item.cash_cost_per_ton_usd;
+                  const cliff = item.license_cliff_3y;
+                  const isUndervalued = rbvGap != null && rbvGap < 0;
+
+                  return (
+                    <TableRow
+                      key={item.symbol}
+                      className="group border-b border-slate-800/60 hover:bg-slate-800/40 transition-colors"
+                    >
+                      <TableCell className="text-center font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400">
+                        {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : idx + 1}
+                      </TableCell>
+
+                      <TableCell>
+                        <Link
+                          href={`/issuer/${item.symbol}`}
+                          className="flex items-center gap-2 group/link"
+                        >
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 font-mono text-xs font-black text-white group-hover/link:border-amber-500/50 group-hover/link:text-amber-400 transition-colors">
+                            {item.symbol.slice(0, 2)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-white group-hover/link:text-amber-300">
+                                {item.symbol}
+                              </span>
+                              <ConfidenceBadge dataQuality={item.data_quality} />
+                            </div>
+                            <div className="text-[11px] text-slate-400 truncate max-w-[140px] sm:max-w-[200px]">
+                              {item.name}
+                            </div>
+                          </div>
+                        </Link>
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="hidden md:block w-12">
+                            <Progress value={scorePct} className="h-1.5" />
+                          </div>
+                          <span className="font-mono font-bold text-amber-400">
+                            {score != null ? score.toFixed(1) : "—"}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        {rli != null ? (
+                          <span className="font-mono font-bold text-cyan-400">
+                            {rli.toFixed(1)} <span className="text-[10px] text-slate-500 font-normal">yrs</span>
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-right font-mono text-xs font-semibold text-emerald-400">
+                        {fmtUSD(item.reserve_backed_value_usd, 2)}
+                      </TableCell>
+
+                      <TableCell className="text-right font-mono text-xs text-slate-300">
+                        {fmtUSD(item.market_cap_usd, 2)}
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        {rbvGap != null ? (
+                          <span
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-bold ${
+                              isUndervalued
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                            }`}
+                          >
+                            {rbvGap > 0 ? `+${rbvGap.toFixed(1)}%` : `${rbvGap.toFixed(1)}%`}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-right font-mono text-xs">
+                        {cost != null ? (
+                          <span className={cost <= 35 ? "text-emerald-400 font-bold" : "text-slate-300"}>
+                            ${cost.toFixed(1)}/t
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        {cliff != null ? (
+                          <span
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-bold ${
+                              cliff >= 50
+                                ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                : cliff > 0
+                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                : "bg-slate-800 text-slate-400"
+                            }`}
+                          >
+                            {cliff.toFixed(0)}%
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-right text-[11px] text-slate-300">
+                        {item.top_destination ? (
+                          <span>
+                            {item.top_destination}{" "}
+                            {item.top_destination_pct != null && (
+                              <span className="font-mono text-slate-500">
+                                ({item.top_destination_pct.toFixed(0)}%)
+                              </span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-amber-400 hover:bg-slate-800"
+                            title={`Compare ${item.symbol}`}
+                          >
+                            <Link href={`/compare?a=${item.symbol}&b=BYAN`}>
+                              <Scale className="h-3.5 w-3.5" />
+                            </Link>
+                          </Button>
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-cyan-400 hover:bg-slate-800"
+                            title={`Inspect ${item.symbol}`}
+                          >
+                            <Link href={`/issuer/${item.symbol}`}>
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
         </div>
       </section>
 

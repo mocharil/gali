@@ -16,6 +16,10 @@ import {
   Flame,
   Clock,
   Compass,
+  Scale,
+  Zap,
+  AlertTriangle,
+  Trophy,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
@@ -87,6 +91,9 @@ export default function LandingPage() {
   const complete = issuers?.filter((i) => i.data_quality === "LENGKAP") ?? [];
   const totalRbv = complete.reduce((s, i) => s + (i.reserve_backed_value_usd ?? 0), 0);
   const totalRbvBillions = totalRbv > 0 ? totalRbv / 1e9 : 36.8;
+
+  const [quickA, setQuickA] = React.useState("BUMI");
+  const [quickB, setQuickB] = React.useState("BYAN");
 
   return (
     <div className="space-y-20 pb-20 overflow-hidden">
@@ -221,6 +228,157 @@ export default function LandingPage() {
             </Link>
           ))}
         </Marquee>
+      </section>
+
+      {/* ── 1.8. Real-Time Market Intelligence Discoveries ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-800/80 pb-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+              <Sparkles className="h-4 w-4" />
+              <span>Fundamental Intelligence Discoveries</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-white mt-1">
+              Key Valuation Moats &amp; Hidden Concession Risks
+            </h2>
+          </div>
+          <p className="text-xs text-slate-400 max-w-md text-left sm:text-right">
+            Revealing discrepancies between paper financial statements and underground physical assets.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Card 1: Cost Leader */}
+          <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-emerald-500/10 via-[#0a1420]/80 to-[#070b14] p-5 shadow-xl transition-all hover:border-emerald-500/50">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-400 border border-emerald-500/30">
+                <Zap className="h-3 w-3" />
+                LOWEST EXTRACTION COST
+              </span>
+              <span className="font-mono text-xs font-bold text-slate-400">M5 Benchmark</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-2xl font-black text-white">BUMI</span>
+              <span className="font-mono text-lg font-bold text-emerald-400">$15.70 / ton</span>
+            </div>
+            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              Maintains the widest cash margin buffer against ICI-4 coal price downturns ($85/t), with 31.5 years of remaining reserve life.
+            </p>
+            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 font-mono">5.4x Breakeven Safety Margin</span>
+              <Link
+                href="/issuer/BUMI"
+                className="text-xs font-bold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1"
+              >
+                Inspect BUMI <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 2: Reserve Fortress */}
+          <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 via-[#0a1420]/80 to-[#070b14] p-5 shadow-xl transition-all hover:border-cyan-500/50">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[10px] font-mono font-bold text-cyan-400 border border-cyan-500/30">
+                <Clock className="h-3 w-3" />
+                LONGEST MINE LIFE
+              </span>
+              <span className="font-mono text-xs font-bold text-slate-400">M2 RLI</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-2xl font-black text-white">PTBA</span>
+              <span className="font-mono text-lg font-bold text-cyan-400">67.8 Years</span>
+            </div>
+            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              State-owned coal reserve fortress with 3+ billion tons of verified geological reserves, virtually zero risk of near-term resource depletion.
+            </p>
+            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 font-mono">National Reserve Anchor</span>
+              <Link
+                href="/issuer/PTBA"
+                className="text-xs font-bold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1"
+              >
+                Inspect PTBA <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 3: Deep Valuation Divergence */}
+          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#181105]/80 to-[#070b14] p-5 shadow-xl transition-all hover:border-amber-500/50">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-500/30">
+                <AlertTriangle className="h-3 w-3" />
+                VALUATION VS CLIFF RISK
+              </span>
+              <span className="font-mono text-xs font-bold text-slate-400">M3 &amp; M6</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-2xl font-black text-white">GEMS</span>
+              <span className="font-mono text-lg font-bold text-rose-400">-68.4% RBV Gap</span>
+            </div>
+            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              Trades at a massive 68.4% discount to physical DCF fair value ($7.97B RBV vs $2.51B Market Cap), but faces 100% concession renewals within 3 years.
+            </p>
+            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-[10px] text-amber-400 font-mono">100% 3Y License Cliff</span>
+              <Link
+                href="/issuer/GEMS"
+                className="text-xs font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"
+              >
+                Inspect GEMS <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Comparator Launch Bar */}
+        <div className="rounded-2xl border border-slate-800/80 bg-gradient-to-r from-slate-900/90 via-[#0b1328]/80 to-slate-900/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <Scale className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-white uppercase tracking-wider">
+                Instant Peer Comparator
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Pit any two IDX coal giants head-to-head on radar chart, reserve longevity, and extraction margins.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={quickA}
+              onChange={(e) => setQuickA(e.target.value)}
+              className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 font-mono text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+            >
+              {issuers?.map((i) => (
+                <option key={`a-${i.symbol}`} value={i.symbol}>
+                  {i.symbol}
+                </option>
+              ))}
+            </select>
+            <span className="font-mono text-xs text-slate-500 font-bold">vs</span>
+            <select
+              value={quickB}
+              onChange={(e) => setQuickB(e.target.value)}
+              className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 font-mono text-xs font-bold text-cyan-400 focus:outline-none focus:border-cyan-500"
+            >
+              {issuers?.map((i) => (
+                <option key={`b-${i.symbol}`} value={i.symbol}>
+                  {i.symbol}
+                </option>
+              ))}
+            </select>
+            <Link
+              href={`/compare?a=${quickA}&b=${quickB}`}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-1.5 text-xs font-black text-slate-950 hover:from-amber-400 hover:to-yellow-400 transition-all shadow-md"
+            >
+              <span>Compare Now</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* ── 2. The 4 Fundamental Pillars (Spotlight Bento Grid) ── */}
