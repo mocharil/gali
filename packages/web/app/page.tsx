@@ -20,9 +20,15 @@ import {
   Zap,
   AlertTriangle,
   Trophy,
+  Bot,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import {
+  runAiMiningReasoning,
+  AI_PROMPT_PILLS,
+  AiRecommendationResult,
+} from "@/components/AiCopilotModal";
 import {
   Marquee,
   NumberTicker,
@@ -94,6 +100,25 @@ export default function LandingPage() {
 
   const [quickA, setQuickA] = React.useState("BUMI");
   const [quickB, setQuickB] = React.useState("BYAN");
+
+  const [landingAiQuery, setLandingAiQuery] = React.useState("Emiten mana yang paling tahan jika harga batubara anjlok di bawah $70/ton?");
+  const [landingAiResult, setLandingAiResult] = React.useState<AiRecommendationResult | null>(null);
+  const [isAiThinking, setIsAiThinking] = React.useState(false);
+
+  React.useEffect(() => {
+    // Initial pre-load of default AI recommendation
+    setLandingAiResult(runAiMiningReasoning("Emiten mana yang paling tahan jika harga batubara anjlok di bawah $70/ton?"));
+  }, []);
+
+  const handleLandingAiSubmit = (q: string) => {
+    if (!q.trim()) return;
+    setIsAiThinking(true);
+    setLandingAiQuery(q);
+    setTimeout(() => {
+      setLandingAiResult(runAiMiningReasoning(q));
+      setIsAiThinking(false);
+    }, 400);
+  };
 
   return (
     <div className="space-y-20 pb-20 overflow-hidden">
@@ -378,6 +403,171 @@ export default function LandingPage() {
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ── 1.9. Interactive GALI AI Mining Copilot & Screener Console ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-b from-[#0f172a] via-[#090f1d] to-[#050811] p-6 sm:p-8 shadow-[0_0_50px_rgba(245,158,11,0.18)]">
+          {/* Top Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-mono font-bold text-amber-400">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Autonomous AI Mining Intelligence</span>
+              </div>
+              <h2 className="text-xl sm:text-3xl font-black text-white">
+                Tanyakan AI: Rekomendasi, Analisis Risiko &amp; Skrining Real-Time
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+                Cari emiten yang tahan krisis, bandingkan dua saham batubara, atau skrining diskon cadangan fisik berbasis data Sectors API &amp; 52 konsesi spasial MODI ESDM.
+              </p>
+            </div>
+          </div>
+
+          {/* Search Bar + Quick Prompts */}
+          <div className="mt-6 space-y-4">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={landingAiQuery}
+                onChange={(e) => setLandingAiQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleLandingAiSubmit(landingAiQuery);
+                  }
+                }}
+                placeholder="Ketik pertanyaan (misal: 'Emiten mana yang paling tahan krisis harga?' atau 'BUMI vs BYAN')..."
+                className="w-full rounded-2xl border border-slate-700/80 bg-slate-950/90 py-3.5 pl-4 pr-32 text-xs sm:text-sm font-medium text-white placeholder-slate-500 shadow-inner focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+              <button
+                onClick={() => handleLandingAiSubmit(landingAiQuery)}
+                disabled={isAiThinking || !landingAiQuery.trim()}
+                className="absolute right-2 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-2 text-xs font-black text-slate-950 hover:from-amber-400 hover:to-yellow-400 transition-all disabled:opacity-50 cursor-pointer shadow-md"
+              >
+                {isAiThinking ? (
+                  <span>Thinking...</span>
+                ) : (
+                  <>
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Tanya AI</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Prompt Chips */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
+                <Zap className="h-3.5 w-3.5 text-amber-400" />
+                Rekomendasi Cepat:
+              </span>
+              {AI_PROMPT_PILLS.map((pill) => {
+                const Icon = pill.icon;
+                return (
+                  <button
+                    key={pill.label}
+                    onClick={() => handleLandingAiSubmit(pill.query)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-amber-500/50 hover:bg-slate-800 hover:text-white transition-all cursor-pointer"
+                  >
+                    <Icon className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                    <span>{pill.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* AI Output Card */}
+          {landingAiResult && (
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6 space-y-5 animate-in fade-in duration-200">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-mono font-bold text-emerald-400">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <span>{landingAiResult.confidenceScore}% AI Confidence · Validated by 52 MEMR Concessions</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-400">Emisi Rekomendasi:</span>
+                  {landingAiResult.primaryTickers.map((t) => (
+                    <Link
+                      key={t}
+                      href={`/issuer/${t}`}
+                      className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-0.5 font-mono text-xs font-black text-amber-400 hover:border-amber-400 transition-colors"
+                    >
+                      {t}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-white">
+                  {landingAiResult.headline}
+                </h3>
+                <p className="mt-1 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  {landingAiResult.summary}
+                </p>
+              </div>
+
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {landingAiResult.metricsEvidence.map((m, idx) => {
+                  let colorClass = "text-white";
+                  if (m.highlight === "green") colorClass = "text-emerald-400";
+                  if (m.highlight === "amber") colorClass = "text-amber-400";
+                  if (m.highlight === "rose") colorClass = "text-rose-400";
+                  if (m.highlight === "cyan") colorClass = "text-cyan-400";
+
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-xl border border-slate-800/80 bg-[#0a1120] p-3 space-y-1 shadow-sm"
+                    >
+                      <div className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                        {m.label}
+                      </div>
+                      <div className={`font-mono text-xs sm:text-sm font-black ${colorClass}`}>
+                        {m.value}
+                      </div>
+                      {m.subtext && (
+                        <div className="text-[9px] text-slate-500 leading-tight">
+                          {m.subtext}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Theses */}
+              <div className="space-y-2 rounded-xl border border-slate-800/60 bg-slate-900/40 p-3.5 text-xs text-slate-300">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Sparkles className="h-3 w-3 text-amber-400" />
+                  <span>Tesis Analis Fundamental AI:</span>
+                </div>
+                {landingAiResult.thesisPoints.map((p, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0 mt-1.5" />
+                    <span>{p}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA Link */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <span className="text-[10px] text-slate-500 font-mono">
+                  Ground Truth Engine · Real-time Reasoning
+                </span>
+                <Link
+                  href={landingAiResult.recommendedAction.href}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-2 text-xs font-black text-slate-950 hover:from-amber-400 hover:to-yellow-400 transition-all shadow-md"
+                >
+                  <span>{landingAiResult.recommendedAction.label}</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

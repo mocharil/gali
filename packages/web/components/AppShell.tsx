@@ -8,6 +8,8 @@ import { LandingNavbar } from "./LandingNavbar";
 import { Footer } from "./Footer";
 import { TerminalStatusBar } from "./TerminalStatusBar";
 import { CommandPalette } from "./CommandPalette";
+import { AiCopilotModal } from "./AiCopilotModal";
+import { AiCopilotFloatingButton } from "./AiCopilotFloatingButton";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -18,6 +20,7 @@ export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
 
   const isLandingPage = pathname === "/";
@@ -65,6 +68,10 @@ export function AppShell({ children }: AppShellProps) {
         e.preventDefault();
         setSearchOpen((v) => !v);
       }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setAiModalOpen((v) => !v);
+      }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b" && !isLandingPage) {
         e.preventDefault();
         toggleCollapse();
@@ -105,7 +112,7 @@ export function AppShell({ children }: AppShellProps) {
     return (
       <div className="min-h-screen bg-[#060911] text-slate-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
         {/* Landing Top Navigation Bar */}
-        <LandingNavbar apiOnline={apiOnline} />
+        <LandingNavbar apiOnline={apiOnline} onOpenAi={() => setAiModalOpen(true)} />
 
         {/* Full-Width Landing Content */}
         <main className="flex-1 bg-ambient-radial">{children}</main>
@@ -115,6 +122,12 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Fast Command Palette */}
         <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
+        {/* Floating AI Copilot Trigger */}
+        <AiCopilotFloatingButton onClick={() => setAiModalOpen(true)} />
+
+        {/* AI Mining Copilot Modal */}
+        <AiCopilotModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />
       </div>
     );
   }
@@ -144,6 +157,7 @@ export function AppShell({ children }: AppShellProps) {
           onToggleCollapse={toggleCollapse}
           isCollapsed={isCollapsed}
           onOpenSearch={() => setSearchOpen(true)}
+          onOpenAi={() => setAiModalOpen(true)}
           apiOnline={apiOnline}
         />
 
@@ -156,6 +170,12 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* ── Universal Fast Command Palette ── */}
       <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      {/* Floating AI Copilot Trigger */}
+      <AiCopilotFloatingButton onClick={() => setAiModalOpen(true)} />
+
+      {/* AI Mining Copilot Modal */}
+      <AiCopilotModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />
     </div>
   );
 }

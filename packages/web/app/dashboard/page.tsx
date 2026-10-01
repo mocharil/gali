@@ -22,10 +22,12 @@ import {
   Sparkles,
   Trophy,
   ExternalLink,
+  Bot,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { MiningSitesMap } from "@/components/MiningSitesMap";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { AiCopilotModal } from "@/components/AiCopilotModal";
 import {
   Card,
   CardHeader,
@@ -58,6 +60,9 @@ function fmtUSD(n: number | null | undefined, digits = 1): string {
 export default function DashboardPage() {
   const [filterType, setFilterType] = useState<"all" | "complete" | "partial">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiFilter, setAiFilter] = useState<"none" | "low_cost" | "deep_value" | "long_life" | "cliff_risk">("none");
+  const [dashboardAiModalOpen, setDashboardAiModalOpen] = useState(false);
+  const [dashboardAiQuery, setDashboardAiQuery] = useState("");
 
   const { data: issuers, isLoading } = useQuery({
     queryKey: ["issuers"],
@@ -139,6 +144,18 @@ export default function DashboardPage() {
   } else if (filterType === "partial") {
     filteredLeaderboard = filteredLeaderboard.filter((i) => i.data_quality === "PARSIAL");
   }
+
+  // AI-guided screening filter
+  if (aiFilter === "low_cost") {
+    filteredLeaderboard = filteredLeaderboard.filter((i) => i.cash_cost_per_ton_usd != null && i.cash_cost_per_ton_usd <= 35);
+  } else if (aiFilter === "deep_value") {
+    filteredLeaderboard = filteredLeaderboard.filter((i) => i.rbv_gap_pct != null && i.rbv_gap_pct < -25);
+  } else if (aiFilter === "long_life") {
+    filteredLeaderboard = filteredLeaderboard.filter((i) => i.rli_years != null && i.rli_years >= 30);
+  } else if (aiFilter === "cliff_risk") {
+    filteredLeaderboard = filteredLeaderboard.filter((i) => (i.license_cliff_3y ?? 0) > 0);
+  }
+
   if (searchQuery.trim()) {
     filteredLeaderboard = filteredLeaderboard.filter(
       (i) =>
@@ -266,6 +283,158 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
+      </section>
+
+      {/* ── 1.5. GALI AI Mining Screener & Recommendation Console ── */}
+      <section className="rounded-3xl border border-amber-500/40 bg-gradient-to-b from-[#0f172a] via-[#090f1d] to-[#050811] p-5 sm:p-6 shadow-[0_0_40px_rgba(245,158,11,0.15)] space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
+              <h2 className="text-base sm:text-lg font-black text-white">
+                GALI AI Screener &amp; Real-Time Recommendation Engine
+              </h2>
+              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-400 border border-emerald-500/30">
+                9 Issuers · 52 Mines
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 max-w-2xl">
+              Gunakan filter AI berbasis model fundamental untuk menyaring emiten tahan krisis, diskon valuasi cadangan, atau risiko izin konsesi.
+            </p>
+          </div>
+
+          {/* Quick Natural Language Search Input */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex items-center min-w-[260px] sm:min-w-[320px]">
+              <Search className="absolute left-3 h-3.5 w-3.5 text-amber-400" />
+              <input
+                type="text"
+                value={dashboardAiQuery}
+                onChange={(e) => setDashboardAiQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && dashboardAiQuery.trim()) {
+                    setDashboardAiModalOpen(true);
+                  }
+                }}
+                placeholder="Tanya AI (misal: 'BUMI vs BYAN' atau 'tahan krisis')..."
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 py-2 pl-9 pr-20 text-xs text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+              <button
+                onClick={() => {
+                  if (dashboardAiQuery.trim()) {
+                    setDashboardAiModalOpen(true);
+                  } else {
+                    setDashboardAiQuery("Rekomendasi emiten batubara terbaik");
+                    setDashboardAiModalOpen(true);
+                  }
+                }}
+                className="absolute right-1.5 inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-2.5 py-1 text-[11px] font-bold text-slate-950 hover:from-amber-400 hover:to-yellow-400 transition-all cursor-pointer shadow-sm"
+              >
+                <Sparkles className="h-3 w-3" />
+                <span>Tanya AI</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Filter Chips */}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
+            <Bot className="h-3.5 w-3.5 text-amber-400" />
+            Skrining AI:
+          </span>
+          <button
+            onClick={() => setAiFilter("none")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              aiFilter === "none"
+                ? "bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]"
+                : "border border-slate-800 bg-slate-900/80 text-slate-300 hover:border-slate-700 hover:text-white"
+            }`}
+          >
+            <span>Semua 9 Emiten</span>
+          </button>
+
+          <button
+            onClick={() => setAiFilter("low_cost")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              aiFilter === "low_cost"
+                ? "bg-emerald-500 text-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+                : "border border-slate-800 bg-slate-900/80 text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300"
+            }`}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            <span>⚡ AI Pick: Biaya Kas Terendah (&le; $35/t)</span>
+          </button>
+
+          <button
+            onClick={() => setAiFilter("deep_value")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              aiFilter === "deep_value"
+                ? "bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                : "border border-slate-800 bg-slate-900/80 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300"
+            }`}
+          >
+            <TrendingDown className="h-3.5 w-3.5" />
+            <span>💎 AI Pick: Diskon Valuasi RBV (&lt; -25%)</span>
+          </button>
+
+          <button
+            onClick={() => setAiFilter("long_life")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              aiFilter === "long_life"
+                ? "bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                : "border border-slate-800 bg-slate-900/80 text-slate-300 hover:border-indigo-500/50 hover:text-indigo-300"
+            }`}
+          >
+            <ShieldAlert className="h-3.5 w-3.5" />
+            <span>🛡️ AI Pick: Benteng Cadangan (&ge; 30 Thn)</span>
+          </button>
+
+          <button
+            onClick={() => setAiFilter("cliff_risk")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              aiFilter === "cliff_risk"
+                ? "bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                : "border border-slate-800 bg-slate-900/80 text-slate-300 hover:border-rose-500/50 hover:text-rose-300"
+            }`}
+          >
+            <ShieldAlert className="h-3.5 w-3.5" />
+            <span>⚠️ AI Alert: Risiko Izin Kadaluarsa (Cliff &gt; 0%)</span>
+          </button>
+        </div>
+
+        {/* AI Insight Callout banner depending on active filter */}
+        <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-amber-400">💡 AI Active Insight:</span>
+            <span>
+              {aiFilter === "low_cost" && "BUMI ($15.70/t) dan BYAN ($29.80/t) adalah emiten dengan ketahanan margin tertinggi terhadap penurunan harga batubara Newcastle/ICI-4."}
+              {aiFilter === "deep_value" && "BUMI (-73.7%), GEMS (-68.4%), dan PTBA (-35.4%) diperdagangkan pada diskon terdalam terhadap valuasi wajar DCF cadangan fisiknya."}
+              {aiFilter === "long_life" && "PTBA (67.8 thn), BYAN (40.2 thn), dan BUMI (31.5 thn) memiliki ketahanan cadangan batubara terlama yang menjamin kelangsungan operasional multi-dekade."}
+              {aiFilter === "cliff_risk" && "GEMS menghadapi 100% kadaluarsa izin konsesi dalam 3 tahun ke depan yang membutuhkan persetujuan perpanjangan regulasi ESDM."}
+              {aiFilter === "none" && "BYAN memimpin peringkat 1 komposit M8 (78.2), disusul PTBA (74.0) dan GEMS (71.5). Klik filter di atas atau tombol 'Tanya AI' untuk rekomendasi mendalam."}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              const queryMap: Record<string, string> = {
+                low_cost: "Emiten mana yang paling tahan krisis harga batubara?",
+                deep_value: "Emiten mana yang valuasinya paling terdiskon terhadap cadangan tambang fisik?",
+                long_life: "Emiten apa yang punya cadangan batubara paling awet untuk jangka panjang?",
+                cliff_risk: "Siapa emiten batubara dengan risiko perpanjangan izin paling kritis?",
+                none: "Rekomendasi emiten batubara terbaik",
+              };
+              setDashboardAiQuery(queryMap[aiFilter]);
+              setDashboardAiModalOpen(true);
+            }}
+            className="text-amber-400 hover:text-amber-300 font-bold shrink-0 inline-flex items-center gap-1 cursor-pointer"
+          >
+            <span>Analisis Lengkap</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
       </section>
 
       {/* ── 2. Main Workspace: Map & Leaderboard ── */}
@@ -779,6 +948,13 @@ export default function DashboardPage() {
           </Link>
         </Button>
       </Card>
+
+      {/* ── Dedicated AI Copilot Modal for Dashboard ── */}
+      <AiCopilotModal
+        isOpen={dashboardAiModalOpen}
+        onClose={() => setDashboardAiModalOpen(false)}
+        initialQuery={dashboardAiQuery}
+      />
     </div>
   );
 }

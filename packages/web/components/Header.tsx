@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   PanelLeft,
+  Sparkles,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ interface HeaderProps {
   onToggleCollapse: () => void;
   isCollapsed?: boolean;
   onOpenSearch: () => void;
+  onOpenAi?: () => void;
   apiOnline?: boolean | null;
 }
 
@@ -67,6 +69,7 @@ export function Header({
   onToggleCollapse,
   isCollapsed = false,
   onOpenSearch,
+  onOpenAi,
   apiOnline,
 }: HeaderProps) {
   const pathname = usePathname();
@@ -170,6 +173,21 @@ export function Header({
               ⌘K
             </kbd>
           </button>
+
+          {/* Quick AI Copilot Trigger */}
+          {onOpenAi && (
+            <button
+              onClick={onOpenAi}
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-400/10 to-yellow-500/10 px-2.5 py-1.5 text-xs font-bold text-amber-400 transition-all hover:border-amber-400 hover:bg-amber-500/20 shadow-sm cursor-pointer"
+              title="Open GALI AI Copilot (⌘J)"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span>Ask AI</span>
+              <kbd className="inline-flex items-center rounded border border-amber-500/30 bg-slate-950 px-1 py-0.2 font-mono text-[9px] text-amber-300">
+                ⌘J
+              </kbd>
+            </button>
+          )}
 
           {/* API Status Badge */}
           <div className="flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/80 px-2.5 py-1 text-xs">

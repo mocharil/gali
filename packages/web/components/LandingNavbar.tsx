@@ -12,13 +12,15 @@ import {
   MapPin,
   Scale,
   SlidersHorizontal,
+  Sparkles,
 } from "lucide-react";
 
 interface LandingNavbarProps {
   apiOnline?: boolean | null;
+  onOpenAi?: () => void;
 }
 
-export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
+export function LandingNavbar({ apiOnline, onOpenAi }: LandingNavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -112,6 +114,21 @@ export function LandingNavbar({ apiOnline }: LandingNavbarProps) {
           >
             <Github className="h-4 w-4" />
           </a>
+
+          {/* Ask AI Copilot Button */}
+          {onOpenAi && (
+            <button
+              onClick={onOpenAi}
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-400/10 to-yellow-500/10 px-3 py-2 text-xs font-bold text-amber-400 transition-all hover:border-amber-400 hover:bg-amber-500/20 shadow-sm cursor-pointer"
+              title="Open GALI AI Copilot (⌘J)"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span>Ask AI</span>
+              <kbd className="inline-flex items-center rounded border border-amber-500/30 bg-slate-950 px-1 py-0.2 font-mono text-[9px] text-amber-300">
+                ⌘J
+              </kbd>
+            </button>
+          )}
 
           {/* Primary CTA: Launch Dashboard App */}
           <Link
