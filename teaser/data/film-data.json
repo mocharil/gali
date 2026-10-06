@@ -1,0 +1,1037 @@
+{
+ "source": "https://gali-api.vercel.app/v1",
+ "as_of": "2026-10-02",
+ "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695",
+ "issuers": [
+  {
+   "symbol": "BUMI",
+   "name": "Bumi Resources Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 68.02,
+   "rli_years": 31.5127,
+   "implied_life_years": null,
+   "cash_cost_per_ton_usd": 15.7,
+   "realized_price_per_ton_usd": 17.94,
+   "unit_margin_usd": 2.24,
+   "breakeven_benchmark_price_usd": 90.04,
+   "license_cliff_3y": 0.0,
+   "reserve_backed_value_usd": 1366239752.76,
+   "market_cap_idr": 70553724492920.0,
+   "weighted_cv_kcal": 6059.4,
+   "top_destination": "Indonesia",
+   "top_destination_pct": 30.44,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "BYAN",
+   "name": "Bayan Resources Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 64.27,
+   "rli_years": 40.2178,
+   "implied_life_years": null,
+   "cash_cost_per_ton_usd": 37.61,
+   "realized_price_per_ton_usd": 61.32,
+   "unit_margin_usd": 23.71,
+   "breakeven_benchmark_price_usd": 63.09,
+   "license_cliff_3y": 0.0,
+   "reserve_backed_value_usd": 10734096499.79,
+   "market_cap_idr": 485833357625000.0,
+   "weighted_cv_kcal": 4276.9,
+   "top_destination": "Philippines",
+   "top_destination_pct": 29.53,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "PTBA",
+   "name": "Bukit Asam Tbk",
+   "data_quality": "PARSIAL",
+   "ground_truth_score": 60.94,
+   "rli_years": 67.768,
+   "implied_life_years": null,
+   "cash_cost_per_ton_usd": null,
+   "realized_price_per_ton_usd": null,
+   "unit_margin_usd": null,
+   "breakeven_benchmark_price_usd": null,
+   "license_cliff_3y": null,
+   "reserve_backed_value_usd": null,
+   "market_cap_idr": 29147267902500.0,
+   "weighted_cv_kcal": 4611.1,
+   "top_destination": "Bangladesh",
+   "top_destination_pct": 100.0,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "GEMS",
+   "name": "Golden Energy Mines Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 52.45,
+   "rli_years": 17.7392,
+   "implied_life_years": 2.82,
+   "cash_cost_per_ton_usd": 30.87,
+   "realized_price_per_ton_usd": 52.16,
+   "unit_margin_usd": 21.29,
+   "breakeven_benchmark_price_usd": 60.88,
+   "license_cliff_3y": 100.0,
+   "reserve_backed_value_usd": 7968181177.65,
+   "market_cap_idr": 40735294525000.0,
+   "weighted_cv_kcal": 4620.0,
+   "top_destination": "China",
+   "top_destination_pct": 0.0,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "DSSA",
+   "name": "Dian Swastatika Sentosa Tbk",
+   "data_quality": "PARSIAL",
+   "ground_truth_score": 50.87,
+   "rli_years": null,
+   "implied_life_years": 10.64,
+   "cash_cost_per_ton_usd": 31.94,
+   "realized_price_per_ton_usd": 53.91,
+   "unit_margin_usd": 21.97,
+   "breakeven_benchmark_price_usd": 60.94,
+   "license_cliff_3y": 100.0,
+   "reserve_backed_value_usd": null,
+   "market_cap_idr": 220570601600000.0,
+   "weighted_cv_kcal": 4170.6,
+   "top_destination": "China",
+   "top_destination_pct": 0.0,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "ADRO",
+   "name": "Alamtri Resources Indonesia Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 47.4,
+   "rli_years": 16.2383,
+   "implied_life_years": 4.23,
+   "cash_cost_per_ton_usd": 26.16,
+   "realized_price_per_ton_usd": 44.01,
+   "unit_margin_usd": 17.85,
+   "breakeven_benchmark_price_usd": 61.15,
+   "license_cliff_3y": 0.0,
+   "reserve_backed_value_usd": 10482738581.46,
+   "market_cap_idr": 76897319514000.0,
+   "weighted_cv_kcal": 5491.0,
+   "top_destination": "Japan",
+   "top_destination_pct": 55.77,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "AADI",
+   "name": "PT Adaro Andalan Indonesia Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 38.85,
+   "rli_years": 17.0235,
+   "implied_life_years": 4.54,
+   "cash_cost_per_ton_usd": 69.06,
+   "realized_price_per_ton_usd": 95.34,
+   "unit_margin_usd": 26.28,
+   "breakeven_benchmark_price_usd": 74.52,
+   "license_cliff_3y": 0.0,
+   "reserve_backed_value_usd": 10444746098.51,
+   "market_cap_idr": 79620968246000.0,
+   "weighted_cv_kcal": 4317.7,
+   "top_destination": "Indonesia",
+   "top_destination_pct": 25.0,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "ITMG",
+   "name": "Indo Tambangraya Megah Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 31.25,
+   "rli_years": 17.5545,
+   "implied_life_years": 3.24,
+   "cash_cost_per_ton_usd": 66.9,
+   "realized_price_per_ton_usd": 96.02,
+   "unit_margin_usd": 29.12,
+   "breakeven_benchmark_price_usd": 71.68,
+   "license_cliff_3y": null,
+   "reserve_backed_value_usd": 5026927109.48,
+   "market_cap_idr": 28982576250000.0,
+   "weighted_cv_kcal": 5671.4,
+   "top_destination": "China",
+   "top_destination_pct": 38.33,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  },
+  {
+   "symbol": "ADMR",
+   "name": "PT Alamtri Minerals Indonesia Tbk",
+   "data_quality": "LENGKAP",
+   "ground_truth_score": 26.92,
+   "rli_years": 26.727,
+   "implied_life_years": 20.02,
+   "cash_cost_per_ton_usd": 102.56,
+   "realized_price_per_ton_usd": 205.34,
+   "unit_margin_usd": 102.78,
+   "breakeven_benchmark_price_usd": 51.38,
+   "license_cliff_3y": null,
+   "reserve_backed_value_usd": 4580605736.78,
+   "market_cap_idr": 69908786865000.0,
+   "weighted_cv_kcal": 7689.5,
+   "top_destination": null,
+   "top_destination_pct": null,
+   "as_of": "2026-10-02",
+   "run_id": "ac225487-3eba-48b0-9ccb-9de48ca38695"
+  }
+ ],
+ "cost_curve": {
+  "benchmark_price_usd": 102.87,
+  "points": [
+   {
+    "symbol": "BUMI",
+    "name": "Bumi Resources Tbk",
+    "cash_cost_per_ton_usd": 15.7,
+    "annual_volume_mt": 75.8,
+    "cumulative_volume_mt": 75.8,
+    "cost_curve_percentile": 8.25,
+    "realized_price_per_ton_usd": 17.94,
+    "unit_margin_usd": 2.24,
+    "breakeven_benchmark_price_usd": 90.04
+   },
+   {
+    "symbol": "ADRO",
+    "name": "Alamtri Resources Indonesia Tbk",
+    "cash_cost_per_ton_usd": 26.16,
+    "annual_volume_mt": 83.79,
+    "cumulative_volume_mt": 159.59,
+    "cost_curve_percentile": 25.63,
+    "realized_price_per_ton_usd": 44.01,
+    "unit_margin_usd": 17.85,
+    "breakeven_benchmark_price_usd": 61.15
+   },
+   {
+    "symbol": "GEMS",
+    "name": "Golden Energy Mines Tbk",
+    "cash_cost_per_ton_usd": 30.87,
+    "annual_volume_mt": 51.86,
+    "cumulative_volume_mt": 211.45,
+    "cost_curve_percentile": 40.4,
+    "realized_price_per_ton_usd": 52.16,
+    "unit_margin_usd": 21.29,
+    "breakeven_benchmark_price_usd": 60.88
+   },
+   {
+    "symbol": "DSSA",
+    "name": "Dian Swastatika Sentosa Tbk",
+    "cash_cost_per_ton_usd": 31.94,
+    "annual_volume_mt": 106.16,
+    "cumulative_volume_mt": 317.61,
+    "cost_curve_percentile": 57.6,
+    "realized_price_per_ton_usd": 53.91,
+    "unit_margin_usd": 21.97,
+    "breakeven_benchmark_price_usd": 60.94
+   },
+   {
+    "symbol": "BYAN",
+    "name": "Bayan Resources Tbk",
+    "cash_cost_per_ton_usd": 37.61,
+    "annual_volume_mt": 56.2,
+    "cumulative_volume_mt": 373.81,
+    "cost_curve_percentile": 75.28,
+    "realized_price_per_ton_usd": 61.32,
+    "unit_margin_usd": 23.71,
+    "breakeven_benchmark_price_usd": 63.09
+   },
+   {
+    "symbol": "ITMG",
+    "name": "Indo Tambangraya Megah Tbk",
+    "cash_cost_per_ton_usd": 66.9,
+    "annual_volume_mt": 24.0,
+    "cumulative_volume_mt": 397.81,
+    "cost_curve_percentile": 84.01,
+    "realized_price_per_ton_usd": 96.02,
+    "unit_margin_usd": 29.12,
+    "breakeven_benchmark_price_usd": 71.68
+   },
+   {
+    "symbol": "AADI",
+    "name": "PT Adaro Andalan Indonesia Tbk",
+    "cash_cost_per_ton_usd": 69.06,
+    "annual_volume_mt": 55.8,
+    "cumulative_volume_mt": 453.61,
+    "cost_curve_percentile": 92.7,
+    "realized_price_per_ton_usd": 95.34,
+    "unit_margin_usd": 26.28,
+    "breakeven_benchmark_price_usd": 74.52
+   },
+   {
+    "symbol": "ADMR",
+    "name": "PT Alamtri Minerals Indonesia Tbk",
+    "cash_cost_per_ton_usd": 102.56,
+    "annual_volume_mt": 5.62,
+    "cumulative_volume_mt": 459.23,
+    "cost_curve_percentile": 99.39,
+    "realized_price_per_ton_usd": 205.34,
+    "unit_margin_usd": 102.78,
+    "breakeven_benchmark_price_usd": 51.38
+   }
+  ]
+ },
+ "sites": [
+  {
+   "slug": "batubara-batalang",
+   "name": "Batubara Batalang",
+   "issuer": "ITMG",
+   "company": "PT Jorong Barutama Greston",
+   "lon": 115.02445,
+   "lat": -3.9069
+  },
+  {
+   "slug": "batubara-batulicin",
+   "name": "Batubara Batulicin",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 115.84732,
+   "lat": -3.21454
+  },
+  {
+   "slug": "batubara-benangin-1",
+   "name": "Batubara Benangin 1",
+   "issuer": "ITMG",
+   "company": "PT Bharinto Ekatama",
+   "lon": 115.391066,
+   "lat": -0.88041
+  },
+  {
+   "slug": "batubara-beruang",
+   "name": "Batubara Beruang",
+   "issuer": "BYAN",
+   "company": "PT Perkasa Inakakerta",
+   "lon": 117.68223,
+   "lat": 0.777278
+  },
+  {
+   "slug": "batubara-bukit-kendi-1",
+   "name": "Batubara Bukit Kendi 1",
+   "issuer": "PTBA",
+   "company": "PT Batubara Bukit Kendi",
+   "lon": 103.737651,
+   "lat": -3.807374
+  },
+  {
+   "slug": "batubara-gunung-sari-3",
+   "name": "Batubara Gunung Sari 3",
+   "issuer": "BYAN",
+   "company": "PT Orkida Makmur",
+   "lon": 116.269085,
+   "lat": 0.459706
+  },
+  {
+   "slug": "batubara-jelmu-sibak",
+   "name": "Batubara Jelmu Sibak",
+   "issuer": "ITMG",
+   "company": "PT Trubaindo Coal Mining",
+   "lon": 115.68008,
+   "lat": -0.71293
+  },
+  {
+   "slug": "batubara-jujuhan-1",
+   "name": "Batubara Jujuhan 1",
+   "issuer": "DSSA",
+   "company": "PT Kuansing Inti Makmur",
+   "lon": 101.745389,
+   "lat": -1.400547
+  },
+  {
+   "slug": "batubara-karendan-2",
+   "name": "Batubara Karendan 2",
+   "issuer": "ITMG",
+   "company": "PT Nusa Persada Resources",
+   "lon": 115.275828,
+   "lat": -0.536324
+  },
+  {
+   "slug": "batubara-kelekat-3",
+   "name": "Batubara Kelekat 3",
+   "issuer": "BYAN",
+   "company": "PT Bara Sejati",
+   "lon": 116.329954,
+   "lat": 0.371399
+  },
+  {
+   "slug": "batubara-kertadewa",
+   "name": "Batubara Kertadewa",
+   "issuer": "BUMI",
+   "company": "PT Pendopo Energi Batubara",
+   "lon": 103.97845,
+   "lat": -3.33306
+  },
+  {
+   "slug": "batubara-laham",
+   "name": "Batubara Laham",
+   "issuer": "BYAN",
+   "company": "PT Mamahak Coal Mining",
+   "lon": 115.413864,
+   "lat": 0.463562
+  },
+  {
+   "slug": "batubara-liangbuah",
+   "name": "Batubara Liangbuah",
+   "issuer": "DSSA",
+   "company": "PT Trisula Kencana Sakti",
+   "lon": 115.193585,
+   "lat": -0.943774
+  },
+  {
+   "slug": "batubara-lisat",
+   "name": "Batubara Lisat",
+   "issuer": "BYAN",
+   "company": "PT Teguh Sinarabadi",
+   "lon": 115.785258,
+   "lat": -0.386003
+  },
+  {
+   "slug": "batubara-lubuk-bintialo-2",
+   "name": "Batubara Lubuk Bintialo 2",
+   "issuer": "DSSA",
+   "company": "PT Barasentosa Lestari",
+   "lon": 103.3574,
+   "lat": -2.38431
+  },
+  {
+   "slug": "batubara-pelakan-1",
+   "name": "Batubara Pelakan 1",
+   "issuer": "ITMG",
+   "company": "PT Indominco Mandiri",
+   "lon": 117.35399,
+   "lat": 0.14212
+  },
+  {
+   "slug": "batubara-sumber-arum",
+   "name": "Batubara Sumber Arum",
+   "issuer": "DSSA",
+   "company": "PT Borneo Indobara",
+   "lon": 115.57178,
+   "lat": -3.558935
+  },
+  {
+   "slug": "batubara-sungai-cuka-1",
+   "name": "Batubara Sungai Cuka 1",
+   "issuer": "BYAN",
+   "company": "PT Wahana Baratama Mining",
+   "lon": 115.31831,
+   "lat": -3.76227
+  },
+  {
+   "slug": "batubara-sungai-mega",
+   "name": "Batubara Sungai Mega",
+   "issuer": "ITMG",
+   "company": "PT Tepian Indah Sukses",
+   "lon": 115.70551,
+   "lat": -0.766081
+  },
+  {
+   "slug": "batubara-tabang",
+   "name": "Batubara Tabang",
+   "issuer": "BYAN",
+   "company": "PT Brian Anjat Sentosa",
+   "lon": 116.088594,
+   "lat": 0.400533
+  },
+  {
+   "slug": "batubara-tukul",
+   "name": "Batubara Tukul",
+   "issuer": "ITMG",
+   "company": "PT Graha Panca Karsa",
+   "lon": 115.691134,
+   "lat": 0.112834
+  },
+  {
+   "slug": "bengalon",
+   "name": "Bengalon",
+   "issuer": "BUMI",
+   "company": "PT Kaltim Prima Coal",
+   "lon": 117.464246,
+   "lat": 0.833614
+  },
+  {
+   "slug": "cisadang",
+   "name": "Cisadang",
+   "issuer": "BUMI",
+   "company": "PT Suma Heksa Sinergi",
+   "lon": 106.052,
+   "lat": -6.647
+  },
+  {
+   "slug": "kintap",
+   "name": "Kintap",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 115.217864,
+   "lat": -3.750346
+  },
+  {
+   "slug": "muliajumbang",
+   "name": "Mulia/Jumbang",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 115.37312,
+   "lat": -3.790327
+  },
+  {
+   "slug": "poboya",
+   "name": "Poboya",
+   "issuer": "BUMI",
+   "company": "PT Citra Palu Mineral",
+   "lon": 119.93,
+   "lat": -0.836
+  },
+  {
+   "slug": "sangatta",
+   "name": "Sangatta",
+   "issuer": "BUMI",
+   "company": "PT Kaltim Prima Coal",
+   "lon": 117.488557,
+   "lat": 0.599251
+  },
+  {
+   "slug": "sarongga",
+   "name": "Sarongga",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 116.018748,
+   "lat": -3.253772
+  },
+  {
+   "slug": "satui",
+   "name": "Satui",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 115.288605,
+   "lat": -3.679438
+  },
+  {
+   "slug": "senakin",
+   "name": "Senakin",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 116.288631,
+   "lat": -2.796658
+  },
+  {
+   "slug": "sungai-mak",
+   "name": "Sungai Mak",
+   "issuer": "BUMI",
+   "company": "PT Gorontalo Minerals",
+   "lon": 123.351,
+   "lat": 0.446
+  },
+  {
+   "slug": "tembaga-sungai-mak",
+   "name": "Tembaga Sungai Mak",
+   "issuer": "BUMI",
+   "company": "PT Gorontalo Minerals",
+   "lon": 123.351,
+   "lat": 0.446
+  },
+  {
+   "slug": "abong",
+   "name": "Abong",
+   "issuer": "BUMI",
+   "company": "PT Linge Mineral Resources",
+   "lon": 97.161,
+   "lat": 4.337
+  },
+  {
+   "slug": "asam-asam",
+   "name": "Asam-asam",
+   "issuer": "BUMI",
+   "company": "PT Arutmin Indonesia",
+   "lon": 115.04344,
+   "lat": -3.94989
+  },
+  {
+   "slug": "batubara-bumbun",
+   "name": "Batubara Bumbun",
+   "issuer": "ADRO",
+   "company": "PT Juloi Coal",
+   "lon": 115.122998,
+   "lat": -3.142556
+  },
+  {
+   "slug": "batubara-dahlia",
+   "name": "Batubara Dahlia",
+   "issuer": "ADRO",
+   "company": "PT Sumber Barito Coal",
+   "lon": 114.710847,
+   "lat": 0.16375
+  },
+  {
+   "slug": "batubara-danum-paro",
+   "name": "Batubara Danum Paro",
+   "issuer": "ADRO",
+   "company": "PT Ratah Coal",
+   "lon": 115.070869,
+   "lat": 0.3272
+  },
+  {
+   "slug": "batubara-gunung-kembang",
+   "name": "Batubara Gunung Kembang",
+   "issuer": "ADRO",
+   "company": "PT Mustika Indah Permai",
+   "lon": 103.633099,
+   "lat": -3.711629
+  },
+  {
+   "slug": "batubara-gunung-sari-2",
+   "name": "Batubara Gunung Sari 2",
+   "issuer": "BYAN",
+   "company": "PT Tanur Jaya",
+   "lon": 116.200016,
+   "lat": 0.487386
+  },
+  {
+   "slug": "batubara-hamarung",
+   "name": "Batubara Hamarung",
+   "issuer": "ADRO",
+   "company": "PT Semesta Centramas",
+   "lon": 115.583027,
+   "lat": -2.352217
+  },
+  {
+   "slug": "batubara-long-lalang-2",
+   "name": "Batubara Long Lalang 2",
+   "issuer": "BYAN",
+   "company": "PT Tiwa Abadi",
+   "lon": 116.157262,
+   "lat": 0.488912
+  },
+  {
+   "slug": "batubara-melapeh-baru-1",
+   "name": "Batubara Melapeh Baru 1",
+   "issuer": "ADRO",
+   "company": "PT Pari Coal",
+   "lon": 115.06088,
+   "lat": -0.05772
+  },
+  {
+   "slug": "batubara-muara-ritan-1",
+   "name": "Batubara Muara Ritan 1",
+   "issuer": "BYAN",
+   "company": "PT Bara Tabang",
+   "lon": 116.1698,
+   "lat": 0.549093
+  },
+  {
+   "slug": "batubara-muara-ritan-2",
+   "name": "Batubara Muara Ritan 2",
+   "issuer": "BYAN",
+   "company": "PT Fajar Sakti Prima",
+   "lon": 116.107206,
+   "lat": 0.534906
+  },
+  {
+   "slug": "batubara-piyait",
+   "name": "Batubara Piyait",
+   "issuer": "ADRO",
+   "company": "PT Paramitha Cipta Sarana",
+   "lon": 115.573617,
+   "lat": -2.398304
+  },
+  {
+   "slug": "batubara-tawahan",
+   "name": "Batubara Tawahan",
+   "issuer": "ADRO",
+   "company": "PT Laskar Semesta Alam",
+   "lon": 115.625618,
+   "lat": -2.349375
+  },
+  {
+   "slug": "haju-block",
+   "name": "Haju Block",
+   "issuer": "ADRO",
+   "company": "PT Lahai Coal",
+   "lon": 114.835719,
+   "lat": -0.314002
+  },
+  {
+   "slug": "paringin-utara",
+   "name": "Paringin Utara",
+   "issuer": "ADRO",
+   "company": "PT Adaro Indonesia",
+   "lon": 115.491708,
+   "lat": -2.2929
+  },
+  {
+   "slug": "tutupan-selatan",
+   "name": "Tutupan Selatan",
+   "issuer": "ADRO",
+   "company": "PT Adaro Indonesia",
+   "lon": 115.517596,
+   "lat": -2.205145
+  },
+  {
+   "slug": "tutupan-utara",
+   "name": "Tutupan Utara",
+   "issuer": "ADRO",
+   "company": "PT Adaro Indonesia",
+   "lon": 115.568231,
+   "lat": -2.171642
+  },
+  {
+   "slug": "wara-i",
+   "name": "Wara I",
+   "issuer": "ADRO",
+   "company": "PT Adaro Indonesia",
+   "lon": 115.476479,
+   "lat": -2.162696
+  },
+  {
+   "slug": "wara-ii",
+   "name": "Wara II",
+   "issuer": "ADRO",
+   "company": "PT Adaro Indonesia",
+   "lon": 115.428509,
+   "lat": -2.275006
+  }
+ ],
+ "adro_companies": [
+  {
+   "slug": "pt-alamtri-resources-indonesia-tbk",
+   "effective_ownership": "100.0%",
+   "sites": []
+  },
+  {
+   "slug": "pt-saptaindra-sejati",
+   "effective_ownership": "100.0%",
+   "sites": []
+  },
+  {
+   "slug": "pt-adaro-minerals-indonesia-tbk",
+   "effective_ownership": "68.5%",
+   "sites": []
+  },
+  {
+   "slug": "pt-lahai-coal",
+   "effective_ownership": "68.5%",
+   "sites": [
+    "bara-block",
+    "haju-block"
+   ]
+  },
+  {
+   "slug": "pt-maruwai-coal",
+   "effective_ownership": "68.5%",
+   "sites": [
+    "lumpunut-block"
+   ]
+  },
+  {
+   "slug": "pt-kalteng-coal",
+   "effective_ownership": "68.5%",
+   "sites": [
+    "luon-block"
+   ]
+  },
+  {
+   "slug": "pt-juloi-coal",
+   "effective_ownership": "68.5%",
+   "sites": [
+    "batubara-bumbun",
+    "juloi-northwest"
+   ]
+  },
+  {
+   "slug": "pt-sumber-barito-coal",
+   "effective_ownership": "68.5%",
+   "sites": [
+    "batubara-dahlia"
+   ]
+  },
+  {
+   "slug": "pt-kalimantan-aluminium-industry",
+   "effective_ownership": "44.5%",
+   "sites": []
+  },
+  {
+   "slug": "pt-adaro-andalan-indonesia-tbk",
+   "effective_ownership": "15.4%",
+   "sites": []
+  },
+  {
+   "slug": "pt-adaro-mining-technologies",
+   "effective_ownership": "15.4%",
+   "sites": []
+  },
+  {
+   "slug": "pt-ratah-coal",
+   "effective_ownership": "15.4%",
+   "sites": [
+    "batubara-danum-paro"
+   ]
+  },
+  {
+   "slug": "pt-adaro-indonesia",
+   "effective_ownership": "15.4%",
+   "sites": [
+    "paringin-utara",
+    "tutupan-selatan",
+    "tutupan-utara",
+    "wara-i",
+    "wara-ii"
+   ]
+  },
+  {
+   "slug": "pt-adaro-logistics",
+   "effective_ownership": "15.3%",
+   "sites": []
+  },
+  {
+   "slug": "pt-laskar-semesta-alam",
+   "effective_ownership": "11.6%",
+   "sites": [
+    "batubara-tawahan"
+   ]
+  },
+  {
+   "slug": "pt-semesta-centramas",
+   "effective_ownership": "11.5%",
+   "sites": [
+    "batubara-hamarung"
+   ]
+  },
+  {
+   "slug": "pt-paramitha-cipta-sarana",
+   "effective_ownership": "11.5%",
+   "sites": [
+    "batubara-piyait"
+   ]
+  },
+  {
+   "slug": "pt-mustika-indah-permai",
+   "effective_ownership": "11.5%",
+   "sites": [
+    "batubara-gunung-kembang"
+   ]
+  },
+  {
+   "slug": "pt-pari-coal",
+   "effective_ownership": "10.0%",
+   "sites": [
+    "batubara-melapeh-baru-1"
+   ]
+  },
+  {
+   "slug": "pt-bukit-enim-energy",
+   "effective_ownership": "9.4%",
+   "sites": []
+  },
+  {
+   "slug": "kestrel-coal-resources",
+   "effective_ownership": "7.5%",
+   "sites": [
+    "kestrel-mine"
+   ]
+  },
+  {
+   "slug": "pt-bhakti-energi-persada",
+   "effective_ownership": "2.8%",
+   "sites": []
+  }
+ ],
+ "credits_used": 405,
+ "coverage": {
+  "In-Universe Mining Sites GPS": [
+   52,
+   57
+  ],
+  "National Mining Sites GPS": [
+   52,
+   143
+  ],
+  "Mining Concession Licenses (IUP/IUPK)": [
+   99,
+   750
+  ],
+  "In-Universe Issuer Completeness": [
+   7,
+   9
+  ]
+ },
+ "scenarios": {
+  "price_-20": [
+   {
+    "symbol": "AADI",
+    "baseline_rank": 3,
+    "post_shock_rank": 3,
+    "baseline_rbv_usd": 10444746098.51,
+    "post_shock_rbv_usd": 8355796878.81,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "ADMR",
+    "baseline_rank": 6,
+    "post_shock_rank": 6,
+    "baseline_rbv_usd": 4580605736.78,
+    "post_shock_rbv_usd": 3664484589.42,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "ADRO",
+    "baseline_rank": 2,
+    "post_shock_rank": 2,
+    "baseline_rbv_usd": 10482738581.46,
+    "post_shock_rbv_usd": 8386190865.16,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "BUMI",
+    "baseline_rank": 7,
+    "post_shock_rank": 7,
+    "baseline_rbv_usd": 1366239752.76,
+    "post_shock_rbv_usd": 1092991802.2,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "BYAN",
+    "baseline_rank": 1,
+    "post_shock_rank": 1,
+    "baseline_rbv_usd": 10734096499.79,
+    "post_shock_rbv_usd": 8587277199.84,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "GEMS",
+    "baseline_rank": 4,
+    "post_shock_rank": 4,
+    "baseline_rbv_usd": 7968181177.65,
+    "post_shock_rbv_usd": 6374544942.12,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "ITMG",
+    "baseline_rank": 5,
+    "post_shock_rank": 5,
+    "baseline_rbv_usd": 5026927109.48,
+    "post_shock_rbv_usd": 4021541687.59,
+    "delta_rbv_pct": -20.0
+   }
+  ],
+  "price_-20_china_-30": [
+   {
+    "symbol": "AADI",
+    "baseline_rank": 3,
+    "post_shock_rank": 1,
+    "baseline_rbv_usd": 10444746098.51,
+    "post_shock_rbv_usd": 8355796878.81,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "ADMR",
+    "baseline_rank": 6,
+    "post_shock_rank": 5,
+    "baseline_rbv_usd": 4580605736.78,
+    "post_shock_rbv_usd": 3664484589.42,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "ADRO",
+    "baseline_rank": 2,
+    "post_shock_rank": 3,
+    "baseline_rbv_usd": 10482738581.46,
+    "post_shock_rbv_usd": 7581116542.11,
+    "delta_rbv_pct": -27.68
+   },
+   {
+    "symbol": "BUMI",
+    "baseline_rank": 7,
+    "post_shock_rank": 7,
+    "baseline_rbv_usd": 1366239752.76,
+    "post_shock_rbv_usd": 1092991802.2,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "BYAN",
+    "baseline_rank": 1,
+    "post_shock_rank": 2,
+    "baseline_rbv_usd": 10734096499.79,
+    "post_shock_rbv_usd": 8066630583.21,
+    "delta_rbv_pct": -24.85
+   },
+   {
+    "symbol": "GEMS",
+    "baseline_rank": 4,
+    "post_shock_rank": 4,
+    "baseline_rbv_usd": 7968181177.65,
+    "post_shock_rbv_usd": 6374544942.12,
+    "delta_rbv_pct": -20.0
+   },
+   {
+    "symbol": "ITMG",
+    "baseline_rank": 5,
+    "post_shock_rank": 6,
+    "baseline_rbv_usd": 5026927109.48,
+    "post_shock_rbv_usd": 3563085935.2,
+    "delta_rbv_pct": -29.12
+   }
+  ],
+  "license_cliff": [
+   {
+    "symbol": "AADI",
+    "baseline_rank": 3,
+    "post_shock_rank": 3,
+    "baseline_rbv_usd": 10444746098.51,
+    "post_shock_rbv_usd": 10444746098.51,
+    "delta_rbv_pct": 0.0
+   },
+   {
+    "symbol": "ADMR",
+    "baseline_rank": 6,
+    "post_shock_rank": 5,
+    "baseline_rbv_usd": 4580605736.78,
+    "post_shock_rbv_usd": 4580605736.78,
+    "delta_rbv_pct": 0.0
+   },
+   {
+    "symbol": "ADRO",
+    "baseline_rank": 2,
+    "post_shock_rank": 2,
+    "baseline_rbv_usd": 10482738581.46,
+    "post_shock_rbv_usd": 10482738581.46,
+    "delta_rbv_pct": 0.0
+   },
+   {
+    "symbol": "BUMI",
+    "baseline_rank": 7,
+    "post_shock_rank": 6,
+    "baseline_rbv_usd": 1366239752.76,
+    "post_shock_rbv_usd": 1366239752.76,
+    "delta_rbv_pct": 0.0
+   },
+   {
+    "symbol": "BYAN",
+    "baseline_rank": 1,
+    "post_shock_rank": 1,
+    "baseline_rbv_usd": 10734096499.79,
+    "post_shock_rbv_usd": 10734096499.79,
+    "delta_rbv_pct": 0.0
+   },
+   {
+    "symbol": "GEMS",
+    "baseline_rank": 4,
+    "post_shock_rank": 7,
+    "baseline_rbv_usd": 7968181177.65,
+    "post_shock_rbv_usd": 985767857.14,
+    "delta_rbv_pct": -87.63
+   },
+   {
+    "symbol": "ITMG",
+    "baseline_rank": 5,
+    "post_shock_rank": 4,
+    "baseline_rbv_usd": 5026927109.48,
+    "post_shock_rbv_usd": 5026927109.48,
+    "delta_rbv_pct": 0.0
+   }
+  ]
+ }
+}

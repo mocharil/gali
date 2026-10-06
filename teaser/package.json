@@ -1,0 +1,17 @@
+{
+  "name": "gali-teaser",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GALI 60-second motion-graphics teaser (deterministic canvas film).",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "qa": "node tools/build.mjs && node tools/qa.mjs",
+    "render": "node tools/build.mjs && node tools/render.mjs",
+    "data": "python tools/prepare_data.py",
+    "music": "python tools/compose_audio.py && ffmpeg -y -hide_banner -loglevel error -i assets/GALI-Score.wav -c:a libmp3lame -b:a 192k assets/GALI-Score.mp3"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

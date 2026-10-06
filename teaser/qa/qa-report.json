@@ -1,0 +1,33 @@
+{
+  "duration": 60,
+  "step": 0.2,
+  "samples": 300,
+  "page_errors": [],
+  "text_warnings": [],
+  "text_overlaps": [
+    {
+      "pair": "Can margins survive a  ⟷  coal price drop?",
+      "first": 16.8
+    },
+    {
+      "pair": "#5  ⟷  ITMG",
+      "first": 50
+    },
+    {
+      "pair": "$3.56B  ⟷  $3.66B",
+      "first": 50
+    },
+    {
+      "pair": "$3.66B  ⟷  −29.1%",
+      "first": 50
+    },
+    {
+      "pair": "−20.0%  ⟷  −29.1%",
+      "first": 50
+    }
+  ],
+  "key_frames": [
+    36.6,
+    37.2
+  ]
+}
