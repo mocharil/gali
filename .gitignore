@@ -4,6 +4,10 @@
 !.env.example
 *.pem
 *.key
+secrets/
+credentials/
+**/*service-account*.json
+**/*sa-key*.json
 
 # --- python ---
 __pycache__/
@@ -49,3 +53,9 @@ playwright-report/
 
 .vercel
 .env*
+!.env.example
+!.env.local.example
+
+# Google service-account keys
+gemini_sa.json
+**/*_sa.json
