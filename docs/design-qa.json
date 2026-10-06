@@ -1,0 +1,540 @@
+{
+  "frames": [
+    {
+      "name": "landing-desktop",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "68px",
+        "lineHeight": "72.08px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": null,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Buka asisten data",
+          "width": 142,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "dashboard-desktop",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "34px",
+        "lineHeight": "40.12px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": 256,
+      "kpis": [
+        "$60.51B",
+        "18.6 yrs",
+        "GEMS · 55%"
+      ],
+      "controls": [
+        {
+          "label": "Toggle sidebar fold",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 158.546875,
+          "height": 42.390625
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 173.546875,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "dashboard-full",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "34px",
+        "lineHeight": "40.12px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": 256,
+      "kpis": [
+        "$60.51B",
+        "18.6 yrs",
+        "GEMS · 55%"
+      ],
+      "controls": [
+        {
+          "label": "Toggle sidebar fold",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 158.546875,
+          "height": 42.390625
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 173.546875,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "issuer-byan",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "36px",
+        "lineHeight": "40px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": 256,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Toggle sidebar fold",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 158.546875,
+          "height": 42.390625
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 173.546875,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "scenario-combined",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "30px",
+        "lineHeight": "36px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": 256,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Toggle sidebar fold",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 158.546875,
+          "height": 42.390625
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 173.546875,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "map-desktop",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "30px",
+        "lineHeight": "36px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": 256,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Toggle sidebar fold",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 158.546875,
+          "height": 42.390625
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 173.546875,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "compare-desktop",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "30px",
+        "lineHeight": "36px",
+        "weight": "700"
+      },
+      "actualWidth": 1440,
+      "viewport": 1440,
+      "sidebarWidth": 256,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Toggle sidebar fold",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 158.546875,
+          "height": 42.390625
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 173.546875,
+          "height": 40
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "dashboard-mobile",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "30px",
+        "lineHeight": "35.4px",
+        "weight": "700"
+      },
+      "actualWidth": 390,
+      "viewport": 390,
+      "sidebarWidth": 256,
+      "kpis": [
+        "$60.51B",
+        "18.6 yrs",
+        "GEMS · 55%"
+      ],
+      "controls": [
+        {
+          "label": "Open navigation menu (mobile)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "landing-mobile",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "40px",
+        "lineHeight": "42.4px",
+        "weight": "700"
+      },
+      "actualWidth": 390,
+      "viewport": 390,
+      "sidebarWidth": null,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Buka asisten data",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Menu",
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "map-mobile",
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        {
+          "family": "jakarta",
+          "weight": "200 800"
+        }
+      ],
+      "background": "rgb(247, 248, 250)",
+      "ink": "rgb(20, 35, 55)",
+      "colorScheme": "light",
+      "heading": {
+        "size": "30px",
+        "lineHeight": "36px",
+        "weight": "700"
+      },
+      "actualWidth": 390,
+      "viewport": 390,
+      "sidebarWidth": 256,
+      "kpis": [],
+      "controls": [
+        {
+          "label": "Open navigation menu (mobile)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Search issuers or features (Ctrl+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Buka asisten data",
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    }
+  ],
+  "externalRequests": [],
+  "pageErrors": [],
+  "contrastChecks": [
+    {
+      "token": "--ink",
+      "onSurface": 15.85,
+      "onCanvas": 14.91
+    },
+    {
+      "token": "--muted",
+      "onSurface": 5.6,
+      "onCanvas": 5.27
+    },
+    {
+      "token": "--subtle",
+      "onSurface": 4.81,
+      "onCanvas": 4.53
+    },
+    {
+      "token": "--brand",
+      "onSurface": 6,
+      "onCanvas": 5.65
+    },
+    {
+      "token": "--info",
+      "onSurface": 5.66,
+      "onCanvas": 5.33
+    },
+    {
+      "token": "--positive",
+      "onSurface": 5.69,
+      "onCanvas": 5.36
+    },
+    {
+      "token": "--negative",
+      "onSurface": 6.18,
+      "onCanvas": 5.82
+    }
+  ]
+}

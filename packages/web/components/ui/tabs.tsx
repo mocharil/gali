@@ -1,112 +1,49 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-interface TabsContextValue {
-  value: string;
-  onValueChange: (val: string) => void;
-}
+const TabsContext = React.createContext<{ value: string; id: string; change: (value: string) => void } | null>(null);
 
-const TabsContext = React.createContext<TabsContextValue | undefined>(undefined);
-
-export function Tabs({
-  value,
-  onValueChange,
-  defaultValue,
-  children,
-  className,
-}: {
+export function Tabs({ value, onValueChange, defaultValue = "", children, className }: {
   value?: string;
-  onValueChange?: (val: string) => void;
+  onValueChange?: (value: string) => void;
   defaultValue?: string;
   children: React.ReactNode;
   className?: string;
 }) {
-  const [currentValue, setCurrentValue] = React.useState(value ?? defaultValue ?? "");
-
-  React.useEffect(() => {
-    if (value !== undefined) setCurrentValue(value);
-  }, [value]);
-
-  const handleValueChange = (val: string) => {
-    setCurrentValue(val);
-    onValueChange?.(val);
-  };
-
-  return (
-    <TabsContext.Provider value={{ value: currentValue, onValueChange: handleValueChange }}>
-      <div className={cn("space-y-4", className)}>{children}</div>
-    </TabsContext.Provider>
-  );
+  const id = React.useId();
+  const [internalValue, setInternalValue] = React.useState(defaultValue);
+  const change = (next: string) => { setInternalValue(next); onValueChange?.(next); };
+  return <TabsContext.Provider value={{ value: value ?? internalValue, id, change }}><div className={cn("min-w-0 space-y-6", className)}>{children}</div></TabsContext.Provider>;
 }
 
-export function TabsList({
-  children,
-  className,
-}: {
+export function TabsList({ children, className, label = "Analysis sections" }: {
   children: React.ReactNode;
   className?: string;
+  label?: string;
 }) {
-  return (
-    <div
-      className={cn(
-        "inline-flex h-9 items-center justify-center rounded-xl bg-slate-900/90 p-1 text-slate-400 border border-slate-800/80 shadow-inner",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+  function navigate(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const index = tabs.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0) return;
+    event.preventDefault();
+    const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next]?.focus();
+    tabs[next]?.click();
+  }
+  return <div role="tablist" aria-label={label} onKeyDown={navigate} className={cn("grid w-full min-w-0 grid-cols-2 gap-1 rounded-2xl sm:flex sm:flex-wrap border border-line bg-surface-muted p-1.5 print:hidden", className)}>{children}</div>;
 }
 
-export function TabsTrigger({
-  value,
-  children,
-  className,
-}: {
-  value: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
+export function TabsTrigger({ value, children, className }: { value: string; children: React.ReactNode; className?: string }) {
   const ctx = React.useContext(TabsContext);
-  const isActive = ctx?.value === value;
-
-  return (
-    <button
-      type="button"
-      onClick={() => ctx?.onValueChange(value)}
-      className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1 text-xs font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
-        isActive
-          ? "bg-slate-800 text-amber-400 font-bold shadow-sm border border-slate-700/50"
-          : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40",
-        className
-      )}
-    >
-      {children}
-    </button>
-  );
+  const active = ctx?.value === value;
+  return <button type="button" role="tab" id={`${ctx?.id}-tab-${value}`} aria-controls={`${ctx?.id}-panel-${value}`} aria-selected={active} tabIndex={active ? 0 : -1} onClick={() => ctx?.change(value)} className={cn("inline-flex min-h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition-colors", active ? "border border-line bg-surface text-ink shadow-sm" : "border border-transparent text-muted hover:text-ink", className)}>{children}</button>;
 }
 
-export function TabsContent({
-  value,
-  children,
-  className,
-}: {
-  value: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
+export function TabsContent({ value, children, className }: { value: string; children: React.ReactNode; className?: string }) {
   const ctx = React.useContext(TabsContext);
   if (ctx?.value !== value) return null;
-
-  return (
-    <div
-      className={cn(
-        "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 animate-fade-up",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+  return <div role="tabpanel" id={`${ctx.id}-panel-${value}`} aria-labelledby={`${ctx.id}-tab-${value}`} tabIndex={0} className={cn("min-w-0 space-y-6 animate-fade-up", className)}>{children}</div>;
 }

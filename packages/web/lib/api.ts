@@ -10,6 +10,7 @@ import {
   ScenarioResponse,
   ScenarioShockRequest,
 } from "./types";
+import { englishDataset } from "./presentation";
 
 const getBaseUrl = (): string => {
   if (typeof window !== "undefined") {
@@ -17,8 +18,15 @@ const getBaseUrl = (): string => {
     return "";
   }
   // Server side: direct connection to API
-  return process.env.API_URL || "http://127.0.0.1:8000";
+  return process.env.API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 };
+
+export class ApiError extends Error {
+  constructor(message: string, public readonly status?: number) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const base = getBaseUrl();
@@ -32,17 +40,28 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
         Accept: "application/json",
         ...options?.headers,
       },
-      next: { revalidate: 30 }, // ISR / cache for 30s
+      signal: options?.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)]) : AbortSignal.timeout(20_000),
+      cache: "no-store",
     });
 
     if (!res.ok) {
-      throw new Error(`API Error [${res.status}]: ${res.statusText} on ${endpoint}`);
+      const message = res.status === 404
+        ? "The requested data is unavailable. Choose another issuer or check data coverage."
+        : res.status === 429
+        ? "Too many requests. Wait a moment and try again."
+        : res.status === 422
+        ? "Invalid parameters. Check the simulation values and try again."
+        : "Sectors data could not be loaded. Check the API connection and the published dataset.";
+      throw new ApiError(message, res.status);
     }
 
-    return await res.json();
+    return englishDataset<T>(await res.json());
   } catch (err) {
-    console.error(`Failed to fetch from ${endpoint}:`, err);
-    throw err;
+    if (err instanceof ApiError) throw err;
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      throw new ApiError("The request timed out. Try again once the connection is stable.");
+    }
+    throw new ApiError("The API could not be reached. Check the connection and try again.");
   }
 }
 
@@ -63,11 +82,12 @@ export const api = {
   getCostCurve: (commodity = "Coal") => fetchAPI<CostCurveResponse>(`/v1/cost-curve?commodity=${commodity}`),
 
   // Scenario Shock
-  simulateScenario: (shock: ScenarioShockRequest) =>
+  simulateScenario: (shock: ScenarioShockRequest, signal?: AbortSignal) =>
     fetchAPI<ScenarioResponse>("/v1/scenario", {
       method: "POST",
       body: JSON.stringify(shock),
       cache: "no-store",
+      signal,
     }),
 
   // Flow & Divergence
@@ -78,4 +98,5 @@ export const api = {
 
   // Health
   checkHealth: () => fetchAPI<{ status: string }>("/health"),
+  checkReadiness: () => fetchAPI<{ status: string; published_run_id?: string | null }>("/ready"),
 };

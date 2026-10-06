@@ -40,8 +40,20 @@ def compute_market_divergence(
         foreign_flows_map: Optional map of symbol -> 30d net foreign flow in IDR.
     """
     flows = foreign_flows_map or {}
-    all_gaps = [m.get("rbv_gap_pct") for m in issuer_metrics_list]
-    all_scores = [m.get("ground_truth_score") for m in issuer_metrics_list]
+
+    def comparable(metrics: dict[str, Any]) -> bool:
+        confidence = metrics.get("confidence")
+        if confidence is None:
+            return True  # Legacy callers without coverage metadata.
+        return bool(confidence.get("ranking_eligible", confidence.get("is_complete", False)))
+
+    peers = [
+        m
+        for m in issuer_metrics_list
+        if comparable(m) and m.get("rbv_gap_pct") is not None and m.get("ground_truth_score") is not None
+    ]
+    all_gaps = [m.get("rbv_gap_pct") for m in peers]
+    all_scores = [m.get("ground_truth_score") for m in peers]
 
     results: list[DivergenceResult] = []
 
@@ -50,8 +62,8 @@ def compute_market_divergence(
         gap = m.get("rbv_gap_pct")
         score = m.get("ground_truth_score")
 
-        gap_pct = percentile_rank_ascending(all_gaps, gap)
-        score_pct = percentile_rank_ascending(all_scores, score)
+        gap_pct = percentile_rank_ascending(all_gaps, gap) if comparable(m) else None
+        score_pct = percentile_rank_ascending(all_scores, score) if comparable(m) else None
 
         if gap_pct is None or score_pct is None:
             results.append(
@@ -62,7 +74,7 @@ def compute_market_divergence(
                     score_percentile=score_pct,
                     quadrant=None,
                     net_foreign_flow_30d_idr=flows.get(symbol),
-                    null_reason="rbv_gap_pct or ground_truth_score is NULL",
+                    null_reason="Model gap or comparable complete score unavailable; provisional scores are not assigned a quadrant",
                 )
             )
             continue
@@ -71,13 +83,13 @@ def compute_market_divergence(
 
         # Quadrant classification
         if gap_pct >= 50.0 and score_pct < 50.0:
-            quadrant = "Overvalued Premia / Weak Ground Truth"
+            quadrant = "Higher Model Gap / Lower Score"
         elif gap_pct < 50.0 and score_pct >= 50.0:
-            quadrant = "Deep Value Discount / Strong Ground Truth"
+            quadrant = "Lower Model Gap / Higher Score"
         elif gap_pct >= 50.0 and score_pct >= 50.0:
-            quadrant = "Quality Premium / Strong Ground Truth"
+            quadrant = "Higher Model Gap / Higher Score"
         else:
-            quadrant = "Discount / Weak Ground Truth"
+            quadrant = "Lower Model Gap / Lower Score"
 
         results.append(
             DivergenceResult(

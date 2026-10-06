@@ -21,10 +21,12 @@ class DbResource(ConfigurableResource):
 class SectorsResource(ConfigurableResource):
     """Provides SectorsClient instance with caching and rate limiting."""
 
-    dry_run: bool = Field(default=False, description="Whether to run in offline dry-run mode.")
+    dry_run: bool | None = Field(default=None, description="Override offline mode; unset uses GALI_DRY_RUN.")
 
     def get_client(self) -> SectorsClient:
-        settings = get_settings().model_copy(update={"gali_dry_run": self.dry_run})
+        settings = get_settings()
+        if self.dry_run is not None:
+            settings = settings.model_copy(update={"gali_dry_run": self.dry_run})
         return SectorsClient(settings=settings)
 
 

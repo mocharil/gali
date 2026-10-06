@@ -8,8 +8,8 @@ import { LandingNavbar } from "./LandingNavbar";
 import { Footer } from "./Footer";
 import { TerminalStatusBar } from "./TerminalStatusBar";
 import { CommandPalette } from "./CommandPalette";
-import { AiCopilotModal } from "./AiCopilotModal";
-import { AiCopilotFloatingButton } from "./AiCopilotFloatingButton";
+import { DataAssistantModal } from "./DataAssistantModal";
+import { api } from "@/lib/api";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -21,6 +21,7 @@ export function AppShell({ children }: AppShellProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [assistantQuery, setAssistantQuery] = useState("");
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
 
   const isLandingPage = pathname === "/";
@@ -51,12 +52,21 @@ export function AppShell({ children }: AppShellProps) {
 
   // Check API health status
   useEffect(() => {
-    fetch("/api/health")
-      .then((res) => {
-        if (res.ok) setApiOnline(true);
-        else setApiOnline(false);
-      })
-      .catch(() => setApiOnline(false));
+    let active = true;
+    const check = () => api.checkReadiness().then((res) => { if (active) setApiOnline(res.status === "ready"); }).catch(() => { if (active) setApiOnline(false); });
+    void check();
+    const interval = setInterval(check, 60_000);
+    return () => { active = false; clearInterval(interval); };
+  }, []);
+
+  useEffect(() => {
+    function openAssistant(event: Event) {
+      setAssistantQuery((event as CustomEvent<{ query?: string }>).detail?.query ?? "");
+      setSearchOpen(false);
+      setAiModalOpen(true);
+    }
+    window.addEventListener("gali:open-assistant", openAssistant);
+    return () => window.removeEventListener("gali:open-assistant", openAssistant);
   }, []);
 
   // Global hotkeys:
@@ -67,10 +77,12 @@ export function AppShell({ children }: AppShellProps) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setSearchOpen((v) => !v);
+        setAiModalOpen(false);
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setAiModalOpen((v) => !v);
+        setSearchOpen(false);
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b" && !isLandingPage) {
         e.preventDefault();
@@ -79,10 +91,12 @@ export function AppShell({ children }: AppShellProps) {
       if (
         e.key === "/" &&
         document.activeElement?.tagName !== "INPUT" &&
-        document.activeElement?.tagName !== "TEXTAREA"
+        document.activeElement?.tagName !== "TEXTAREA" &&
+        !(document.activeElement instanceof HTMLElement && document.activeElement.isContentEditable)
       ) {
         e.preventDefault();
         setSearchOpen(true);
+        setAiModalOpen(false);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -93,6 +107,7 @@ export function AppShell({ children }: AppShellProps) {
   useEffect(() => {
     setSidebarOpen(false);
     setSearchOpen(false);
+    setAiModalOpen(false);
   }, [pathname]);
 
   // Lock body scroll when mobile drawer is open
@@ -110,12 +125,12 @@ export function AppShell({ children }: AppShellProps) {
   // ── 1. Landing Page Layout (Full-Width, No Sidebar) ──
   if (isLandingPage) {
     return (
-      <div className="min-h-screen bg-[#060911] text-slate-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+      <div className="min-h-screen bg-canvas text-ink flex flex-col selection:bg-brand-soft selection:text-brand">
         {/* Landing Top Navigation Bar */}
         <LandingNavbar apiOnline={apiOnline} onOpenAi={() => setAiModalOpen(true)} />
 
         {/* Full-Width Landing Content */}
-        <main className="flex-1 bg-ambient-radial">{children}</main>
+        {children}
 
         {/* Landing Footer */}
         <Footer />
@@ -123,18 +138,14 @@ export function AppShell({ children }: AppShellProps) {
         {/* Fast Command Palette */}
         <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-        {/* Floating AI Copilot Trigger */}
-        <AiCopilotFloatingButton onClick={() => setAiModalOpen(true)} />
-
-        {/* AI Mining Copilot Modal */}
-        <AiCopilotModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />
+        <DataAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} initialQuery={assistantQuery} />
       </div>
     );
   }
 
   // ── 2. App & Dashboard Layout (Sidebar + Contextual Header) ──
   return (
-    <div className="min-h-screen bg-[#060911] text-slate-100 flex selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="min-h-screen bg-canvas text-ink flex selection:bg-brand-soft selection:text-brand">
       {/* ── Left Sidebar Navigation (Collapsible / Foldable) ── */}
       <Sidebar
         isOpen={sidebarOpen}
@@ -148,7 +159,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* ── Right Content Area ── */}
       <div
         className={`flex-1 flex flex-col min-w-0 transition-[padding] duration-200 ease-in-out ${
-          isCollapsed ? "lg:pl-[72px]" : "lg:pl-72"
+          isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"
         }`}
       >
         {/* Top Contextual Header with Sidebar Toggle Button */}
@@ -162,7 +173,7 @@ export function AppShell({ children }: AppShellProps) {
         />
 
         {/* Page Content */}
-        <main className="flex-1 bg-ambient-radial">{children}</main>
+        {children}
 
         {/* Minimal Terminal Status Bar (No landing footer) */}
         <TerminalStatusBar apiOnline={apiOnline} />
@@ -171,11 +182,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* ── Universal Fast Command Palette ── */}
       <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      {/* Floating AI Copilot Trigger */}
-      <AiCopilotFloatingButton onClick={() => setAiModalOpen(true)} />
-
-      {/* AI Mining Copilot Modal */}
-      <AiCopilotModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />
+      <DataAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} initialQuery={assistantQuery} />
     </div>
   );
 }

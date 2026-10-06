@@ -11,6 +11,7 @@ Formulas:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -69,24 +70,42 @@ def compute_rli(
     has_any_production = False
 
     components: list[RLIComponent] = []
+    missing_pairs: list[str] = []
 
     for link in links:
         slug = link["company_slug"]
-        own_pct = float(link.get("effective_ownership_pct", 100.0))
+        ownership = link.get("effective_ownership_pct")
+        if ownership == 0:
+            continue
+        if ownership is None or not math.isfinite(float(ownership)) or not 0 < float(ownership) <= 100:
+            missing_pairs.append(f"{slug}: ownership")
+            continue
+        own_pct = float(ownership)
         own_frac = own_pct / 100.0
 
         perf = performance_map.get(slug)
         if not perf:
+            missing_pairs.append(f"{slug}: performance")
             continue
 
         res_val = perf.get("total_reserves_mt")
         prov_val = perf.get("proven_reserves_mt")
         prob_val = perf.get("probable_reserves_mt")
         prod_val = perf.get("production_volume")
+        res_val, prov_val, prob_val, prod_val = (
+            value if value is not None and math.isfinite(value) and value >= 0 else None
+            for value in (res_val, prov_val, prob_val, prod_val)
+        )
 
         # Fallback: if total_reserves_mt is missing but proven + probable exist
-        if res_val is None and (prov_val is not None or prob_val is not None):
-            res_val = (prov_val or 0.0) + (prob_val or 0.0)
+        if res_val is None and prov_val is not None and prob_val is not None:
+            res_val = prov_val + prob_val
+        if (
+            res_val is None
+            or prod_val is None
+            or any(not math.isfinite(value) or value <= 0 for value in (res_val, prod_val) if value is not None)
+        ):
+            missing_pairs.append(f"{slug}: reserves/production")
 
         attr_res = (res_val * own_frac) if res_val is not None else None
         attr_prod = (prod_val * own_frac) if prod_val is not None else None
@@ -120,22 +139,8 @@ def compute_rli(
             )
         )
 
-    # If primary entity reports production but no reserves (e.g. DSSA), do not proxy from subsidiaries
-    primary_link = next(
-        (
-            lnk
-            for lnk in links
-            if float(lnk.get("effective_ownership_pct", 0.0)) >= 99.0 and lnk["company_slug"].endswith("-tbk")
-        ),
-        None,
-    )
-    if primary_link:
-        primary_perf = performance_map.get(primary_link["company_slug"], {})
-        if primary_perf.get("production_volume") is not None and primary_perf.get("total_reserves_mt") is None:
-            has_any_reserves = False
-
     # If reserves are absent or production is zero/absent, RLI must be NULL
-    if not has_any_reserves or symbol == "DSSA":
+    if missing_pairs or not has_any_reserves:
         return RLIResult(
             symbol=symbol,
             rli_years=None,
@@ -145,7 +150,11 @@ def compute_rli(
             probable_reserves_mt=total_attr_probable if total_attr_probable > 0 else None,
             components=components,
             is_partial=True,
-            null_reason="total_reserves_mt is not reported in performance endpoint for this issuer",
+            null_reason=(
+                "Matched reserves/production or ownership unavailable: " + "; ".join(missing_pairs)
+                if missing_pairs
+                else "total_reserves_mt is not reported in performance endpoint for this issuer"
+            ),
         )
 
     if not has_any_production or total_attr_production <= 0:

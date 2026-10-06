@@ -58,12 +58,36 @@ async def get_metric_rankings(
     ascending_metrics = {"cash_cost_per_ton_usd", "license_cliff_3y", "destination_hhi"}
     is_asc = metric in ascending_metrics
 
-    valid_rows.sort(key=lambda item: getattr(item[0], metric), reverse=not is_asc)
+    def rankable(row: tuple) -> bool:
+        metrics = row[0]
+        return metric != "ground_truth_score" or (
+            (metrics.confidence or {}).get("effective_weight", 0) >= 1.0
+            and all(
+                getattr(metrics, key) is not None
+                for key in ("rli_years", "reserve_backed_value_usd", "cash_cost_per_ton_usd")
+            )
+        )
+
+    valid_rows.sort(
+        key=lambda item: (
+            not rankable(item),
+            getattr(item[0], metric) if is_asc else -getattr(item[0], metric),
+            item[0].symbol,
+        )
+    )
+    qualified = [row for row in valid_rows if rankable(row)]
 
     items: list[RankingItem] = []
-    for idx, (m, c) in enumerate(valid_rows):
+    for m, c in valid_rows:
         val = getattr(m, metric)
-        conf_pct = (m.confidence or {}).get("effective_weight", 1.0) * 100.0 if m.confidence else 100.0
+        conf_pct = (m.confidence or {}).get("effective_weight", 0.0) * 100.0
+        eligible = rankable((m, c))
+        rank = (
+            1
+            + sum((getattr(other, metric) < val if is_asc else getattr(other, metric) > val) for other, _ in qualified)
+            if eligible
+            else None
+        )
 
         # Human-readable formatting
         if metric == "ground_truth_score":
@@ -81,7 +105,7 @@ async def get_metric_rankings(
 
         items.append(
             RankingItem(
-                rank=idx + 1,
+                rank=rank,
                 symbol=m.symbol,
                 name=c.name if c else m.symbol,
                 data_quality=data_quality_label(
@@ -92,6 +116,7 @@ async def get_metric_rankings(
                 metric_value=round(val, 2) if isinstance(val, float) else val,
                 formatted_value=fmt,
                 confidence_pct=round(conf_pct, 1),
+                ranking_status="complete" if eligible else "provisional",
             )
         )
 

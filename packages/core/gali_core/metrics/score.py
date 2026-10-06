@@ -1,6 +1,6 @@
 """M8 — Ground Truth Score (0–100) Engine.
 
-Aggregates fundamental, operational, and supply-chain metrics into an objective 0–100 score.
+Aggregates fundamental, operational, and supply-chain metrics into a relative 0–100 score.
 Components with missing upstream data are dropped, weights are dynamically re-normalized,
 and effective weight confidence is explicitly tracked.
 
@@ -14,7 +14,8 @@ Weights & Directions:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, replace
 from typing import Any
 
 BASE_WEIGHTS: dict[str, float] = {
@@ -38,13 +39,13 @@ class ScoreResult:
 
 def percentile_rank_ascending(values: list[float | None], val: float | None) -> float | None:
     """Compute percentile rank [0, 100] where higher numerical value gives higher score."""
-    if val is None:
+    if val is None or not math.isfinite(val):
         return None
-    valid = [v for v in values if v is not None]
+    valid = [v for v in values if v is not None and math.isfinite(v)]
     if not valid:
         return 50.0
     if len(valid) == 1:
-        return 100.0
+        return 50.0
     count_lower = sum(1 for v in valid if v < val)
     count_equal = sum(1 for v in valid if v == val)
     return ((count_lower + 0.5 * count_equal) / len(valid)) * 100.0
@@ -52,13 +53,13 @@ def percentile_rank_ascending(values: list[float | None], val: float | None) -> 
 
 def percentile_rank_descending(values: list[float | None], val: float | None) -> float | None:
     """Compute percentile rank [0, 100] where lower numerical value (less risk/cost) gives higher score."""
-    if val is None:
+    if val is None or not math.isfinite(val):
         return None
-    valid = [v for v in values if v is not None]
+    valid = [v for v in values if v is not None and math.isfinite(v)]
     if not valid:
         return 50.0
     if len(valid) == 1:
-        return 100.0
+        return 50.0
     count_higher = sum(1 for v in valid if v > val)
     count_equal = sum(1 for v in valid if v == val)
     return ((count_higher + 0.5 * count_equal) / len(valid)) * 100.0
@@ -88,11 +89,9 @@ def compute_ground_truth_scores(
     for m in issuer_metrics_list:
         hhi = m.get("contractor_hhi")
         cliff = m.get("contract_cliff_12m")
-        if hhi is not None or cliff is not None:
+        if hhi is not None and cliff is not None:
             # HHI normalized from 0-10000 to 0-100
-            hhi_norm = (hhi / 100.0) if hhi is not None else 50.0
-            cliff_val = cliff if cliff is not None else 0.0
-            all_contractor_risk.append((hhi_norm + cliff_val) / 2.0)
+            all_contractor_risk.append((hhi / 100.0 + cliff) / 2.0)
         else:
             all_contractor_risk.append(None)
 
@@ -169,4 +168,66 @@ def compute_ground_truth_scores(
             )
         )
 
-    return results
+    # A score computed from fewer pillars remains useful, but has no comparable
+    # full-universe rank. Weight coverage is not statistical confidence.
+    eligible = {
+        result.symbol
+        for result, metrics in zip(results, issuer_metrics_list, strict=True)
+        if result.confidence["is_complete"]
+        and result.ground_truth_score is not None
+        and all(
+            metrics.get(key) is not None
+            for key in ("rli_years", "reserve_backed_value_usd", "cash_cost_per_ton_usd")
+            if key in metrics
+        )
+    }
+    variants = [BASE_WEIGHTS]
+    for pillar in BASE_WEIGHTS:
+        for multiplier in (0.8, 1.2):
+            variants.append(
+                {key: weight * (multiplier if key == pillar else 1) for key, weight in BASE_WEIGHTS.items()}
+            )
+    variant_scores: list[dict[str, float]] = []
+    for weights in variants:
+        scores = {}
+        for result in results:
+            available = {key: value for key, value in result.component_scores.items() if value is not None}
+            total = sum(weights[key] for key in available)
+            if total:
+                scores[result.symbol] = sum(weights[key] * value for key, value in available.items()) / total
+        variant_scores.append(scores)
+    variant_scores[0] = {
+        result.symbol: result.ground_truth_score for result in results if result.ground_truth_score is not None
+    }
+
+    enhanced = []
+    for result in results:
+        tested = [scores[result.symbol] for scores in variant_scores if result.symbol in scores]
+        ranks = (
+            [
+                1 + sum(value > scores[result.symbol] + 1e-9 for symbol, value in scores.items() if symbol in eligible)
+                for scores in variant_scores
+            ]
+            if result.symbol in eligible
+            else []
+        )
+        enhanced.append(
+            replace(
+                result,
+                confidence={
+                    **result.confidence,
+                    "ranking_eligible": result.symbol in eligible,
+                    "ranking_status": "complete" if result.symbol in eligible else "provisional",
+                    "peer_count": len(eligible),
+                    "weight_sensitivity": {
+                        "method": "one_pillar_at_a_time_20pct",
+                        "tested_configurations": len(variants),
+                        "score_min": round(min(tested), 2) if tested else None,
+                        "score_max": round(max(tested), 2) if tested else None,
+                        "rank_min": min(ranks) if ranks else None,
+                        "rank_max": max(ranks) if ranks else None,
+                    },
+                },
+            )
+        )
+    return enhanced

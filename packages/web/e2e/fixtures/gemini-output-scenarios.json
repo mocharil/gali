@@ -1,0 +1,1826 @@
+{
+  "comparison": {
+    "question": "Bandingkan kekuatan dan risiko BUMI dengan BYAN",
+    "request": {
+      "mode": "chat",
+      "question": "Compare BUMI and BYAN",
+      "symbols": [
+        "BUMI",
+        "BYAN"
+      ]
+    },
+    "answer": {
+      "status": "answered",
+      "title": "Cost resilience comes with different exposures",
+      "summary": {
+        "text": "BYAN has a lower cash cost of 33.00 USD/ton against BUMI's 52.00 USD/ton, alongside a longer reserve life. These operating advantages should be assessed against destination concentration and license exposure before drawing a valuation conclusion.",
+        "evidence_ids": [
+          "BYAN.cash_cost_per_ton_usd",
+          "BUMI.cash_cost_per_ton_usd",
+          "BYAN.rli_years",
+          "BUMI.rli_years",
+          "method.rbv"
+        ]
+      },
+      "findings": [
+        {
+          "text": "BYAN's unit margin is 52.00 USD/ton against BUMI's 10.00 USD/ton in the active dataset. This suggests a larger operating buffer at the supplied realized prices; it does not establish that every future price shock will affect the issuers equally.",
+          "evidence_ids": [
+            "BYAN.unit_margin_usd",
+            "BUMI.unit_margin_usd",
+            "method.scenario"
+          ],
+          "kind": "finding",
+          "title": "A stronger unit-cost buffer"
+        },
+        {
+          "text": "BYAN's reserve life is 25.71 years and BUMI's is 14.83 years. The measure holds annual production constant and cannot establish license renewal, future recovery, or the economics of extracting all remaining reserves.",
+          "evidence_ids": [
+            "BYAN.rli_years",
+            "BUMI.rli_years",
+            "method.reserve_life"
+          ],
+          "kind": "finding",
+          "title": "Reserve life needs an operating context"
+        },
+        {
+          "text": "BYAN's largest destination is China with 45.00% of sales volume; BUMI's largest-destination share is 30.00%. Concentration can increase sensitivity to a local demand reduction, but volume shares do not establish revenue exposure.",
+          "evidence_ids": [
+            "BYAN.top_destination",
+            "BYAN.top_destination_pct",
+            "BUMI.top_destination_pct",
+            "method.destination"
+          ],
+          "kind": "risk",
+          "title": "Sales concentration can offset cost strength"
+        },
+        {
+          "text": "BUMI's linked licensed area expiring within the near-term window is 25.00%, compared with 12.00% for BYAN. These figures locate an exposure for research; they do not represent probabilities of failed renewal or site-level production losses.",
+          "evidence_ids": [
+            "BUMI.license_cliff_3y",
+            "BYAN.license_cliff_3y",
+            "method.license"
+          ],
+          "kind": "risk",
+          "title": "Expiry exposure needs renewal evidence"
+        },
+        {
+          "text": "The supplied RBV model capitalizes gross profit and excludes overhead, tax, capital expenditure, working capital, and the debt/cash bridge. A large modeled gap therefore requires reconciliation before it can support an equity-value interpretation.",
+          "evidence_ids": [
+            "method.rbv"
+          ],
+          "kind": "limitation",
+          "title": "Modeled reserves are not equity value"
+        },
+        {
+          "text": "Compare the issuer reporting periods, realized prices, ownership scope, and renewal evidence. Then run a combined scenario with explicit assumptions rather than adding unrelated stress-test results.",
+          "evidence_ids": [
+            "BUMI.financial_years",
+            "BYAN.financial_years",
+            "method.ownership",
+            "method.attribution"
+          ],
+          "kind": "next_step",
+          "title": "Reconcile periods and operating scope"
+        }
+      ],
+      "follow_up_questions": [
+        "What could reverse BYAN's operating advantage?",
+        "Which license evidence should I inspect first?",
+        "How do the issuers react to the same price shock?"
+      ],
+      "request_id": "qa-output-comparison",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "BUMI.rli_years",
+          "label": "BUMI · Reserve life",
+          "raw_value": 14.8343,
+          "value": "14.83 years",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.cash_cost_per_ton_usd",
+          "label": "BUMI · Cash cost",
+          "raw_value": 52,
+          "value": "52.00 USD/ton",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.license_cliff_3y",
+          "label": "BUMI · Licensed area expiring within three years",
+          "raw_value": 25,
+          "value": "25.00%",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · license_cliff_3y",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.top_destination_pct",
+          "label": "BUMI · Largest destination's sales volume share",
+          "raw_value": 30,
+          "value": "30.00%",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · top_destination_pct",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.rli_years",
+          "label": "BYAN · Reserve life",
+          "raw_value": 25.7127,
+          "value": "25.71 years",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.cash_cost_per_ton_usd",
+          "label": "BYAN · Cash cost",
+          "raw_value": 33,
+          "value": "33.00 USD/ton",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.license_cliff_3y",
+          "label": "BYAN · Licensed area expiring within three years",
+          "raw_value": 12,
+          "value": "12.00%",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · license_cliff_3y",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.top_destination_pct",
+          "label": "BYAN · Largest destination's sales volume share",
+          "raw_value": 45,
+          "value": "45.00%",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · top_destination_pct",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.top_destination",
+          "label": "BYAN · Largest sales destination",
+          "raw_value": "China",
+          "value": "China",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · top_destination",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.unit_margin_usd",
+          "label": "BUMI · Unit margin",
+          "raw_value": 10,
+          "value": "10.00 USD/ton",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers/BUMI · unit_margin_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.financial_years",
+          "label": "BUMI · Financial reporting periods",
+          "raw_value": "2025",
+          "value": "2025",
+          "href": "/issuer/BUMI",
+          "source": "Issuer Evidence · reporting periods",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.unit_margin_usd",
+          "label": "BYAN · Unit margin",
+          "raw_value": 52,
+          "value": "52.00 USD/ton",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers/BYAN · unit_margin_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.financial_years",
+          "label": "BYAN · Financial reporting periods",
+          "raw_value": "2025",
+          "value": "2025",
+          "href": "/issuer/BYAN",
+          "source": "Issuer Evidence · reporting periods",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.reserve_life",
+          "label": "Reserve life assumptions",
+          "raw_value": "Reserve life divides attributable reserves by annual production. It does not guarantee operating life or license renewal.",
+          "value": "Reserve life divides attributable reserves by annual production. It does not guarantee operating life or license renewal.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.rbv",
+          "label": "RBV model boundaries",
+          "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.license",
+          "label": "License expiry exposure",
+          "raw_value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.destination",
+          "label": "Destination volume exposure",
+          "raw_value": "Destination percentages describe reported sales volume, not revenue share. Demand reductions simulate destination volume, not tariffs. The largest destination is not necessarily China.",
+          "value": "Destination percentages describe reported sales volume, not revenue share. Demand reductions simulate destination volume, not tariffs. The largest destination is not necessarily China.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scenario",
+          "label": "Scenario operating mechanics",
+          "raw_value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.attribution",
+          "label": "Driver attribution order",
+          "raw_value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.ownership",
+          "label": "Ownership and aggregation",
+          "raw_value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "BUMI",
+          "BYAN"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "active_itmg": {
+    "question": "Explain ITMG's active scenario",
+    "request": {
+      "mode": "brief",
+      "question": "Explain ITMG's active scenario",
+      "symbols": [
+        "ITMG"
+      ],
+      "scenario": {
+        "price_shock_pct": -0.2,
+        "destination_shocks": {
+          "China": 0.3
+        },
+        "discount_rate": 0.16,
+        "variable_cost_share": 0.5,
+        "license_cliff_expiry_shock": true
+      }
+    },
+    "answer": {
+      "status": "answered",
+      "title": "ITMG's scenario is driven by operating economics",
+      "summary": {
+        "text": "ITMG's modeled RBV changes by -66.02% in the selected scenario. Read this result alongside price pressure, exposed destination volume, and the discount-rate assumption rather than treating it as a forecast.",
+        "evidence_ids": [
+          "scenario.active.ITMG.change_pct",
+          "method.scenario",
+          "method.sensitivity"
+        ]
+      },
+      "findings": [
+        {
+          "text": "The price contribution to modeled RBV change is USD -2,397,391,147.27 and the volume contribution is USD -394,718,852.12. Interactions belong to the driver applied later in GALI's fixed attribution order.",
+          "evidence_ids": [
+            "scenario.active.ITMG.driver.price",
+            "scenario.active.ITMG.driver.volume",
+            "method.attribution"
+          ],
+          "kind": "finding",
+          "title": "Trace the calculated drivers"
+        },
+        {
+          "text": "Modeled scenario revenue is USD 1,320,649,848.00 and costs are USD 1,029,158,760.00. Fixed costs remain when destination volume falls; the assumed variable-cost share changes how much cost can adjust.",
+          "evidence_ids": [
+            "scenario.active.ITMG.post_shock_revenue_usd",
+            "scenario.active.ITMG.post_shock_cost_usd",
+            "method.scenario"
+          ],
+          "kind": "risk",
+          "title": "Cost rigidity can amplify lost sales"
+        },
+        {
+          "text": "The tested RBV-change range runs from -100.00% to -11.59%. It varies price and discount-rate assumptions while holding the other active parameters fixed; it is not a confidence interval.",
+          "evidence_ids": [
+            "scenario.active.ITMG.sensitivity_low",
+            "scenario.active.ITMG.sensitivity_high",
+            "method.sensitivity"
+          ],
+          "kind": "limitation",
+          "title": "Sensitivity is an assumption range"
+        },
+        {
+          "text": "Review the Reconciled revenue and costs basis, reconcile reported costs, and test an alternative variable-cost assumption. Validate license renewal exposure separately from a destination-demand assumption.",
+          "evidence_ids": [
+            "scenario.active.ITMG.basis",
+            "method.scenario",
+            "method.license"
+          ],
+          "kind": "next_step",
+          "title": "Inspect the operating basis"
+        }
+      ],
+      "follow_up_questions": [
+        "Which assumption changes ITMG's result most?",
+        "How should I interpret the driver order?"
+      ],
+      "request_id": "qa-output-active_itmg",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "method.license",
+          "label": "License expiry exposure",
+          "raw_value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scenario",
+          "label": "Scenario operating mechanics",
+          "raw_value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.attribution",
+          "label": "Driver attribution order",
+          "raw_value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.sensitivity",
+          "label": "Sensitivity assumptions",
+          "raw_value": "The sensitivity range varies price and discount-rate assumptions while holding other active parameters fixed. It is not a probability, forecast, or confidence interval.",
+          "value": "The sensitivity range varies price and discount-rate assumptions while holding other active parameters fixed. It is not a probability, forecast, or confidence interval.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.change_pct",
+          "label": "ITMG · Active scenario · RBV change",
+          "raw_value": -66.02,
+          "value": "-66.02%",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.post_shock_revenue_usd",
+          "label": "ITMG · Scenario revenue",
+          "raw_value": 1320649848,
+          "value": "USD 1,320,649,848.00",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.post_shock_cost_usd",
+          "label": "ITMG · Scenario costs",
+          "raw_value": 1029158760,
+          "value": "USD 1,029,158,760.00",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.basis",
+          "label": "ITMG · Scenario model basis",
+          "raw_value": "revenue_cost",
+          "value": "Reconciled revenue and costs",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.driver.price",
+          "label": "ITMG · Price contribution to RBV change",
+          "raw_value": -2397391147.27,
+          "value": "USD -2,397,391,147.27",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.driver.volume",
+          "label": "ITMG · Sales destination volume contribution to RBV change",
+          "raw_value": -394718852.12,
+          "value": "USD -394,718,852.12",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.sensitivity_low",
+          "label": "ITMG · Lowest tested RBV change",
+          "raw_value": -100,
+          "value": "-100.00%",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.ITMG.sensitivity_high",
+          "label": "ITMG · Highest tested RBV change",
+          "raw_value": -11.59,
+          "value": "-11.59%",
+          "href": "/scenario?price=-0.2&rate=0.16&variable=0.5&cliff=1&china=0.3&issuer=ITMG",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "ITMG"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "gross_loss": {
+    "question": "Explain BUMI's severe downside scenario",
+    "request": {
+      "mode": "brief",
+      "question": "Explain BUMI's severe downside scenario",
+      "symbols": [
+        "BUMI"
+      ],
+      "scenario": {
+        "price_shock_pct": -0.5,
+        "destination_shocks": {
+          "China": 0.5
+        },
+        "discount_rate": 0.16,
+        "variable_cost_share": 0.5,
+        "license_cliff_expiry_shock": true
+      }
+    },
+    "answer": {
+      "status": "answered",
+      "title": "The valuation floor does not remove operating losses",
+      "summary": {
+        "text": "BUMI's modeled gross profit falls to USD -1,732,170,000.00 while scenario RBV is USD 0.00. The zero valuation floor limits the annuity output; it does not mean the operation avoids a loss.",
+        "evidence_ids": [
+          "scenario.active.BUMI.post_shock_gp_usd",
+          "scenario.active.BUMI.post_shock_rbv_usd",
+          "method.scenario"
+        ]
+      },
+      "findings": [
+        {
+          "text": "Scenario gross loss is USD 1,732,170,000.00 under the selected assumptions. Revenue pressure and reduced exposed sales volume act against a cost base that cannot fall proportionally when part of it is fixed.",
+          "evidence_ids": [
+            "scenario.active.BUMI.gross_loss_usd",
+            "method.scenario"
+          ],
+          "kind": "finding",
+          "title": "The loss remains visible"
+        },
+        {
+          "text": "RBV change is -100.00%. Further operating deterioration can deepen a gross loss without reducing an already floored modeled value, so review the gross-profit result alongside the annuity measure.",
+          "evidence_ids": [
+            "scenario.active.BUMI.change_pct",
+            "scenario.active.BUMI.post_shock_gp_usd",
+            "method.scenario"
+          ],
+          "kind": "risk",
+          "title": "A floor can hide further deterioration"
+        },
+        {
+          "text": "The price-change assumption is -50.00% and the exposed China-volume reduction is 50.00%. Neither is a forecast or a probability, and RBV omits costs required for a complete cash-flow and equity assessment.",
+          "evidence_ids": [
+            "scenario.active.price",
+            "scenario.active.demand.China",
+            "method.sensitivity",
+            "method.rbv"
+          ],
+          "kind": "limitation",
+          "title": "This is a stress assumption"
+        },
+        {
+          "text": "Validate the reconciled operating inputs and examine cost flexibility, liquidity, and obligations using evidence outside this model. The active dataset cannot establish financing capacity from a floored RBV result.",
+          "evidence_ids": [
+            "scenario.active.BUMI.basis",
+            "method.rbv",
+            "method.scope"
+          ],
+          "kind": "next_step",
+          "title": "Research liquidity and cost flexibility"
+        }
+      ],
+      "follow_up_questions": [
+        "Why can gross loss grow after RBV reaches its floor?",
+        "Which cost assumptions should I challenge?"
+      ],
+      "request_id": "qa-output-gross_loss",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "method.rbv",
+          "label": "RBV model boundaries",
+          "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scenario",
+          "label": "Scenario operating mechanics",
+          "raw_value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.sensitivity",
+          "label": "Sensitivity assumptions",
+          "raw_value": "The sensitivity range varies price and discount-rate assumptions while holding other active parameters fixed. It is not a probability, forecast, or confidence interval.",
+          "value": "The sensitivity range varies price and discount-rate assumptions while holding other active parameters fixed. It is not a probability, forecast, or confidence interval.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scope",
+          "label": "Dataset and research scope",
+          "raw_value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.price",
+          "label": "Active scenario · Price change assumption",
+          "raw_value": -50,
+          "value": "-50.00%",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.demand.China",
+          "label": "Active scenario · China volume reduction assumption",
+          "raw_value": 50,
+          "value": "50.00%",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.BUMI.change_pct",
+          "label": "BUMI · Active scenario · RBV change",
+          "raw_value": -100,
+          "value": "-100.00%",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5&issuer=BUMI",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.BUMI.post_shock_rbv_usd",
+          "label": "BUMI · Scenario RBV",
+          "raw_value": 0,
+          "value": "USD 0.00",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5&issuer=BUMI",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.BUMI.post_shock_gp_usd",
+          "label": "BUMI · Scenario gross profit",
+          "raw_value": -1732170000,
+          "value": "USD -1,732,170,000.00",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5&issuer=BUMI",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.BUMI.gross_loss_usd",
+          "label": "BUMI · Scenario gross loss",
+          "raw_value": 1732170000,
+          "value": "USD 1,732,170,000.00",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5&issuer=BUMI",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.active.BUMI.basis",
+          "label": "BUMI · Scenario model basis",
+          "raw_value": "revenue_cost",
+          "value": "Reconciled revenue and costs",
+          "href": "/scenario?price=-0.5&rate=0.16&variable=0.5&cliff=1&china=0.5&issuer=BUMI",
+          "source": "POST /api/v1/scenario · Active scenario",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "BUMI"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "partial_data": {
+    "question": "Can I compare PTBA and DSSA on cost and reserve value?",
+    "request": {
+      "mode": "chat",
+      "question": "Compare PTBA and DSSA",
+      "symbols": [
+        "PTBA",
+        "DSSA"
+      ]
+    },
+    "answer": {
+      "status": "insufficient_data",
+      "title": "The available metrics do not support a full comparison",
+      "summary": {
+        "text": "PTBA cash cost: Unavailable. DSSA reserve life: Unavailable. These gaps prevent a like-for-like cost and reserve-value comparison; they should remain visible rather than being filled with zero.",
+        "evidence_ids": [
+          "PTBA.cash_cost_per_ton_usd",
+          "DSSA.rli_years",
+          "method.scope"
+        ]
+      },
+      "findings": [
+        {
+          "text": "PTBA's available reserve life is 39.56 years and DSSA's available cash cost is 45.00 USD/ton. These are different dimensions and do not establish an overall winner.",
+          "evidence_ids": [
+            "PTBA.rli_years",
+            "DSSA.cash_cost_per_ton_usd",
+            "method.reserve_life"
+          ],
+          "kind": "finding",
+          "title": "Some observations are still supported"
+        },
+        {
+          "text": "PTBA modeled RBV: Unavailable. DSSA modeled RBV: Unavailable. Missing model outputs cannot establish that either issuer has no asset value or no exposure to operating risk.",
+          "evidence_ids": [
+            "PTBA.reserve_backed_value_usd",
+            "DSSA.reserve_backed_value_usd",
+            "method.rbv"
+          ],
+          "kind": "risk",
+          "title": "An incomplete comparison can mislead"
+        },
+        {
+          "text": "A complete score rank requires every required pillar and full score weight coverage. Partial issuer evidence should be researched as a gap, rather than assigned a complete rank.",
+          "evidence_ids": [
+            "PTBA.ranking_status",
+            "DSSA.ranking_status",
+            "method.score"
+          ],
+          "kind": "limitation",
+          "title": "Coverage constrains the conclusion"
+        },
+        {
+          "text": "Verify PTBA's attributable financial inputs and DSSA's paired attributable reserves and production. Check reporting periods and ownership before rerunning the model.",
+          "evidence_ids": [
+            "PTBA.cash_cost_per_ton_usd",
+            "DSSA.rli_years",
+            "method.rbv",
+            "method.ownership"
+          ],
+          "kind": "next_step",
+          "title": "Recover the missing inputs"
+        }
+      ],
+      "follow_up_questions": [
+        "Which missing inputs block PTBA's RBV?",
+        "Which DSSA operating evidence is available?"
+      ],
+      "request_id": "qa-output-partial_data",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "PTBA.rli_years",
+          "label": "PTBA · Reserve life",
+          "raw_value": 39.558,
+          "value": "39.56 years",
+          "href": "/issuer/PTBA",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "PTBA.cash_cost_per_ton_usd",
+          "label": "PTBA · Cash cost",
+          "raw_value": null,
+          "value": "Unavailable",
+          "href": "/issuer/PTBA",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "PTBA.reserve_backed_value_usd",
+          "label": "PTBA · Modeled reserve-backed value",
+          "raw_value": null,
+          "value": "Unavailable",
+          "href": "/issuer/PTBA",
+          "source": "GET /api/v1/issuers · reserve_backed_value_usd",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "PTBA.ranking_status",
+          "label": "PTBA · Score ranking status",
+          "raw_value": "partial",
+          "value": "partial",
+          "href": "/issuer/PTBA",
+          "source": "GALI complete/provisional score eligibility",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "DSSA.rli_years",
+          "label": "DSSA · Reserve life",
+          "raw_value": null,
+          "value": "Unavailable",
+          "href": "/issuer/DSSA",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "DSSA.cash_cost_per_ton_usd",
+          "label": "DSSA · Cash cost",
+          "raw_value": 45,
+          "value": "45.00 USD/ton",
+          "href": "/issuer/DSSA",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "DSSA.reserve_backed_value_usd",
+          "label": "DSSA · Modeled reserve-backed value",
+          "raw_value": null,
+          "value": "Unavailable",
+          "href": "/issuer/DSSA",
+          "source": "GET /api/v1/issuers · reserve_backed_value_usd",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "DSSA.ranking_status",
+          "label": "DSSA · Score ranking status",
+          "raw_value": "partial",
+          "value": "partial",
+          "href": "/issuer/DSSA",
+          "source": "GALI complete/provisional score eligibility",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.reserve_life",
+          "label": "Reserve life assumptions",
+          "raw_value": "Reserve life divides attributable reserves by annual production. It does not guarantee operating life or license renewal.",
+          "value": "Reserve life divides attributable reserves by annual production. It does not guarantee operating life or license renewal.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.rbv",
+          "label": "RBV model boundaries",
+          "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.score",
+          "label": "Score eligibility and coverage",
+          "raw_value": "Scores are relative to the active peer universe. Only issuers with every required score pillar and full score weight coverage receive a complete score rank. Data weight coverage is not statistical confidence or a probability.",
+          "value": "Scores are relative to the active peer universe. Only issuers with every required score pillar and full score weight coverage receive a complete score rank. Data weight coverage is not statistical confidence or a probability.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.ownership",
+          "label": "Ownership and aggregation",
+          "raw_value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scope",
+          "label": "Dataset and research scope",
+          "raw_value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "PTBA",
+          "DSSA"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "provisional_score": {
+    "question": "Can ADMR receive a complete rank?",
+    "request": {
+      "mode": "chat",
+      "question": "Explain ADMR's score coverage",
+      "symbols": [
+        "ADMR"
+      ]
+    },
+    "answer": {
+      "status": "answered",
+      "title": "ADMR's score needs its missing pillar",
+      "summary": {
+        "text": "ADMR's score weight coverage is 85.00% and its ranking status is provisional. Weight coverage describes available model inputs; it is not statistical confidence or the likelihood that an investment succeeds.",
+        "evidence_ids": [
+          "ADMR.confidence_pct",
+          "ADMR.ranking_status",
+          "method.score"
+        ]
+      },
+      "findings": [
+        {
+          "text": "ADMR's reserve life is 17.80 years and its cash cost is 100.00 USD/ton. These supplied observations can inform a focused question even while the full score remains provisional.",
+          "evidence_ids": [
+            "ADMR.rli_years",
+            "ADMR.cash_cost_per_ton_usd"
+          ],
+          "kind": "finding",
+          "title": "Available operating inputs remain useful"
+        },
+        {
+          "text": "The active universe contains 6 issuers eligible for complete score ranking. ADMR should be excluded from that ordering until all required score pillars are available.",
+          "evidence_ids": [
+            "dataset.rankable",
+            "ADMR.ranking_status",
+            "method.score"
+          ],
+          "kind": "limitation",
+          "title": "Incomplete weight coverage prevents a complete rank"
+        },
+        {
+          "text": "Review contractor-concentration evidence and confirm how missing inputs affect the reported score. Recover the missing pillar before comparing complete ranks.",
+          "evidence_ids": [
+            "ADMR.pillar.contractor_risk",
+            "method.score"
+          ],
+          "kind": "next_step",
+          "title": "Inspect the missing component"
+        }
+      ],
+      "follow_up_questions": [
+        "How does score coverage differ from data completeness?"
+      ],
+      "request_id": "qa-output-provisional_score",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "dataset.rankable",
+          "label": "Issuers eligible for complete score ranking",
+          "raw_value": 6,
+          "value": "6",
+          "href": "/methodology",
+          "source": "GALI score eligibility rules",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "ADMR.confidence_pct",
+          "label": "ADMR · Score weight coverage",
+          "raw_value": 85,
+          "value": "85.00%",
+          "href": "/issuer/ADMR",
+          "source": "GET /api/v1/issuers · confidence_pct",
+          "quality": "provisional",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "ADMR.rli_years",
+          "label": "ADMR · Reserve life",
+          "raw_value": 17.8011,
+          "value": "17.80 years",
+          "href": "/issuer/ADMR",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "provisional",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "ADMR.cash_cost_per_ton_usd",
+          "label": "ADMR · Cash cost",
+          "raw_value": 100,
+          "value": "100.00 USD/ton",
+          "href": "/issuer/ADMR",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "provisional",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "ADMR.ranking_status",
+          "label": "ADMR · Score ranking status",
+          "raw_value": "provisional",
+          "value": "provisional",
+          "href": "/issuer/ADMR",
+          "source": "GALI complete/provisional score eligibility",
+          "quality": "provisional",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "ADMR.pillar.contractor_risk",
+          "label": "ADMR · contractor risk score",
+          "raw_value": null,
+          "value": "Unavailable",
+          "href": "/issuer/ADMR",
+          "source": "GALI component scores",
+          "quality": "partial",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.score",
+          "label": "Score eligibility and coverage",
+          "raw_value": "Scores are relative to the active peer universe. Only issuers with every required score pillar and full score weight coverage receive a complete score rank. Data weight coverage is not statistical confidence or a probability.",
+          "value": "Scores are relative to the active peer universe. Only issuers with every required score pillar and full score weight coverage receive a complete score rank. Data weight coverage is not statistical confidence or a probability.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "ADMR"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "dashboard_stress": {
+    "question": "Write a balanced resilience brief",
+    "request": {
+      "mode": "brief",
+      "question": "Write a balanced resilience brief"
+    },
+    "answer": {
+      "status": "answered",
+      "title": "Resilience differs across the separate stress tests",
+      "summary": {
+        "text": "The price-pressure test changes the complete-core issuer-model aggregate by -47.05%; the China-demand test changes it by -15.11%. These tests are separate and cannot be added to infer a combined scenario.",
+        "evidence_ids": [
+          "scenario.price.aggregate_change_pct",
+          "scenario.china.aggregate_change_pct",
+          "method.attribution"
+        ]
+      },
+      "findings": [
+        {
+          "text": "The price test includes 7 eligible complete-core issuer models, while 6 issuers qualify for complete score ranking. Core metric coverage and complete score coverage are distinct eligibility checks.",
+          "evidence_ids": [
+            "scenario.price.aggregate_count",
+            "dataset.rankable",
+            "method.score"
+          ],
+          "kind": "finding",
+          "title": "Keep aggregation scope explicit"
+        },
+        {
+          "text": "The license-expiry test changes the modeled aggregate by -6.76%. It applies an explicit no-renewal stress to linked area exposure; the result is neither a forecast nor a site-level production-loss estimate.",
+          "evidence_ids": [
+            "scenario.license.aggregate_change_pct",
+            "method.license"
+          ],
+          "kind": "risk",
+          "title": "License exposure has a separate mechanism"
+        },
+        {
+          "text": "Shared operating entities may appear in more than one issuer model, and RBV excludes the equity bridge and costs beyond gross profit. The issuer-model sum cannot establish an industry total or portfolio fair value.",
+          "evidence_ids": [
+            "method.ownership",
+            "method.rbv"
+          ],
+          "kind": "limitation",
+          "title": "The aggregate is not an industry valuation"
+        },
+        {
+          "text": "Inspect the issuer-level cost basis, destination volume, ownership, and renewal evidence. Then construct a combined scenario and assess sensitivity with explicit assumptions.",
+          "evidence_ids": [
+            "method.destination",
+            "method.scenario",
+            "method.attribution"
+          ],
+          "kind": "next_step",
+          "title": "Move from screening to issuer research"
+        }
+      ],
+      "follow_up_questions": [
+        "Which issuers are most exposed to price pressure?",
+        "How should I build a combined scenario?"
+      ],
+      "request_id": "qa-output-dashboard_stress",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "dataset.rankable",
+          "label": "Issuers eligible for complete score ranking",
+          "raw_value": 6,
+          "value": "6",
+          "href": "/methodology",
+          "source": "GALI score eligibility rules",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.rbv",
+          "label": "RBV model boundaries",
+          "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.score",
+          "label": "Score eligibility and coverage",
+          "raw_value": "Scores are relative to the active peer universe. Only issuers with every required score pillar and full score weight coverage receive a complete score rank. Data weight coverage is not statistical confidence or a probability.",
+          "value": "Scores are relative to the active peer universe. Only issuers with every required score pillar and full score weight coverage receive a complete score rank. Data weight coverage is not statistical confidence or a probability.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.license",
+          "label": "License expiry exposure",
+          "raw_value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.destination",
+          "label": "Destination volume exposure",
+          "raw_value": "Destination percentages describe reported sales volume, not revenue share. Demand reductions simulate destination volume, not tariffs. The largest destination is not necessarily China.",
+          "value": "Destination percentages describe reported sales volume, not revenue share. Demand reductions simulate destination volume, not tariffs. The largest destination is not necessarily China.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scenario",
+          "label": "Scenario operating mechanics",
+          "raw_value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.attribution",
+          "label": "Driver attribution order",
+          "raw_value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.ownership",
+          "label": "Ownership and aggregation",
+          "raw_value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.price.aggregate_change_pct",
+          "label": "Separate price-pressure test · Complete-core issuer-model aggregate change",
+          "raw_value": -47.053208764937146,
+          "value": "-47.05%",
+          "href": "/scenario?price=-0.2&rate=0.12&variable=0.65&cliff=0",
+          "source": "POST /api/v1/scenario · Separate price-pressure test",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.price.aggregate_count",
+          "label": "Separate price-pressure test · Eligible complete-core issuer models in aggregate",
+          "raw_value": 7,
+          "value": "7",
+          "href": "/scenario?price=-0.2&rate=0.12&variable=0.65&cliff=0",
+          "source": "POST /api/v1/scenario · Separate price-pressure test",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.china.aggregate_change_pct",
+          "label": "Separate China-demand test · Complete-core issuer-model aggregate change",
+          "raw_value": -15.114105985226303,
+          "value": "-15.11%",
+          "href": "/scenario?price=0&rate=0.12&variable=0.65&cliff=0&china=0.3",
+          "source": "POST /api/v1/scenario · Separate China-demand test",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "scenario.license.aggregate_change_pct",
+          "label": "Separate license-expiry test · Complete-core issuer-model aggregate change",
+          "raw_value": -6.763885328173577,
+          "value": "-6.76%",
+          "href": "/scenario?price=0&rate=0.12&variable=0.65&cliff=1",
+          "source": "POST /api/v1/scenario · Separate license-expiry test",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "AADI",
+          "ADMR",
+          "ADRO",
+          "BUMI",
+          "BYAN",
+          "GEMS",
+          "ITMG",
+          "PTBA",
+          "DSSA"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "out_of_scope": {
+    "question": "What is BYAN's latest news and current share price?",
+    "request": {
+      "mode": "chat",
+      "question": "What is BYAN's latest news and current share price?",
+      "symbols": [
+        "BYAN"
+      ]
+    },
+    "answer": {
+      "status": "out_of_scope",
+      "title": "The active dataset cannot answer a live-market question",
+      "summary": {
+        "text": "GALI does not browse news or retrieve current market prices for this answer. I can explain BYAN's supplied operating evidence and model limitations, but cannot establish a current share price or verify a recent event.",
+        "evidence_ids": [
+          "method.scope"
+        ]
+      },
+      "findings": [
+        {
+          "text": "The active dataset snapshot is 2026-09-30. Its date describes this publication and does not establish freshness for external market news or prices.",
+          "evidence_ids": [
+            "dataset.snapshot",
+            "method.scope"
+          ],
+          "kind": "limitation",
+          "title": "The snapshot has a defined scope"
+        },
+        {
+          "text": "Check an appropriate live-market source for the external fact, then compare any verified information with the operating and valuation assumptions available in GALI.",
+          "evidence_ids": [
+            "method.scope",
+            "method.rbv"
+          ],
+          "kind": "next_step",
+          "title": "Separate market verification from model interpretation"
+        }
+      ],
+      "follow_up_questions": [
+        "What does BYAN's available operating evidence show?"
+      ],
+      "request_id": "qa-output-out_of_scope",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "dataset.snapshot",
+          "label": "Active dataset snapshot",
+          "raw_value": "2026-09-30",
+          "value": "2026-09-30",
+          "href": "/coverage",
+          "source": "GET /api/v1/issuers and issuer Evidence",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.rbv",
+          "label": "RBV model boundaries",
+          "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scope",
+          "label": "Dataset and research scope",
+          "raw_value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "BYAN"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  },
+  "long_response": {
+    "question": "ResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContextResearchContext",
+    "request": {
+      "mode": "chat",
+      "question": "Compare BUMI and BYAN with a detailed evidence view",
+      "symbols": [
+        "BUMI",
+        "BYAN"
+      ]
+    },
+    "answer": {
+      "status": "answered",
+      "title": "ReserveValueSensitivityReserveValueSensitivityReserveValueSensitivityReserveValueSensitivityReserveValueSensitivity",
+      "summary": {
+        "text": "BYAN has a lower cash cost of 33.00 USD/ton against BUMI's 52.00 USD/ton, alongside a longer reserve life. These operating advantages should be assessed against destination concentration and license exposure before drawing a valuation conclusion.",
+        "evidence_ids": [
+          "BYAN.cash_cost_per_ton_usd",
+          "BUMI.cash_cost_per_ton_usd",
+          "BYAN.rli_years",
+          "BUMI.rli_years",
+          "method.rbv"
+        ]
+      },
+      "findings": [
+        {
+          "text": "BYAN's unit margin is 52.00 USD/ton against BUMI's 10.00 USD/ton in the active dataset. This suggests a larger operating buffer at the supplied realized prices; it does not establish that every future price shock will affect the issuers equally.\n\nReconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. Reconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. Reconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. Reconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. Reconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. Reconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. Reconcile realized prices, ownership scope, cost behavior, and reporting periods before translating an operating observation into a valuation conclusion. EvidenceContextEvidenceContextEvidenceContextEvidenceContextEvidenceContextEvidenceContextEvidenceContextEvidenceContext",
+          "evidence_ids": [
+            "BYAN.unit_margin_usd",
+            "BUMI.unit_margin_usd",
+            "method.scenario",
+            "method.rbv",
+            "method.ownership",
+            "method.scope"
+          ],
+          "kind": "finding",
+          "title": "A stronger unit-cost buffer"
+        },
+        {
+          "text": "BYAN's reserve life is 25.71 years and BUMI's is 14.83 years. The measure holds annual production constant and cannot establish license renewal, future recovery, or the economics of extracting all remaining reserves.",
+          "evidence_ids": [
+            "BYAN.rli_years",
+            "BUMI.rli_years",
+            "method.reserve_life"
+          ],
+          "kind": "finding",
+          "title": "Reserve life needs an operating context"
+        },
+        {
+          "text": "BYAN's largest destination is China with 45.00% of sales volume; BUMI's largest-destination share is 30.00%. Concentration can increase sensitivity to a local demand reduction, but volume shares do not establish revenue exposure.",
+          "evidence_ids": [
+            "BYAN.top_destination",
+            "BYAN.top_destination_pct",
+            "BUMI.top_destination_pct",
+            "method.destination"
+          ],
+          "kind": "risk",
+          "title": "Sales concentration can offset cost strength"
+        },
+        {
+          "text": "BUMI's linked licensed area expiring within the near-term window is 25.00%, compared with 12.00% for BYAN. These figures locate an exposure for research; they do not represent probabilities of failed renewal or site-level production losses.",
+          "evidence_ids": [
+            "BUMI.license_cliff_3y",
+            "BYAN.license_cliff_3y",
+            "method.license"
+          ],
+          "kind": "risk",
+          "title": "Expiry exposure needs renewal evidence"
+        },
+        {
+          "text": "The supplied RBV model capitalizes gross profit and excludes overhead, tax, capital expenditure, working capital, and the debt/cash bridge. A large modeled gap therefore requires reconciliation before it can support an equity-value interpretation.",
+          "evidence_ids": [
+            "method.rbv"
+          ],
+          "kind": "limitation",
+          "title": "Modeled reserves are not equity value"
+        },
+        {
+          "text": "Compare the issuer reporting periods, realized prices, ownership scope, and renewal evidence. Then run a combined scenario with explicit assumptions rather than adding unrelated stress-test results.",
+          "evidence_ids": [
+            "BUMI.financial_years",
+            "BYAN.financial_years",
+            "method.ownership",
+            "method.attribution"
+          ],
+          "kind": "next_step",
+          "title": "Reconcile periods and operating scope"
+        }
+      ],
+      "follow_up_questions": [
+        "What could reverse BYAN's operating advantage?",
+        "Which license evidence should I inspect first?",
+        "How do the issuers react to the same price shock?"
+      ],
+      "request_id": "qa-output-long_response",
+      "provider": "gemini_vertex",
+      "model": "gemini-3.8-flash",
+      "generated_at": "2026-10-06T02:00:00.000Z",
+      "cached": false,
+      "evidence": [
+        {
+          "id": "BUMI.rli_years",
+          "label": "BUMI · Reserve life",
+          "raw_value": 14.8343,
+          "value": "14.83 years",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.cash_cost_per_ton_usd",
+          "label": "BUMI · Cash cost",
+          "raw_value": 52,
+          "value": "52.00 USD/ton",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.license_cliff_3y",
+          "label": "BUMI · Licensed area expiring within three years",
+          "raw_value": 25,
+          "value": "25.00%",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · license_cliff_3y",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.top_destination_pct",
+          "label": "BUMI · Largest destination's sales volume share",
+          "raw_value": 30,
+          "value": "30.00%",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers · top_destination_pct",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.rli_years",
+          "label": "BYAN · Reserve life",
+          "raw_value": 25.7127,
+          "value": "25.71 years",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · rli_years",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.cash_cost_per_ton_usd",
+          "label": "BYAN · Cash cost",
+          "raw_value": 33,
+          "value": "33.00 USD/ton",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.license_cliff_3y",
+          "label": "BYAN · Licensed area expiring within three years",
+          "raw_value": 12,
+          "value": "12.00%",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · license_cliff_3y",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.top_destination_pct",
+          "label": "BYAN · Largest destination's sales volume share",
+          "raw_value": 45,
+          "value": "45.00%",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · top_destination_pct",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.top_destination",
+          "label": "BYAN · Largest sales destination",
+          "raw_value": "China",
+          "value": "China",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers · top_destination",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.unit_margin_usd",
+          "label": "BUMI · Unit margin",
+          "raw_value": 10,
+          "value": "10.00 USD/ton",
+          "href": "/issuer/BUMI",
+          "source": "GET /api/v1/issuers/BUMI · unit_margin_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BUMI.financial_years",
+          "label": "BUMI · Financial reporting periods",
+          "raw_value": "2025",
+          "value": "2025",
+          "href": "/issuer/BUMI",
+          "source": "Issuer Evidence · reporting periods",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.unit_margin_usd",
+          "label": "BYAN · Unit margin",
+          "raw_value": 52,
+          "value": "52.00 USD/ton",
+          "href": "/issuer/BYAN",
+          "source": "GET /api/v1/issuers/BYAN · unit_margin_usd",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "BYAN.financial_years",
+          "label": "BYAN · Financial reporting periods",
+          "raw_value": "2025",
+          "value": "2025",
+          "href": "/issuer/BYAN",
+          "source": "Issuer Evidence · reporting periods",
+          "quality": "complete",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.reserve_life",
+          "label": "Reserve life assumptions",
+          "raw_value": "Reserve life divides attributable reserves by annual production. It does not guarantee operating life or license renewal.",
+          "value": "Reserve life divides attributable reserves by annual production. It does not guarantee operating life or license renewal.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.rbv",
+          "label": "RBV model boundaries",
+          "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.license",
+          "label": "License expiry exposure",
+          "raw_value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.destination",
+          "label": "Destination volume exposure",
+          "raw_value": "Destination percentages describe reported sales volume, not revenue share. Demand reductions simulate destination volume, not tariffs. The largest destination is not necessarily China.",
+          "value": "Destination percentages describe reported sales volume, not revenue share. Demand reductions simulate destination volume, not tariffs. The largest destination is not necessarily China.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scenario",
+          "label": "Scenario operating mechanics",
+          "raw_value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "value": "Price changes act on revenue; fixed costs remain when volume falls. Without reconciled revenue and cost inputs, gross profit scales directly and the proxy is identified. RBV has a zero floor while gross losses remain visible.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.attribution",
+          "label": "Driver attribution order",
+          "raw_value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "value": "Scenario driver order is price, volume, license life, then discount rate. Interactions belong to the driver applied later. Separate stress tests cannot be added to estimate a combined shock.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.ownership",
+          "label": "Ownership and aggregation",
+          "raw_value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        },
+        {
+          "id": "method.scope",
+          "label": "Dataset and research scope",
+          "raw_value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "value": "The assistant uses the active GALI dataset and its deterministic calculations. It does not browse news, retrieve current market prices, or produce buy/sell instructions. Unsupported information must be identified as unavailable.",
+          "href": "/methodology",
+          "source": "GALI model methodology",
+          "quality": "methodology",
+          "as_of": "2026-09-30",
+          "run_id": "simulation-2026.09-v1"
+        }
+      ],
+      "snapshot": {
+        "as_of": "2026-09-30",
+        "run_id": "simulation-2026.09-v1",
+        "source_type": "synthetic",
+        "scope": [
+          "BUMI",
+          "BYAN"
+        ]
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null
+      }
+    }
+  }
+}

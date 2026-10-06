@@ -1,0 +1,9 @@
+{
+  "version": "0.5.1",
+  "runner_isolation_verified": true,
+  "parent_ai_enabled": "1",
+  "parent_credential_configuration": "Intentionally invalid non-secret test JSON",
+  "child_ai_enabled": "0",
+  "result": "Missing-credentials endpoint contract passed; test runner did not load parent provider configuration",
+  "live_provider_test": false
+}

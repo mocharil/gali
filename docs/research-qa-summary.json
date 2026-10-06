@@ -1,0 +1,36 @@
+{
+  "app_version": "0.4.0",
+  "python": {
+    "tests": 124,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "typescript_python_scenario_parity": {
+    "scenarios": 15,
+    "field_comparisons": 2700,
+    "passed": true
+  },
+  "browser_full_suite": {
+    "tests": 16,
+    "failures": 0,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "browser_after_chart_label_polish": {
+    "research_tests": 5,
+    "failures": 0
+  },
+  "build_typecheck_lint_mypy_ruff": "passed",
+  "visual": {
+    "pages": 10,
+    "focused_panels": 5,
+    "runtime_errors": 0,
+    "external_requests": 0,
+    "minimum_text_contrast": 4.53
+  },
+  "synthetic_inputs_sha256": "13cfb5a198135fb85f02efca3d054856ab38e55f30cf6c52e87f6e3951b640b1",
+  "live_sectors_verified": false,
+  "native_postgres_verified": false,
+  "public_deployment_updated": false
+}

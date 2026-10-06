@@ -15,7 +15,7 @@ from gali_api.cache import get_cached_json, make_cache_key, set_cached_json
 from gali_api.dependencies import get_db, get_published_run_id, get_redis
 from gali_api.derive import data_quality_label
 from gali_api.schemas.coverage import CoverageItem, DataCoverageResponse
-from gali_core.config import GATE_DECISION, IN_UNIVERSE_SYMBOLS
+from gali_core.config import IN_UNIVERSE_SYMBOLS
 from gali_core.db.models import (
     CreditLedger,
     IdxCompany,
@@ -53,7 +53,9 @@ async def get_data_coverage_report(
 
     in_univ_sites_stmt = select(
         func.count().label("total"),
-        func.count(MiningSite.latitude).label("with_gps"),
+        func.count()
+        .filter(MiningSite.latitude.between(-90, 90), MiningSite.longitude.between(-180, 180))
+        .label("with_gps"),
     ).where(MiningSite.company_slug.in_(in_univ_slugs))
     in_univ_site_counts = (await db.execute(in_univ_sites_stmt)).first()
     num_gps = in_univ_site_counts.with_gps if in_univ_site_counts else 0
@@ -62,7 +64,9 @@ async def get_data_coverage_report(
     # 3. Overall national site GPS
     all_sites_stmt = select(
         func.count().label("total"),
-        func.count(MiningSite.latitude).label("with_gps"),
+        func.count()
+        .filter(MiningSite.latitude.between(-90, 90), MiningSite.longitude.between(-180, 180))
+        .label("with_gps"),
     )
     all_site_counts = (await db.execute(all_sites_stmt)).first()
     all_num_gps = all_site_counts.with_gps if all_site_counts else 0
@@ -144,7 +148,7 @@ async def get_data_coverage_report(
     ]
 
     response = DataCoverageResponse(
-        gate_decision=GATE_DECISION,
+        gate_decision=f"Dataset: {len(in_univ_list)} emiten, {complete_count} lengkap, {len(in_univ_list) - complete_count} parsial",
         updated_at=dt.datetime.now(dt.UTC),
         credits_used=total_credits,
         credits_cap=1000,

@@ -1,0 +1,80 @@
+{
+  "version": "0.5.1",
+  "generated_at": "2026-10-06T02:08:46.685Z",
+  "live_provider_test": false,
+  "response_source": "Authored test-only prose validated against real server-built evidence; no Gemini request",
+  "scenarios": [
+    "comparison",
+    "active_itmg",
+    "gross_loss",
+    "partial_data",
+    "provisional_score",
+    "dashboard_stress",
+    "out_of_scope",
+    "long_response"
+  ],
+  "passed": 15,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "comparison: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "active_itmg: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "gross_loss: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "partial_data: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "provisional_score: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "dashboard_stress: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "out_of_scope: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "long_response: grounded structure, exact facts, missing-value semantics and export",
+      "passed": true
+    },
+    {
+      "name": "Issuer scenario references reopen the discussed issuer and identical assumptions",
+      "passed": true
+    },
+    {
+      "name": "Method references have distinct readable labels",
+      "passed": true
+    },
+    {
+      "name": "Malformed or ungrounded responses never become presentable answers",
+      "passed": true
+    },
+    {
+      "name": "Plain-text responses reject Markdown decoration and concealed directional formatting",
+      "passed": true
+    },
+    {
+      "name": "Whitespace is normalized without changing words or resolved metric values",
+      "passed": true
+    },
+    {
+      "name": "Repeated follow-up questions are displayed only once",
+      "passed": true
+    },
+    {
+      "name": "Markdown export preserves finding kinds and limited-answer status",
+      "passed": true
+    }
+  ]
+}

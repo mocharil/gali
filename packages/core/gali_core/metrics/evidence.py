@@ -37,5 +37,5 @@ def build_evidence_payload(
         "provenance": field_provenance,
         "null_fields": null_fields,
         "assumptions": assumptions,
-        "audit_version": "2.0-verified",
+        "audit_version": "3.0-context",
     }

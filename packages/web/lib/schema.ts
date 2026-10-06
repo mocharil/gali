@@ -279,7 +279,7 @@ export interface components {
             /** Run Id */
             run_id: string;
             /** Benchmark Price Usd */
-            benchmark_price_usd: number;
+            benchmark_price_usd: number | null;
             /** Points */
             points: components["schemas"]["CostCurvePoint"][];
             /** Partial Issuers Excluded */
@@ -565,11 +565,30 @@ export interface components {
             /** Volume At Risk Pct */
             volume_at_risk_pct: number;
             /** Revenue At Risk Usd */
-            revenue_at_risk_usd: number;
+            revenue_at_risk_usd: number | null;
             /** Post Shock Gp Usd */
             post_shock_gp_usd: number | null;
             /** Is Partial */
             is_partial: boolean;
+            /**
+             * Model Basis
+             * @default gross_profit_proxy
+             */
+            model_basis: string;
+            /** Warnings */
+            warnings?: string[];
+            /** Post Shock Revenue Usd */
+            post_shock_revenue_usd?: number | null;
+            /** Post Shock Cost Usd */
+            post_shock_cost_usd?: number | null;
+            /** Gross Loss Usd */
+            gross_loss_usd?: number | null;
+            /** Break Even Price Change Pct */
+            break_even_price_change_pct?: number | null;
+            /** Drivers */
+            drivers?: components["schemas"]["ScenarioDriverSchema"][];
+            /** Sensitivity */
+            sensitivity?: components["schemas"]["SensitivityPointSchema"][];
         };
         /** IssuerSummary */
         IssuerSummary: {
@@ -591,8 +610,8 @@ export interface components {
             ground_truth_score?: number | null;
             /**
              * Confidence Pct
-             * @description Effective weight utilized (0-100%)
-             * @default 100
+             * @description Available score weight coverage (0-100%), not statistical confidence
+             * @default 0
              */
             confidence_pct: number;
             /**
@@ -611,7 +630,7 @@ export interface components {
             market_cap_usd?: number | null;
             /**
              * Rbv Gap Pct
-             * @description M2 valuation premia / discount %
+             * @description M2 equity market cap vs gross-profit annuity proxy gap %, not fair value
              */
             rbv_gap_pct?: number | null;
             /**
@@ -659,6 +678,8 @@ export interface components {
             company_name?: string | null;
             /** Issuer Symbol */
             issuer_symbol?: string | null;
+            /** Issuer Symbols */
+            issuer_symbols?: string[];
             /** Province */
             province?: string | null;
             /** City */
@@ -676,7 +697,7 @@ export interface components {
         /** RankingItem */
         RankingItem: {
             /** Rank */
-            rank: number;
+            rank: number | null;
             /** Symbol */
             symbol: string;
             /** Name */
@@ -689,6 +710,11 @@ export interface components {
             formatted_value: string;
             /** Confidence Pct */
             confidence_pct?: number | null;
+            /**
+             * Ranking Status
+             * @default complete
+             */
+            ranking_status: string;
         };
         /** RankingsResponse */
         RankingsResponse: {
@@ -713,6 +739,15 @@ export interface components {
             redis: boolean;
             /** Published Run Id */
             published_run_id?: string | null;
+        };
+        /** ScenarioDriverSchema */
+        ScenarioDriverSchema: {
+            /** Key */
+            key: string;
+            /** Delta Rbv Usd */
+            delta_rbv_usd: number;
+            /** Rbv After Usd */
+            rbv_after_usd: number;
         };
         /** ScenarioResponse */
         ScenarioResponse: {
@@ -763,6 +798,17 @@ export interface components {
              * @example false
              */
             license_cliff_expiry_shock: boolean;
+        };
+        /** SensitivityPointSchema */
+        SensitivityPointSchema: {
+            /** Price Shock Pct */
+            price_shock_pct: number;
+            /** Discount Rate */
+            discount_rate: number;
+            /** Rbv Usd */
+            rbv_usd: number;
+            /** Delta Rbv Pct */
+            delta_rbv_pct: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -979,8 +1025,8 @@ export interface operations {
     get_metric_rankings_v1_rankings_get: {
         parameters: {
             query?: {
-                /** @description Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct' */
-                metric?: string;
+                /** @description Metric to rank by: one of ('ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'). An unlisted value is rejected with 422 rather than silently returning an empty list. */
+                metric?: "ground_truth_score" | "rli_years" | "reserve_backed_value_usd" | "cash_cost_per_ton_usd" | "license_cliff_3y" | "rbv_gap_pct";
             };
             header?: never;
             path?: never;
@@ -1010,7 +1056,9 @@ export interface operations {
     };
     get_national_cost_curve_v1_cost_curve_get: {
         parameters: {
-            query?: never;
+            query?: {
+                commodity?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1024,6 +1072,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CostCurveResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

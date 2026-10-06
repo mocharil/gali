@@ -13,11 +13,13 @@ from gali_api.schemas.sites import (
     MiningSiteProperties,
 )
 from gali_core.db.models import (
+    IssuerMetrics,
     IssuerMiningLink,
     MiningCompany,
     MiningSite,
     MiningSiteProduction,
 )
+from gali_core.metrics.periods import latest_year_rows
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -48,7 +50,7 @@ async def get_mining_sites_geojson(
     stmt = (
         select(MiningSite, MiningCompany)
         .join(MiningCompany, MiningSite.company_slug == MiningCompany.slug, isouter=True)
-        .where(MiningSite.latitude.is_not(None), MiningSite.longitude.is_not(None))
+        .where(MiningSite.latitude.between(-90, 90), MiningSite.longitude.between(-180, 180))
     )
     if commodity:
         stmt = stmt.where(MiningSite.commodity_type.ilike(f"%{commodity}%"))
@@ -57,26 +59,34 @@ async def get_mining_sites_geojson(
 
     # 2. Fetch in-universe links
     link_stmt = select(IssuerMiningLink)
-    if issuer:
-        link_stmt = link_stmt.where(IssuerMiningLink.symbol == issuer.upper())
+    if in_universe_only:
+        link_stmt = link_stmt.where(
+            IssuerMiningLink.symbol.in_(select(IssuerMetrics.symbol).where(IssuerMetrics.run_id == run_id))
+        )
+    link_stmt = link_stmt.order_by(IssuerMiningLink.effective_ownership_pct.desc(), IssuerMiningLink.symbol)
     links = (await db.execute(link_stmt)).scalars().all()
 
-    company_to_issuer: dict[str, str] = {lnk.company_slug: lnk.symbol for lnk in links}
+    company_to_issuers: dict[str, list[str]] = {}
+    for link in links:
+        company_to_issuers.setdefault(link.company_slug, []).append(link.symbol)
 
     # 3. Fetch latest production volumes
     prod_stmt = select(MiningSiteProduction)
     prod_rows = (await db.execute(prod_stmt)).scalars().all()
-    site_prod_map: dict[str, float] = {p.site_slug: float(p.production_volume or 0.0) for p in prod_rows}
+    site_prod_map: dict[str, float | None] = {
+        p.site_slug: p.production_volume for p in latest_year_rows(prod_rows, "site_slug")
+    }
 
     features: list[GeoJSONFeature] = []
 
     for site, comp in site_rows:
-        sym = company_to_issuer.get(site.company_slug) if site.company_slug else None
-        is_in_universe = sym is not None
+        symbols = company_to_issuers.get(site.company_slug or "", [])
+        sym = issuer.upper() if issuer and issuer.upper() in symbols else (symbols[0] if symbols else None)
+        is_in_universe = bool(symbols)
 
         if in_universe_only and not is_in_universe:
             continue
-        if issuer and sym != issuer.upper():
+        if issuer and issuer.upper() not in symbols:
             continue
 
         feature = GeoJSONFeature(
@@ -95,6 +105,7 @@ async def get_mining_sites_geojson(
                 company_slug=site.company_slug,
                 company_name=comp.name if comp else (site.company_slug or "").replace("-", " ").title(),
                 issuer_symbol=sym,
+                issuer_symbols=symbols,
                 province=site.province,
                 city=site.city,
                 project_name=site.project_name,

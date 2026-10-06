@@ -1,451 +1,97 @@
 "use client";
 
-import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Maximize2, X, ExternalLink, Pickaxe, Copy, Check, Compass } from "lucide-react";
-
+import { MapPin, X, Copy, Search, ArrowUpRight } from "lucide-react";
+import type { GeoJSONFeature } from "@/lib/types";
 import { api } from "@/lib/api";
+import { useHydrated } from "@/lib/useHydrated";
+import { issuerColor, siteColor, siteSymbols } from "@/lib/sites";
+import { DataState } from "@/components/DataState";
+import { GeographicSitesMap } from "@/components/GeographicSitesMap";
+import { VisualAsset } from "@/components/VisualAsset";
 
-const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
-
-interface MiningSitesMapProps {
-  compact?: boolean;
-  className?: string;
-}
-
-interface SelectedSiteInfo {
-  name: string;
-  slug?: string;
-  commodity?: string;
-  company_name?: string;
-  issuer_symbol?: string;
-  province?: string;
-  city?: string;
-  production_volume_mt?: number;
-  coordinates: [number, number]; // [lon, lat]
-}
-
-export function MiningSitesMap({ compact = false, className = "" }: MiningSitesMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeRegion, setActiveRegion] = useState<string>("all");
-  const [selectedSite, setSelectedSite] = useState<SelectedSiteInfo | null>(null);
-  const [copiedCoords, setCopiedCoords] = useState(false);
-
-  const { data: geojson, isLoading } = useQuery({
-    queryKey: ["sites-geojson"],
-    queryFn: () => api.getSitesGeoJSON(),
-  });
-
-  function flyToRegion(region: string) {
-    setActiveRegion(region);
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (region === "all") {
-      map.flyTo({ center: [115.5, -1.5], zoom: compact ? 3.4 : 4.5, essential: true });
-    } else if (region === "kalimantan") {
-      map.flyTo({ center: [115.2, -1.2], zoom: 6.2, essential: true });
-    } else if (region === "sumatra") {
-      map.flyTo({ center: [102.5, -3.2], zoom: 6.2, essential: true });
-    } else if (region === "sulawesi") {
-      map.flyTo({ center: [121.5, -2.5], zoom: 6.0, essential: true });
-    } else if (region === "tutupan") {
-      map.flyTo({ center: [115.52, -2.15], zoom: 9.8, essential: true });
-    }
-  }
-
-  function handleCopyCoordinates(coords: [number, number]) {
-    const text = `${coords[1].toFixed(6)}, ${coords[0].toFixed(6)}`;
-    navigator.clipboard.writeText(text);
-    setCopiedCoords(true);
-    setTimeout(() => setCopiedCoords(false), 2000);
-  }
+export function MiningSitesMap({ compact = false, className = "" }: { compact?: boolean; className?: string }) {
+  const detailRef = useRef<HTMLDivElement>(null);
+  const [mapRevision, setMapRevision] = useState(0);
+  const [selected, setSelected] = useState<GeoJSONFeature | null>(null);
+  const [filter, setFilter] = useState("");
+  const [issuer, setIssuer] = useState("");
+  const [province, setProvince] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
+  const hydrated = useHydrated();
+  const result = useQuery({ queryKey: ["sites-geojson"], queryFn: api.getSitesGeoJSON, enabled: hydrated });
+  const query = {
+    ...result,
+    data: hydrated ? result.data : undefined,
+    error: hydrated ? result.error : null,
+    isLoading: !hydrated || result.isLoading,
+    isError: hydrated && result.isError,
+  };
+  const visible = useMemo(() => (query.data?.features ?? []).filter((site) => {
+    const symbols = siteSymbols(site);
+    const text = `${site.properties.name} ${site.properties.company_name ?? ""} ${symbols.join(" ")} ${site.properties.province ?? ""}`.toLowerCase();
+    return (!filter || text.includes(filter.trim().toLowerCase())) && (!issuer || symbols.includes(issuer)) && (!province || site.properties.province === province);
+  }), [query.data, filter, issuer, province]);
+  const allSymbols = [...new Set((query.data?.features ?? []).flatMap(siteSymbols))].sort();
+  const allProvinces = [...new Set((query.data?.features ?? []).flatMap((site) => site.properties.province ? [site.properties.province] : []))].sort();
+  const visibleSymbols = [...new Set(visible.flatMap(siteSymbols))].sort();
+  const visibleProvinces = new Set(visible.flatMap((site) => site.properties.province ? [site.properties.province] : []));
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (selected && window.matchMedia("(max-width: 1279px)").matches) detailRef.current?.scrollIntoView({ block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  }, [selected]);
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: BASEMAP_STYLE,
-      center: [115.5, -1.5],
-      zoom: compact ? 3.4 : 4.5,
-      attributionControl: false,
-    });
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-    map.on("error", (e) => setLoadError(String(e.error?.message ?? "map failed to load")));
-    mapRef.current = map;
+  function choose(site: GeoJSONFeature) {
+    setSelected(site); setCopyMessage("");
+  }
+  function clearSelection() { setSelected(null); setCopyMessage(""); }
+  function resetFilters() { setFilter(""); setIssuer(""); setProvince(""); clearSelection(); setMapRevision((revision) => revision + 1); }
+  async function copyCoordinates() {
+    if (!selected) return;
+    const [lon, lat] = selected.geometry.coordinates;
+    try { await navigator.clipboard.writeText(`${lat.toFixed(6)}, ${lon.toFixed(6)}`); setCopyMessage("Coordinates copied."); }
+    catch { setCopyMessage("Copy the coordinates displayed above."); }
+  }
+  if (query.isError) return <DataState error={query.error} onRetry={() => query.refetch()} />;
 
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [compact]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !geojson) return;
-
-    const applySource = () => {
-      const sourceId = "mining-sites";
-      if (map.getSource(sourceId)) {
-        (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(
-          geojson as unknown as GeoJSON.FeatureCollection
-        );
-        return;
-      }
-      map.addSource(sourceId, {
-        type: "geojson",
-        data: geojson as unknown as GeoJSON.FeatureCollection,
-      });
-
-      map.addLayer({
-        id: "sites-glow",
-        type: "circle",
-        source: sourceId,
-        paint: {
-          "circle-radius": [
-            "interpolate",
-            ["linear"],
-            ["coalesce", ["get", "production_volume_mt"], 1],
-            0,
-            8,
-            100,
-            26,
-          ],
-          "circle-color": [
-            "match",
-            ["get", "commodity"],
-            "Coal",
-            "#f59e0b",
-            "Nickel",
-            "#06b6d4",
-            "#94a3b8",
-          ],
-          "circle-opacity": 0.25,
-          "circle-blur": 1,
-        },
-      });
-
-      map.addLayer({
-        id: "sites-point",
-        type: "circle",
-        source: sourceId,
-        paint: {
-          "circle-radius": [
-            "interpolate",
-            ["linear"],
-            ["coalesce", ["get", "production_volume_mt"], 1],
-            0,
-            4,
-            100,
-            14,
-          ],
-          "circle-color": [
-            "match",
-            ["get", "commodity"],
-            "Coal",
-            "#f59e0b",
-            "Nickel",
-            "#06b6d4",
-            "#38bdf8",
-          ],
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#060911",
-        },
-      });
-
-      const popup = new maplibregl.Popup({ closeButton: false, offset: 14 });
-      map.on("mouseenter", "sites-point", (e) => {
-        map.getCanvas().style.cursor = "pointer";
-        const f = e.features?.[0];
-        if (!f) return;
-        const p = f.properties as Record<string, unknown>;
-        popup
-          .setLngLat((f.geometry as unknown as { coordinates: [number, number] }).coordinates)
-          .setHTML(
-            `<div style="font-family:var(--font-sans), sans-serif; padding:4px 6px; min-width:190px;">
-               <div style="font-weight:800; font-size:12px; color:#f8fafc;">${p.name ?? "—"}</div>
-               <div style="color:#94a3b8; font-size:10px; margin-top:2px;">${p.province ?? ""} · <span style="color:#f59e0b; font-weight:700;">${p.commodity ?? ""}</span></div>
-               <div style="margin-top:4px; padding-top:4px; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
-                 <span style="font-family:var(--font-mono); font-weight:800; color:#38bdf8; font-size:11px;">${p.issuer_symbol ?? p.company_name ?? "—"}</span>
-                 ${p.production_volume_mt ? `<span style="font-size:10px; font-family:var(--font-mono); color:#cbd5e1;">${Number(p.production_volume_mt).toFixed(1)} Mt/yr</span>` : ""}
-               </div>
-               <div style="font-size:9px; color:#a855f7; margin-top:3px; font-weight:600;">Click point for full detail ↗</div>
-             </div>`
-          )
-          .addTo(map);
-      });
-
-      map.on("mouseleave", "sites-point", () => {
-        map.getCanvas().style.cursor = "";
-        popup.remove();
-      });
-
-      // Click event: Zoom and open Slide-over Drawer
-      map.on("click", "sites-point", (e) => {
-        const f = e.features?.[0];
-        if (!f) return;
-        const p = f.properties as Record<string, unknown>;
-        const coords = (f.geometry as unknown as { coordinates: [number, number] }).coordinates;
-
-        map.flyTo({
-          center: coords,
-          zoom: Math.max(map.getZoom(), 7.8),
-          essential: true,
-        });
-
-        setSelectedSite({
-          name: String(p.name ?? "Mining Concession"),
-          slug: p.slug ? String(p.slug) : undefined,
-          commodity: String(p.commodity ?? "Coal"),
-          company_name: String(p.company_name ?? ""),
-          issuer_symbol: p.issuer_symbol ? String(p.issuer_symbol) : undefined,
-          province: String(p.province ?? ""),
-          city: p.city ? String(p.city) : undefined,
-          production_volume_mt: p.production_volume_mt ? Number(p.production_volume_mt) : undefined,
-          coordinates: coords,
-        });
-      });
-    };
-
-    if (map.isStyleLoaded()) applySource();
-    else map.once("load", applySource);
-  }, [geojson]);
-
-  return (
-    <div className={`relative overflow-hidden rounded-2xl border border-slate-800 ${className}`}>
-      <div ref={containerRef} className="h-full w-full" style={{ minHeight: compact ? 300 : 540 }} />
-
-      {/* Region Quick Zoom Buttons */}
-      {!compact && (
-        <div className="absolute top-4 left-4 z-10 flex flex-wrap gap-1.5 rounded-xl border border-slate-800/80 bg-[#060911]/90 p-1 backdrop-blur-xl shadow-xl">
-          <button
-            onClick={() => flyToRegion("all")}
-            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-              activeRegion === "all" ? "bg-slate-800 text-amber-400 font-bold" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            National
-          </button>
-          <button
-            onClick={() => flyToRegion("kalimantan")}
-            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-              activeRegion === "kalimantan" ? "bg-slate-800 text-amber-400 font-bold" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Kalimantan (Coal Belt)
-          </button>
-          <button
-            onClick={() => flyToRegion("sumatra")}
-            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-              activeRegion === "sumatra" ? "bg-slate-800 text-amber-400 font-bold" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            South Sumatra
-          </button>
-          <button
-            onClick={() => flyToRegion("sulawesi")}
-            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-              activeRegion === "sulawesi" ? "bg-slate-800 text-cyan-400 font-bold" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Sulawesi (Nickel Belt)
-          </button>
-          <button
-            onClick={() => flyToRegion("tutupan")}
-            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-              activeRegion === "tutupan" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold" : "text-amber-400/80 hover:text-amber-300"
-            }`}
-            title="Focus on Tutupan Mine (ADRO) - South Kalimantan"
-          >
-            🎯 Tutupan (ADRO)
-          </button>
+  return <div className="min-w-0 space-y-4">
+    {!compact && <>
+      <div className="grid grid-cols-3 gap-3" aria-label="Filtered site summary">{[{ label: "Sites", count: visible.length }, { label: "Provinces", count: visibleProvinces.size }, { label: "Related issuers", count: visibleSymbols.length }].map((item) => <div key={item.label} className="gali-card p-4"><p className="text-[12px] text-muted">{item.label}</p><p className="mt-1 font-numeric text-2xl font-semibold text-ink">{query.isLoading ? "…" : item.count}</p></div>)}</div>
+      <div className="gali-card grid items-end gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
+        <label className="block text-[12px] font-medium text-muted">Search sites, provinces, or issuers<span className="relative mt-1.5 block"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" /><input value={filter} onChange={(event) => { setFilter(event.target.value); clearSelection(); }} placeholder="Site name or ticker" className="gali-input pl-10" /></span></label>
+        <div className="block text-[12px] font-medium text-muted"><label htmlFor="map-issuer-filter">Issuer filter</label><select id="map-issuer-filter" value={issuer} onChange={(event) => { setIssuer(event.target.value); clearSelection(); }} className="gali-input mt-1.5"><option value="">All issuers</option>{allSymbols.map((symbol) => <option key={symbol}>{symbol}</option>)}</select></div>
+        <div className="block text-[12px] font-medium text-muted"><label htmlFor="map-province-filter">Province filter</label><select id="map-province-filter" value={province} onChange={(event) => { setProvince(event.target.value); clearSelection(); }} className="gali-input mt-1.5"><option value="">All provinces</option>{allProvinces.map((name) => <option key={name}>{name}</option>)}</select></div>
+        <button onClick={resetFilters} disabled={!filter && !issuer && !province} className="gali-button gali-button-secondary disabled:opacity-40">Reset filter</button>
+      </div>
+    </>}
+    <div className={`grid min-w-0 gap-4 ${compact ? "" : "xl:grid-cols-[minmax(0,1fr)_320px]"}`}>
+      <div className="min-w-0 space-y-3">
+        <div className={`relative overflow-hidden rounded-2xl border border-line bg-surface ${className || (compact ? "h-[280px]" : "h-[320px] sm:h-[420px]")}`} aria-label="Mining site map">
+          {!query.isLoading && <GeographicSitesMap key={mapRevision} sites={visible} selected={selected} onSelect={choose} />}
+          {query.isLoading && <div className="absolute inset-0 grid place-items-center bg-surface text-sm text-ink-soft" role="status">Loading sites from the dataset…</div>}
+          {compact && <Link href="/map" className="absolute bottom-3 right-3 rounded-xl border border-line bg-surface px-3 py-2 text-[12px] font-medium text-info">Open the full map →</Link>}
         </div>
-      )}
-
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 text-xs text-slate-300 font-medium backdrop-blur-sm">
-          Loading coordinates for 52 mining sites…
-        </div>
-      )}
-
-      {loadError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 p-4 text-center text-xs text-rose-300">
-          Map failed to load: {loadError}
-        </div>
-      )}
-
-      {/* Floating Map Legend (Bottom-Left) */}
-      {!isLoading && geojson && (
-        <div className="absolute bottom-3 left-3 z-10 hidden sm:flex flex-col gap-2 rounded-xl border border-slate-800/90 bg-[#060911]/95 p-3 text-xs text-slate-300 backdrop-blur-xl shadow-2xl max-w-xs">
-          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5">
-            <span>Map Legend</span>
-            <span className="font-mono text-amber-400 font-semibold">{geojson.features.length} Sites</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-              <span>Coal</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-              <span>Nickel</span>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-800/60 pt-1.5 space-y-1 text-[10px] text-slate-400">
-            <span className="text-slate-500 font-medium block">Radius Scale (Annual Production):</span>
-            <div className="flex items-center justify-between font-mono">
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" /> &lt;5 Mt
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-slate-300" /> 10-20 Mt
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-3.5 w-3.5 rounded-full bg-amber-400" /> &gt;40 Mt
-              </span>
-            </div>
+        <div className="gali-card p-4"><div className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Issuer legend">{visibleSymbols.map((symbol) => <span key={symbol} className="inline-flex items-center gap-1.5 text-[12px] text-ink-soft"><span className="h-2.5 w-2.5 rounded-full" style={{ background: issuerColor(symbol) }} />{symbol}</span>)}</div><p className="mt-2 text-[11px] leading-relaxed text-muted">Colors follow the primary issuer; shared sites may link to several issuers. Open a group to explore its sites. Individual marker sizes reflect production when available. Country borders are not mining-license boundaries.</p></div>
+      </div>
+      <div className="min-w-0 space-y-3">
+        {selected && <div ref={detailRef} className="relative scroll-mt-28 rounded-2xl border border-brand-line bg-surface p-4" aria-label="Selected site details">
+          <button aria-label="Close site details" onClick={clearSelection} className="gali-icon-button absolute right-3 top-3"><X className="h-4 w-4" /></button>
+          <p className="gali-eyebrow">Selected site</p><VisualAsset name="site-operation" className="gali-selected-site-art" /><p className="text-[10px] text-muted">Illustrative operating-site view</p><h3 className="mt-2 pr-10 text-base font-semibold text-ink">{selected.properties.name}</h3>
+          <p className="mt-2 text-[12px] text-muted">{selected.properties.company_name ?? selected.properties.company_slug ?? "Operator unavailable"} · {selected.properties.province ?? "Province unavailable"}</p>
+          <dl className="mt-4 space-y-2 border-t border-line pt-3 text-[12px]"><div><dt className="text-muted">Coordinates · latitude, longitude</dt><dd className="mt-1 font-numeric text-ink-soft">{selected.geometry.coordinates[1].toFixed(6)}, {selected.geometry.coordinates[0].toFixed(6)}</dd></div><div className="flex items-center justify-between"><dt className="text-muted">Production</dt><dd className="font-numeric text-ink-soft">{selected.properties.production_volume_mt != null ? `${selected.properties.production_volume_mt.toFixed(2)} Mt/year` : "Unavailable"}</dd></div></dl>
+          <div className="mt-4 flex flex-wrap gap-2">{siteSymbols(selected).map((symbol) => <Link key={symbol} href={`/issuer/${symbol}`} className="gali-button gali-button-secondary text-[12px]">Profile {symbol} →</Link>)}<button onClick={copyCoordinates} className="gali-button gali-button-secondary text-[12px]"><Copy className="h-3 w-3" />Copy coordinates</button></div>
+          {!siteSymbols(selected).length && <p className="mt-3 text-[12px] text-muted">No issuer links in the dataset.</p>}
+          {copyMessage && <p role="status" className="mt-3 text-[12px] text-brand">{copyMessage}</p>}
+        </div>}
+        <div className="gali-card overflow-hidden"><div className="border-b border-line p-4"><h2 className="text-sm font-semibold text-ink">Site list</h2><p className="mt-1 text-[12px] text-muted">{visible.length} sites match your filters. Select a site to view details.</p></div>
+          <div className={`overflow-y-auto p-2 ${compact ? "max-h-40" : selected ? "max-h-72" : "max-h-[420px]"}`} aria-label="Mining site list">
+            {(compact ? visible.slice(0, 4) : visible).map((site) => <button key={site.properties.slug} onClick={() => choose(site)} aria-pressed={selected?.properties.slug === site.properties.slug} className={`flex min-h-16 w-full items-start gap-3 rounded-xl p-3 text-left ${selected?.properties.slug === site.properties.slug ? "bg-brand-soft" : "hover:bg-surface-muted"}`}><MapPin className="mt-0.5 h-4 w-4 shrink-0" style={{ color: siteColor(site) }} /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-ink">{site.properties.name}</span><span className="mt-1 block text-[12px] text-muted">{site.properties.province ?? "–"} · {siteSymbols(site).join(", ") || "Outside the universe"}</span></span><ArrowUpRight className="mt-1 h-3.5 w-3.5 shrink-0 text-subtle" /></button>)}
+            {!query.isLoading && !visible.length && <p role="status" className="p-4 text-sm text-muted">{query.data?.features.length ? "No sites match your filters." : "No complete coordinates are available."}</p>}
           </div>
         </div>
-      )}
-
-      {/* Slide-over Interactive Site Drawer (Right / Bottom) */}
-      {selectedSite && (
-        <div className="absolute right-3 top-3 bottom-3 z-30 w-full max-w-sm overflow-y-auto rounded-2xl border border-slate-700/80 bg-[#0a0f1d]/95 p-5 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-right-4 duration-200">
-          <div className="flex items-start justify-between border-b border-slate-800/80 pb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold border ${
-                    selectedSite.commodity === "Nickel"
-                      ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-400"
-                      : "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                  }`}
-                >
-                  <Pickaxe className="h-3 w-3" />
-                  {selectedSite.commodity}
-                </span>
-                {selectedSite.issuer_symbol && (
-                  <span className="rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-mono font-bold text-indigo-300">
-                    IDX: {selectedSite.issuer_symbol}
-                  </span>
-                )}
-              </div>
-              <h3 className="mt-2 text-base font-extrabold text-white leading-snug">
-                {selectedSite.name}
-              </h3>
-            </div>
-            <button
-              onClick={() => setSelectedSite(null)}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-              aria-label="Close site detail"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="mt-4 space-y-4 text-xs">
-            {/* Coordinates Box */}
-            <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-3 space-y-2">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="flex items-center gap-1.5 font-medium">
-                  <Compass className="h-3.5 w-3.5 text-cyan-400" />
-                  Verified GPS Coordinates
-                </span>
-                <button
-                  onClick={() => handleCopyCoordinates(selectedSite.coordinates)}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
-                  title="Copy Latitude, Longitude"
-                >
-                  {copiedCoords ? (
-                    <>
-                      <Check className="h-3 w-3 text-emerald-400" />
-                      <span className="text-emerald-400">Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-3 w-3" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
-              </div>
-              <div className="font-mono text-slate-200 text-xs">
-                Lat: {selectedSite.coordinates[1].toFixed(5)}, Lon: {selectedSite.coordinates[0].toFixed(5)}
-              </div>
-            </div>
-
-            {/* Location & Operator info */}
-            <div className="space-y-2.5">
-              <div className="flex items-start justify-between">
-                <span className="text-slate-400">Region / Province:</span>
-                <span className="font-semibold text-slate-200 text-right">
-                  {selectedSite.city ? `${selectedSite.city}, ` : ""}
-                  {selectedSite.province || "—"}
-                </span>
-              </div>
-
-              <div className="flex items-start justify-between">
-                <span className="text-slate-400">Operating Company:</span>
-                <span className="font-semibold text-slate-200 text-right max-w-[190px]">
-                  {selectedSite.company_name || "—"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-slate-800/60 pt-2.5">
-                <span className="text-slate-400">Production Rate:</span>
-                <span className="font-mono font-bold text-amber-400">
-                  {selectedSite.production_volume_mt != null
-                    ? `${selectedSite.production_volume_mt.toFixed(1)} Mt/yr`
-                    : "Not yet reported"}
-                </span>
-              </div>
-            </div>
-
-            {/* Connected IDX Issuer Card */}
-            {selectedSite.issuer_symbol ? (
-              <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/90 p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-slate-300">Listed Parent Issuer</span>
-                  <span className="font-mono text-sm font-black text-amber-400">
-                    {selectedSite.issuer_symbol}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  This mining concession is deterministically linked to {selectedSite.issuer_symbol}'s financial statements on the IDX via the effective ownership graph.
-                </p>
-                <Link
-                  href={`/issuer/${selectedSite.issuer_symbol}`}
-                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 transition-colors shadow-lg"
-                >
-                  <span>Fundamental Analysis for {selectedSite.issuer_symbol}</span>
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-[11px] text-slate-400">
-                This concession is operated by a non-listed private entity outside the hackathon's 9-issuer focus universe.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {compact && (
-        <Link
-          href="/map"
-          className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-400 backdrop-blur-xl hover:bg-amber-500/20 transition-colors shadow-lg"
-        >
-          <Maximize2 className="h-3 w-3" /> Full Map →
-        </Link>
-      )}
+      </div>
     </div>
-  );
+  </div>;
 }

@@ -11,26 +11,26 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
     const variantStyles = {
-      default: "bg-slate-100 text-slate-900 shadow hover:bg-slate-200 active:scale-[0.98]",
-      destructive: "bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/40",
-      outline: "border border-slate-800 bg-slate-900/60 text-slate-200 hover:bg-slate-800 hover:border-slate-700 hover:text-white shadow-sm",
-      secondary: "bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700/50",
-      ghost: "hover:bg-slate-800/80 hover:text-white text-slate-400",
-      link: "text-amber-400 underline-offset-4 hover:underline p-0 h-auto",
-      amber: "bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:from-amber-400 hover:to-yellow-400 hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] active:scale-[0.98]",
-      cyan: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-500/50",
+      default: "gali-button-primary",
+      destructive: "bg-negative-soft text-negative border border-negative-line hover:bg-negative-soft hover:border-negative-line",
+      outline: "border border-line bg-surface text-ink-soft hover:bg-surface-hover hover:border-line-strong hover:text-ink",
+      secondary: "bg-surface-hover text-ink-soft hover:bg-surface-hover hover:text-ink border border-line-strong",
+      ghost: "hover:bg-surface-hover hover:text-ink text-muted",
+      link: "text-brand underline-offset-4 hover:underline p-0 h-auto",
+      amber: "gali-button-primary",
+      cyan: "bg-info-soft text-info border border-info-line hover:bg-info-soft hover:border-info-line",
     }[variant];
 
     const sizeStyles = {
-      default: "h-9 px-4 py-2 text-xs",
-      sm: "h-8 rounded-lg px-3 text-[11px]",
-      xs: "h-7 rounded-md px-2 text-[10px]",
-      lg: "h-11 rounded-xl px-6 text-sm font-semibold",
-      icon: "h-9 w-9 p-0",
+      default: "h-10 px-4 py-2 text-sm",
+      sm: "h-8 min-h-8 px-3 text-[12px]",
+      xs: "h-8 min-h-8 px-2.5 text-[12px]",
+      lg: "h-12 px-6 text-sm",
+      icon: "h-10 w-10 p-0",
     }[size];
 
     const buttonClassName = cn(
-      "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
+      "gali-button whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
       variantStyles,
       sizeStyles,
       className

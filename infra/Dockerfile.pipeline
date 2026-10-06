@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1
+FROM python:3.13-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    DAGSTER_HOME=/opt/dagster/home
+
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /opt/dagster/home
+
+COPY packages/core /app/packages/core
+COPY packages/pipeline /app/packages/pipeline
+RUN pip install -e /app/packages/core -e /app/packages/pipeline
+
+EXPOSE 3000
+CMD ["dagster", "dev", "-m", "gali_pipeline.definitions", "-h", "0.0.0.0", "-p", "3000"]

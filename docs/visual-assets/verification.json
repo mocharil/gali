@@ -1,0 +1,26 @@
+{
+  "version": "0.4.3",
+  "date": "2026-10-06",
+  "build": "passed",
+  "typecheck": "passed",
+  "lint": "passed",
+  "browser": {
+    "startTime": "2026-10-06T00:20:08.464Z",
+    "duration": 127744.957,
+    "expected": 26,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "visualCaptures": 22,
+  "assets": 11,
+  "webAssetBytes": 2517926,
+  "allTransparent": true,
+  "protectedFilesUnchanged": 99,
+  "analysisChecks": {
+    "referenceScenarios": 15,
+    "fieldComparisons": 2700,
+    "researchChecks": "passed"
+  },
+  "onlineTileTests": "Requests intercepted: opt-in and failure recovery verified; public tile availability not tested."
+}

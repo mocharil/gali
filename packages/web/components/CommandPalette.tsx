@@ -1,46 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import { useIssuerUniverse } from "@/lib/useIssuerUniverse";
+import { useDialog } from "@/lib/useDialog";
+import { DataState } from "./DataState";
 import { useRouter } from "next/navigation";
-import {
-  Search,
-  Pickaxe,
-  MapPin,
-  Scale,
-  SlidersHorizontal,
-  TrendingDown,
-  LineChart,
-  ShieldCheck,
-  BookOpen,
-  ArrowRight,
-  Sparkles,
-  X,
-  Keyboard,
-} from "lucide-react";
+import { Search, Pickaxe, ArrowRight, Sparkles, X, Keyboard } from "lucide-react";
+import { NAVIGATION_PAGES } from "@/lib/navigation";
 
-const COAL_TITANS = [
-  { symbol: "AADI", name: "Adaro Andalan Indonesia Tbk", quality: "LENGKAP", score: 62.1 },
-  { symbol: "ADMR", name: "Adaro Minerals Indonesia Tbk", quality: "LENGKAP", score: 65.4 },
-  { symbol: "ADRO", name: "Alamtri Resources Indonesia Tbk", quality: "PARSIAL", score: 47.4 },
-  { symbol: "BUMI", name: "Bumi Resources Tbk", quality: "LENGKAP", score: 58.9 },
-  { symbol: "BYAN", name: "Bayan Resources Tbk", quality: "LENGKAP", score: 78.2 },
-  { symbol: "DSSA", name: "Dian Swastatika Sentosa Tbk", quality: "PARSIAL", score: 39.8 },
-  { symbol: "GEMS", name: "Golden Energy Mines Tbk", quality: "LENGKAP", score: 71.5 },
-  { symbol: "ITMG", name: "Indo Tambangraya Megah Tbk", quality: "LENGKAP", score: 68.3 },
-  { symbol: "PTBA", name: "Bukit Asam Tbk", quality: "LENGKAP", score: 74.0 },
-];
-
-const PAGES = [
-  { href: "/dashboard", label: "Executive Dashboard", desc: "Fundamental analytics terminal & 9-issuer leaderboard", icon: Pickaxe },
-  { href: "/compare", label: "Peer Comparison Studio", desc: "Head-to-head comparison of 2 IDX coal issuers", icon: Scale },
-  { href: "/", label: "Landing Page", desc: "Public home introducing the platform & 4 pillars", icon: Sparkles },
-  { href: "/map", label: "National Concession Map", desc: "Distribution map of 52 GPS-coordinated mining sites", icon: MapPin },
-  { href: "/scenario", label: "Scenario Studio", desc: "Stress-test simulation of coal prices & import tariffs", icon: SlidersHorizontal },
-  { href: "/cost-curve", label: "National Cost Curve", desc: "Cash cost ladder vs ICI benchmark price", icon: TrendingDown },
-  { href: "/divergence", label: "Market Divergence", desc: "Physical reserve valuation matrix vs market price", icon: LineChart },
-  { href: "/coverage", label: "Truth Audit & Ledger", desc: "Data honesty audit & API credit spending", icon: ShieldCheck },
-  { href: "/methodology", label: "Methodology & Formulas", desc: "Transparency of M1–M9 formulas & disclaimer", icon: BookOpen },
-];
+const PAGES = [{ href: "/", label: "Home", description: "Introduction to GALI and the research workflow", icon: Sparkles }, ...NAVIGATION_PAGES].map((page) => ({ ...page, desc: page.description }));
 
 export function CommandPalette({
   isOpen,
@@ -52,19 +20,10 @@ export function CommandPalette({
   const [query, setQuery] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        onClose();
-      }
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useDialog(isOpen, onClose, panelRef);
+  const issuers = useIssuerUniverse(isOpen);
+  const COAL_TITANS = issuers.data ?? [];
 
   if (!isOpen) return null;
 
@@ -86,46 +45,52 @@ export function CommandPalette({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 pt-20 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-overlay p-4 pt-20 backdrop-blur-md animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-700/80 bg-[#0a0f1d] shadow-2xl backdrop-blur-2xl animate-in zoom-in-95 duration-150"
+        ref={panelRef}
+        role="dialog" aria-modal="true" aria-label="Search issuers and features"
+        className="w-full max-w-2xl overflow-hidden rounded-3xl border border-line bg-surface shadow-panel animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3.5">
-          <Search className="h-4 w-4 text-amber-400 shrink-0" />
+        <div className="flex items-center gap-3 border-b border-line px-4 py-3.5">
+          <Search className="h-4 w-4 text-brand shrink-0" />
           <input
+            aria-label="Search issuers or pages"
             type="text"
-            placeholder="Type an issuer symbol (ADRO, BYAN) or navigate to a page..."
+            placeholder="Search tickers (ADRO, BYAN) or features…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
-            className="w-full bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
+            className="min-h-11 w-full bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="text-xs text-slate-500 hover:text-slate-300"
+              className="text-sm text-muted hover:text-ink-soft"
             >
               Reset
             </button>
           )}
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+            aria-label="Close search"
+            className="gali-icon-button"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto p-3 space-y-4">
+          {issuers.isError && <DataState error={issuers.error} onRetry={() => issuers.refetch()} />}
+          {issuers.isLoading && <p role="status" className="p-3 text-sm text-muted">Loading issuers…</p>}
           {/* Issuers Section */}
           <div>
-            <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <div className="px-2 py-1 text-[12px] font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
               <Pickaxe className="h-3 w-3" />
-              <span>Coal Mining Issuers ({filteredIssuers.length})</span>
+              <span>Coal issuers ({filteredIssuers.length})</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1">
               {filteredIssuers.map((i) => (
@@ -135,20 +100,20 @@ export function CommandPalette({
                     router.push(`/issuer/${i.symbol}`);
                     onClose();
                   }}
-                  className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-900/40 p-2.5 text-left transition-colors hover:border-amber-500/40 hover:bg-slate-800/80 group"
+                  className="flex items-center justify-between rounded-xl border border-line bg-surface p-2.5 text-left transition-colors hover:border-brand-line hover:bg-surface-hover group"
                 >
                   <div className="min-w-0 pr-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-black text-amber-400 group-hover:text-amber-300">
+                      <span className="font-numeric font-bold text-brand group-hover:text-brand">
                         {i.symbol}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-500">
-                        Score: {i.score.toFixed(1)}
+                      <span className="text-[12px] font-numeric text-muted">
+                        Score: {i.ground_truth_score != null ? i.ground_truth_score.toFixed(1) : "—"}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-400 truncate">{i.name}</div>
+                    <div className="text-[12px] text-muted truncate">{i.name}</div>
                   </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-slate-600 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-3.5 w-3.5 text-subtle group-hover:text-brand group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
               ))}
             </div>
@@ -156,9 +121,9 @@ export function CommandPalette({
 
           {/* Navigation Pages Section */}
           <div>
-            <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+            <div className="px-2 py-1 text-[12px] font-bold uppercase tracking-wider text-info flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
-              <span>Pages &amp; Analysis Tools ({filteredPages.length})</span>
+              <span>Pages &amp; analysis features ({filteredPages.length})</span>
             </div>
             <div className="space-y-1 mt-1">
               {filteredPages.map((p) => {
@@ -170,20 +135,20 @@ export function CommandPalette({
                       router.push(p.href);
                       onClose();
                     }}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-800/60 bg-slate-900/40 p-2.5 text-left transition-colors hover:border-cyan-500/40 hover:bg-slate-800/80 group"
+                    className="flex w-full items-center justify-between rounded-xl border border-line bg-surface p-2.5 text-left transition-colors hover:border-info-line hover:bg-surface-hover group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-800 text-cyan-400 border border-slate-700">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-hover text-info border border-line-strong">
                         <Icon className="h-3.5 w-3.5" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white group-hover:text-cyan-300">
+                        <div className="text-sm font-bold text-ink group-hover:text-info">
                           {p.label}
                         </div>
-                        <div className="text-[11px] text-slate-400">{p.desc}</div>
+                        <div className="text-[12px] text-muted">{p.desc}</div>
                       </div>
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ArrowRight className="h-3.5 w-3.5 text-subtle group-hover:text-info group-hover:translate-x-0.5 transition-all shrink-0" />
                   </button>
                 );
               })}
@@ -192,14 +157,14 @@ export function CommandPalette({
         </div>
 
         {/* Footer Shortcut Info */}
-        <div className="flex items-center justify-between border-t border-slate-800/80 bg-slate-950/80 px-4 py-2.5 text-[11px] text-slate-500">
+        <div className="flex items-center justify-between border-t border-line bg-surface px-4 py-2.5 text-[12px] text-muted">
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 border border-slate-800 font-mono text-[10px] text-slate-400">
+            <span className="flex items-center gap-1 rounded bg-surface px-1.5 py-0.5 border border-line font-numeric text-[12px] text-muted">
               <Keyboard className="h-3 w-3" /> Esc
             </span>
             <span>to close</span>
           </div>
-          <span className="font-mono text-slate-400">GALI Fast Navigator</span>
+          <span className="font-numeric text-muted">GALI navigation</span>
         </div>
       </div>
     </div>

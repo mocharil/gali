@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 import { Providers } from "./providers";
+import { datasetStatus } from "@/lib/simulation/dataset";
+import { DatasetNotice } from "@/components/DatasetContext";
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
+export const dynamic = "force-dynamic";
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+const jakarta = localFont({
+  src: "./fonts/PlusJakartaSans-Variable.ttf",
+  variable: "--font-gali",
   display: "swap",
+  weight: "200 800",
 });
 
 const SITE_URL = "https://gali-web.vercel.app";
@@ -31,7 +30,6 @@ export const metadata: Metadata = {
   keywords: [
     "IDX",
     "mining",
-    "batubara",
     "coal",
     "reserve life index",
     "market intelligence",
@@ -42,7 +40,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: "GALI",
-    locale: "id_ID",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
@@ -57,11 +55,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const dataset = datasetStatus();
   return (
-    <html lang="en" className={`dark ${plusJakarta.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-[#060911] text-slate-100 font-sans antialiased min-h-screen selection:bg-amber-500/30 selection:text-amber-200">
-        <Providers>
-          <AppShell>{children}</AppShell>
+    <html lang="en" className={jakarta.variable}>
+      <body data-dataset-mode={dataset.mode} data-dataset-as-of={dataset.as_of ?? ""} className="bg-canvas text-ink font-sans antialiased min-h-screen selection:bg-brand-soft selection:text-brand">
+        <Providers dataset={dataset}>
+          <AppShell>
+            <main className="flex-1 bg-ambient-radial"><DatasetNotice />{children}</main>
+          </AppShell>
         </Providers>
       </body>
     </html>

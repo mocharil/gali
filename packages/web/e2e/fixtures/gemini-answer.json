@@ -1,0 +1,137 @@
+{
+  "status": "answered",
+  "title": "BUMI and BYAN research",
+  "summary": {
+    "text": "BUMI's reserve life is 14.83 years. Compare the evidence and model limits before drawing conclusions.",
+    "evidence_ids": [
+      "BUMI.rli_years",
+      "method.rbv"
+    ]
+  },
+  "findings": [
+    {
+      "text": "BUMI's cash cost is 52.00 USD/ton; BYAN's is 33.00 USD/ton.",
+      "evidence_ids": [
+        "BUMI.cash_cost_per_ton_usd",
+        "BYAN.cash_cost_per_ton_usd"
+      ],
+      "kind": "finding",
+      "title": "Cost evidence"
+    },
+    {
+      "text": "License expiry exposure is linked licensed area, not a probability of failed renewal.",
+      "evidence_ids": [
+        "method.license"
+      ],
+      "kind": "risk",
+      "title": "License continuity"
+    },
+    {
+      "text": "RBV excludes costs and the equity bridge required to assess equity value.",
+      "evidence_ids": [
+        "method.rbv"
+      ],
+      "kind": "limitation",
+      "title": "Value model limits"
+    },
+    {
+      "text": "Check reporting periods, ownership scope, and costs beyond gross profit.",
+      "evidence_ids": [
+        "method.rbv",
+        "method.ownership"
+      ],
+      "kind": "next_step",
+      "title": "Reconcile the evidence"
+    }
+  ],
+  "follow_up_questions": [
+    "How does license exposure change the interpretation?",
+    "Which inputs should I verify next?"
+  ],
+  "request_id": "browser-test-fixture",
+  "provider": "gemini_vertex",
+  "model": "gemini-3.8-flash",
+  "generated_at": "2026-10-06T01:00:00.000Z",
+  "cached": false,
+  "evidence": [
+    {
+      "id": "BUMI.rli_years",
+      "label": "BUMI · Reserve life",
+      "raw_value": 14.8343,
+      "value": "14.83 years",
+      "href": "/issuer/BUMI",
+      "source": "GET /api/v1/issuers · rli_years",
+      "quality": "complete",
+      "as_of": "2026-09-30",
+      "run_id": "simulation-2026.09-v1"
+    },
+    {
+      "id": "BUMI.cash_cost_per_ton_usd",
+      "label": "BUMI · Cash cost",
+      "raw_value": 52,
+      "value": "52.00 USD/ton",
+      "href": "/issuer/BUMI",
+      "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+      "quality": "complete",
+      "as_of": "2026-09-30",
+      "run_id": "simulation-2026.09-v1"
+    },
+    {
+      "id": "BYAN.cash_cost_per_ton_usd",
+      "label": "BYAN · Cash cost",
+      "raw_value": 33,
+      "value": "33.00 USD/ton",
+      "href": "/issuer/BYAN",
+      "source": "GET /api/v1/issuers · cash_cost_per_ton_usd",
+      "quality": "complete",
+      "as_of": "2026-09-30",
+      "run_id": "simulation-2026.09-v1"
+    },
+    {
+      "id": "method.rbv",
+      "label": "RBV model boundaries",
+      "raw_value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+      "value": "RBV is a capped finite annuity of gross profit. It excludes overhead, tax, capex, working capital, and the debt/cash bridge. It is not free cash flow, fair equity value, or a share-price target.",
+      "href": "/methodology",
+      "source": "GALI model methodology",
+      "quality": "methodology",
+      "as_of": "2026-09-30",
+      "run_id": "simulation-2026.09-v1"
+    },
+    {
+      "id": "method.license",
+      "label": "License expiry exposure",
+      "raw_value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+      "value": "License expiry exposure is linked licensed-area share, not a probability of failed renewal and not a site-level production weight. Missing dates and unlinked licenses do not establish absence of risk.",
+      "href": "/methodology",
+      "source": "GALI model methodology",
+      "quality": "methodology",
+      "as_of": "2026-09-30",
+      "run_id": "simulation-2026.09-v1"
+    },
+    {
+      "id": "method.ownership",
+      "label": "Ownership and aggregation",
+      "raw_value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+      "value": "Aggregating issuer models may double-count shared operating entities. An issuer-model sum is not an industry total or an investable portfolio.",
+      "href": "/methodology",
+      "source": "GALI model methodology",
+      "quality": "methodology",
+      "as_of": "2026-09-30",
+      "run_id": "simulation-2026.09-v1"
+    }
+  ],
+  "snapshot": {
+    "as_of": "2026-09-30",
+    "run_id": "simulation-2026.09-v1",
+    "source_type": "synthetic",
+    "scope": [
+      "BUMI",
+      "BYAN"
+    ]
+  },
+  "usage": {
+    "input_tokens": 400,
+    "output_tokens": 200
+  }
+}

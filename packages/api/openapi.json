@@ -305,12 +305,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "enum": [
+                "ground_truth_score",
+                "rli_years",
+                "reserve_backed_value_usd",
+                "cash_cost_per_ton_usd",
+                "license_cliff_3y",
+                "rbv_gap_pct"
+              ],
               "type": "string",
-              "description": "Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'",
+              "description": "Metric to rank by: one of ('ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'). An unlisted value is rejected with 422 rather than silently returning an empty list.",
               "default": "ground_truth_score",
               "title": "Metric"
             },
-            "description": "Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'"
+            "description": "Metric to rank by: one of ('ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'). An unlisted value is rejected with 422 rather than silently returning an empty list."
           }
         ],
         "responses": {
@@ -345,6 +353,19 @@
         "summary": "Get National Cost Curve",
         "description": "Retrieve national cumulative cost curve curve points, unit margins, and benchmark breakevens.",
         "operationId": "get_national_cost_curve_v1_cost_curve_get",
+        "parameters": [
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^Coal$",
+              "default": "Coal",
+              "title": "Commodity"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -352,6 +373,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CostCurveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -531,7 +562,14 @@
             "title": "Run Id"
           },
           "benchmark_price_usd": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Benchmark Price Usd"
           },
           "points": {
@@ -600,7 +638,7 @@
           "gate_decision": {
             "type": "string",
             "title": "Gate Decision",
-            "default": "GO MENYEMPIT (Coal Titans \u2014 9 Emiten: 7 lengkap + 2 parsial)"
+            "default": "GO NARROWED (Coal Titans \u2014 9 Issuers: 7 complete + 2 partial)"
           },
           "updated_at": {
             "type": "string",
@@ -1446,7 +1484,14 @@
             "title": "Volume At Risk Pct"
           },
           "revenue_at_risk_usd": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Revenue At Risk Usd"
           },
           "post_shock_gp_usd": {
@@ -1463,6 +1508,76 @@
           "is_partial": {
             "type": "boolean",
             "title": "Is Partial"
+          },
+          "model_basis": {
+            "type": "string",
+            "title": "Model Basis",
+            "default": "gross_profit_proxy"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "post_shock_revenue_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Shock Revenue Usd"
+          },
+          "post_shock_cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Shock Cost Usd"
+          },
+          "gross_loss_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gross Loss Usd"
+          },
+          "break_even_price_change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Break Even Price Change Pct"
+          },
+          "drivers": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioDriverSchema"
+            },
+            "type": "array",
+            "title": "Drivers"
+          },
+          "sensitivity": {
+            "items": {
+              "$ref": "#/components/schemas/SensitivityPointSchema"
+            },
+            "type": "array",
+            "title": "Sensitivity"
           }
         },
         "type": "object",
@@ -1523,8 +1638,8 @@
           "confidence_pct": {
             "type": "number",
             "title": "Confidence Pct",
-            "description": "Effective weight utilized (0-100%)",
-            "default": 100.0
+            "description": "Available score weight coverage (0-100%), not statistical confidence",
+            "default": 0.0
           },
           "rli_years": {
             "anyOf": [
@@ -1582,7 +1697,7 @@
               }
             ],
             "title": "Rbv Gap Pct",
-            "description": "M2 valuation premia / discount %"
+            "description": "M2 equity market cap vs gross-profit annuity proxy gap %, not fair value"
           },
           "license_cliff_3y": {
             "anyOf": [
@@ -1745,6 +1860,13 @@
             ],
             "title": "Issuer Symbol"
           },
+          "issuer_symbols": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Issuer Symbols"
+          },
           "province": {
             "anyOf": [
               {
@@ -1805,7 +1927,14 @@
       "RankingItem": {
         "properties": {
           "rank": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Rank"
           },
           "symbol": {
@@ -1845,6 +1974,11 @@
               }
             ],
             "title": "Confidence Pct"
+          },
+          "ranking_status": {
+            "type": "string",
+            "title": "Ranking Status",
+            "default": "complete"
           }
         },
         "type": "object",
@@ -1919,6 +2053,29 @@
         ],
         "title": "ReadyResponse"
       },
+      "ScenarioDriverSchema": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "delta_rbv_usd": {
+            "type": "number",
+            "title": "Delta Rbv Usd"
+          },
+          "rbv_after_usd": {
+            "type": "number",
+            "title": "Rbv After Usd"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "delta_rbv_usd",
+          "rbv_after_usd"
+        ],
+        "title": "ScenarioDriverSchema"
+      },
       "ScenarioResponse": {
         "properties": {
           "params": {
@@ -1948,6 +2105,8 @@
         "properties": {
           "price_shock_pct": {
             "type": "number",
+            "maximum": 2.0,
+            "minimum": -1.0,
             "title": "Price Shock Pct",
             "description": "Percentage shock to commodity benchmark price (-1.0 to 2.0)",
             "default": 0.0,
@@ -1993,6 +2152,34 @@
         },
         "type": "object",
         "title": "ScenarioShockRequest"
+      },
+      "SensitivityPointSchema": {
+        "properties": {
+          "price_shock_pct": {
+            "type": "number",
+            "title": "Price Shock Pct"
+          },
+          "discount_rate": {
+            "type": "number",
+            "title": "Discount Rate"
+          },
+          "rbv_usd": {
+            "type": "number",
+            "title": "Rbv Usd"
+          },
+          "delta_rbv_pct": {
+            "type": "number",
+            "title": "Delta Rbv Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "price_shock_pct",
+          "discount_rate",
+          "rbv_usd",
+          "delta_rbv_pct"
+        ],
+        "title": "SensitivityPointSchema"
       },
       "ValidationError": {
         "properties": {

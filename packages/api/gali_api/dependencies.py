@@ -52,8 +52,7 @@ async def init_redis_pool() -> aioredis.Redis | None:
     if client:
         try:
             await client.ping()
-            settings = get_settings()
-            logger.info("Connected to Redis cache at %s", settings.redis_url)
+            logger.info("Redis cache connection verified")
             return client
         except Exception as exc:
             logger.warning("Redis ping failed at startup: %s. Proceeding without cache.", exc)
@@ -85,18 +84,16 @@ async def get_published_run_id(
     db: AsyncSession = Depends(get_db),
     redis: aioredis.Redis | None = Depends(get_redis),
 ) -> str:
-    """Fetch the active Blue/Green published run_id, checking Redis cache first."""
-    cache_key = "gali:v1:published_run_id"
-    if redis:
-        try:
-            cached = await redis.get(cache_key)
-            if cached:
-                return str(cached)
-        except Exception as exc:
-            logger.warning("Redis error reading published_run_id: %s", exc)
-
+    """Read the publication pointer from the DB; endpoint caches remain run-scoped."""
     stmt = select(PublishedPointer.run_id).where(PublishedPointer.singleton.is_(True))
-    result = await db.execute(stmt)
+    try:
+        result = await db.execute(stmt)
+    except Exception as exc:
+        logger.warning("Published dataset is unavailable (%s)", type(exc).__name__)
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "DATA_UNAVAILABLE", "message": "The published dataset is temporarily unavailable."},
+        ) from exc
     run_id = result.scalar_one_or_none()
     if not run_id:
         raise HTTPException(
@@ -107,9 +104,4 @@ async def get_published_run_id(
             },
         )
     run_id_str = str(run_id)
-    if redis:
-        try:
-            await redis.setex(cache_key, 300, run_id_str)
-        except Exception as exc:
-            logger.warning("Redis error setting published_run_id: %s", exc)
     return run_id_str

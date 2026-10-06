@@ -1,7 +1,11 @@
+import { MethodologyExplorer } from "@/components/MethodologyExplorer";
 import fs from "node:fs";
 import path from "node:path";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { ShieldAlert } from "lucide-react";
 
 export const metadata = {
@@ -27,20 +31,21 @@ export default function MethodologyPage() {
   const content = readMetricsDoc();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-        <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
-        <p className="text-sm leading-relaxed text-amber-100">
+    <div className="gali-page max-w-6xl">
+      <MethodologyExplorer />
+      <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-line bg-brand-soft p-4">
+        <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+        <p className="text-sm leading-relaxed text-brand">
           <strong>GALI is an information and analysis tool, not investment advice.</strong> All
-          metrics below are mathematical derivations of public data, presented for research and
+          metrics below are mathematical derivations of the active dataset, presented for research and
           transparency — not buy/sell recommendations. GALI has no trade execution mechanism of any
           kind. Do your own independent research and consult a licensed financial advisor before
           making any financial decision.
         </p>
       </div>
 
-      <article className="prose prose-invert prose-sm sm:prose-base max-w-none prose-headings:text-white prose-a:text-amber-400 prose-code:text-cyan-300 prose-strong:text-slate-200 prose-table:text-xs">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <article className="prose prose-sm sm:prose-base max-w-none prose-headings:text-ink prose-a:text-brand prose-code:text-info prose-strong:text-ink-soft prose-table:text-sm">
+        <ReactMarkdown components={{ h1: ({ children }) => <h2>{children}</h2>, h3: ({ children }) => <h3 id={String(children).startsWith("M2") ? "rbv" : String(children).startsWith("M8") ? "score" : undefined}>{children}</h3> }} remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{content}</ReactMarkdown>
       </article>
     </div>
   );

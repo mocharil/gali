@@ -1,0 +1,56 @@
+{
+  "version": "0.5.0",
+  "suite": "Final Gemini browser suite",
+  "passed": 9,
+  "failed": 0,
+  "tests": [
+    {
+      "index": 1,
+      "test": "e2e/gemini.spec.ts:15:5 \u203a AI endpoints: missing credentials, origin check, bounded input, and no fabricated success (75ms)",
+      "passed": true
+    },
+    {
+      "index": 2,
+      "test": "e2e/gemini.spec.ts:28:5 \u203a Without credentials: data analysis works and Gemini setup is explicit (3.6s)",
+      "passed": true
+    },
+    {
+      "index": 3,
+      "test": "e2e/gemini.spec.ts:42:5 \u203a Configured Gemini: connection test, source-linked answers, follow-ups and Markdown export (4.3s)",
+      "passed": true
+    },
+    {
+      "index": 4,
+      "test": "e2e/gemini.spec.ts:69:5 \u203a Gemini errors remain errors and a manual retry can succeed (963ms)",
+      "passed": true
+    },
+    {
+      "index": 5,
+      "test": "e2e/gemini.spec.ts:81:5 \u203a Stop and close cancel pending answers without late UI updates (3.2s)",
+      "passed": true
+    },
+    {
+      "index": 6,
+      "test": "e2e/gemini.spec.ts:97:5 \u203a Dashboard AI brief is requested explicitly and includes a balanced evidence view (2.2s)",
+      "passed": true
+    },
+    {
+      "index": 7,
+      "test": "e2e/gemini.spec.ts:108:5 \u203a Scenario AI uses the selected issuer and active parameters; switching clears prior answers (2.2s)",
+      "passed": true
+    },
+    {
+      "index": 8,
+      "test": "e2e/gemini.spec.ts:123:7 \u203a Gemini answer and evidence are responsive at 1440px (3.3s)",
+      "passed": true
+    },
+    {
+      "index": 9,
+      "test": "e2e/gemini.spec.ts:123:7 \u203a Gemini answer and evidence are responsive at 390px (1.6s)",
+      "passed": true
+    }
+  ],
+  "live_provider_test": false,
+  "browser_provider": "explicit test fixtures",
+  "production_endpoints_tested": "missing configuration, origin and input rejection"
+}

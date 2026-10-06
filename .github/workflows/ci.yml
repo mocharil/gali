@@ -89,18 +89,74 @@ jobs:
         run: |
           alembic -c packages/core/alembic.ini upgrade head
 
-      - name: Run core unit tests + security tests
+      - name: Run all core and API tests
         env:
           DATABASE_URL: postgresql+asyncpg://gali:gali@localhost:5432/gali
           DATABASE_URL_SYNC: postgresql+psycopg://gali:gali@localhost:5432/gali
           REDIS_URL: redis://localhost:6379/0
           ENVIRONMENT: test
           GALI_DRY_RUN: "1"
+          GALI_QA_FIXTURES: "1"
         run: |
-          # test_api.py tests (test_list_issuers, test_post_scenario etc.) require a DB
-          # pre-populated with published metrics (run `gali metrics run` first) — they
-          # pass locally against real Neon DB but cannot run in CI ephemeral DB.
-          # test_security.py tests CORS and rate limiting using mock Redis + mini FastAPI
-          # apps — no DB required.
-          pytest packages/core/tests packages/api/tests/test_security.py packages/api/tests/test_derive.py -v --cov=gali_core
+          pytest packages/core/tests packages/api/tests packages/pipeline/tests -v --cov=gali_core
 
+  frontend:
+    name: Frontend build and E2E
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: gali
+          POSTGRES_PASSWORD: gali
+          POSTGRES_DB: gali
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      DATABASE_URL: postgresql+asyncpg://gali:gali@localhost:5432/gali
+      DATABASE_URL_SYNC: postgresql+psycopg://gali:gali@localhost:5432/gali
+      REDIS_URL: redis://localhost:6379/0
+      ENVIRONMENT: test
+      GALI_QA_FIXTURES: "1"
+      GALI_DRY_RUN: "1"
+      # One local proxy IP serves all browser cases; quota behavior has separate security tests.
+      RATE_LIMIT_ANON_PER_MIN: "10000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: packages/web/package-lock.json
+      - name: Prepare test database
+        run: |
+          pip install -e "packages/core[dev]" -e "packages/api[dev]"
+          alembic -c packages/core/alembic.ini upgrade head
+          python scripts/seed_test_database.py
+      - name: Build frontend and verify API schema
+        working-directory: packages/web
+        run: |
+          npm ci
+          npm run gen:api
+          git diff --exit-code -- lib/schema.ts
+          npm run typecheck
+          npm run lint
+          npm run build
+      - name: Browser regression tests
+        working-directory: packages/web
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Retain failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: packages/web/test-results

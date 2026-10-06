@@ -86,8 +86,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Rate Limiting Middleware — Redis sliding-window counter per client IP (anon) or API key (keyed).
-# Limits come from settings.rate_limit_anon_per_min / rate_limit_keyed_per_min.
+# Rate Limiting Middleware — Redis sliding-window counter per client IP.
+# Public quota comes from settings.rate_limit_anon_per_min.
 # Fail-open: if Redis is down, rate limiting is bypassed rather than blocking all traffic.
 app.add_middleware(RateLimitMiddleware)
 

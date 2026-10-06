@@ -1,8 +1,8 @@
 """Redis-backed continuous sliding-window rate limiter middleware for GALI API.
 
 Design:
-- Anonymous requests (no X-API-Key header): limited to rate_limit_anon_per_min RPM.
-- Keyed requests (X-API-Key header present): limited to rate_limit_keyed_per_min RPM.
+- Public requests use rate_limit_anon_per_min per IP; arbitrary API key headers cannot bypass the quota.
+- Proxy headers are trusted only behind an explicitly configured stripping proxy.
 - Uses an atomic Redis Sorted Set (ZSET) continuous sliding window (ZREMRANGEBYSCORE + ZCARD + ZADD).
 - Prevents minute-boundary resets and fixed-window burst bypass.
 - If Redis is unavailable, rate limiting is bypassed gracefully (fail-open).
@@ -55,7 +55,7 @@ end
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Continuous sliding-window rate limiter backed by Redis Sorted Sets.
 
-    Key schema: ``gali:rl:<anon|keyed>:<identifier>``
+    Key schema: ``gali:rl:anon:<identifier>``
 
     Uses an atomic Lua script to prune timestamps older than 60 seconds, count
     active requests in the rolling 60-second window, and calculate exact Retry-After.
@@ -81,23 +81,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         settings = get_settings()
-        api_key = request.headers.get("X-API-Key", "").strip()
-
-        if api_key:
-            tier = "keyed"
-            identifier = api_key[:32]  # truncate to avoid huge keys
-            limit = settings.rate_limit_keyed_per_min
-        else:
-            tier = "anon"
-            real_ip = request.headers.get("x-real-ip", "").strip()
+        # This is a public read API with no key-authentication dependency.
+        # An arbitrary header must never buy a higher quota or a fresh bucket.
+        tier = "anon"
+        identifier = request.client.host if request.client else "unknown"
+        if settings.trust_proxy_headers:
             forwarded = request.headers.get("x-forwarded-for", "").strip()
-            client_ip = (
-                real_ip
-                or (forwarded.split(",")[0].strip() if forwarded else "")
-                or (request.client.host if request.client else "unknown")
+            identifier = request.headers.get("x-real-ip", "").strip() or (
+                forwarded.split(",")[0].strip() if forwarded else identifier
             )
-            identifier = client_ip
-            limit = settings.rate_limit_anon_per_min
+        limit = settings.rate_limit_anon_per_min
 
         redis_key = f"gali:rl:{tier}:{identifier}"
         now = time.time()
@@ -126,7 +119,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 allowed = count <= limit
                 retry_after = 60 - (int(now) % 60)
 
-            logger.info("RATE_LIMIT_CHECK: key=%s count=%d limit=%d allowed=%s", redis_key, count, limit, allowed)
+            logger.debug("Rate-limit count=%d limit=%d allowed=%s", count, limit, allowed)
 
             if not allowed:
                 retry_after = max(1, retry_after)

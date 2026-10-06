@@ -1,0 +1,1547 @@
+[
+  {
+    "feature": "landing",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 748,
+        "height": 400
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "site-operation",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "scenario-drivers",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "dashboard",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 641,
+        "height": 320
+      },
+      {
+        "name": "reserve-value",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 307,
+        "height": 134
+      },
+      {
+        "name": "export-containers",
+        "loaded": true,
+        "width": 307,
+        "height": 134
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 307,
+        "height": 134
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full caption-bottom text-sm text-left",
+        "text": "Score #IssuerScoreReserve lifeReserve valueMarket capGap RBVCost / tonLicenses ≤"
+      },
+      {
+        "tag": "THEAD",
+        "className": "border-b border-line bg-surface-muted text-[12px] font-semibold text-muted",
+        "text": "Score #IssuerScoreReserve lifeReserve valueMarket capGap RBVCost / tonLicenses ≤"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover border-b border-line bg-surface",
+        "text": "Score #IssuerScoreReserve lifeReserve valueMarket capGap RBVCost / tonLicenses ≤"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 w-20 text-center",
+        "text": "Action"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line font-medium",
+        "text": "1AAAADIComplete core metricsAADI · Coal portfolio68.1100% weight · complete23.7 "
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "1AAAADIComplete core metricsAADI · Coal portfolio68.1100% weight · complete23.7 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "2BYBYANComplete core metricsBYAN · Coal portfolio63.2100% weight · complete25.7 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "3ITITMGComplete core metricsITMG · Coal portfolio56.9100% weight · complete14.8 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "4ADADROComplete core metricsADRO · Coal portfolio53.9100% weight · complete21.8 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "5GEGEMSComplete core metricsGEMS · Coal portfolio31.6100% weight · complete11.9 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "issuer",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 1082,
+        "height": 400
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 84,
+        "height": 84
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 84,
+        "height": 84
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 84,
+        "height": 84
+      },
+      {
+        "name": "reserve-value",
+        "loaded": true,
+        "width": 84,
+        "height": 84
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "compare",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 510,
+        "height": 200
+      },
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 510,
+        "height": 200
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "map",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "site-operation",
+        "loaded": true,
+        "width": 294,
+        "height": 126
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "scenario",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "scenario-drivers",
+        "loaded": true,
+        "width": 576,
+        "height": 240
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "cost-curve",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 555,
+        "height": 240
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "valuation",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "valuation-lenses",
+        "loaded": true,
+        "width": 483,
+        "height": 240
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "coverage",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "data-modules",
+        "loaded": true,
+        "width": 483,
+        "height": 240
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "methodology",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 538,
+        "height": 240
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "mfrac",
+        "className": "",
+        "text": "reserves(s)production(s)"
+      },
+      {
+        "tag": "mrow",
+        "className": "",
+        "text": "reserves(s)"
+      },
+      {
+        "tag": "mtext",
+        "className": "",
+        "text": "reserves"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": "("
+      },
+      {
+        "tag": "mi",
+        "className": "",
+        "text": "s"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": ")"
+      },
+      {
+        "tag": "mrow",
+        "className": "",
+        "text": "production(s)"
+      },
+      {
+        "tag": "mtext",
+        "className": "",
+        "text": "production"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": "("
+      },
+      {
+        "tag": "mi",
+        "className": "",
+        "text": "s"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": ")"
+      },
+      {
+        "tag": "math",
+        "className": "",
+        "text": "RBV(s)=attributable_GP(s)×1−(1+r)−min⁡(RLI(s),30)r\\text{RBV}(s) = \\text{attribut"
+      },
+      {
+        "tag": "semantics",
+        "className": "",
+        "text": "RBV(s)=attributable_GP(s)×1−(1+r)−min⁡(RLI(s),30)r\\text{RBV}(s) = \\text{attribut"
+      },
+      {
+        "tag": "mrow",
+        "className": "",
+        "text": "RBV(s)=attributable_GP(s)×1−(1+r)−min⁡(RLI(s),30)r"
+      },
+      {
+        "tag": "mtext",
+        "className": "",
+        "text": "attributable_GP"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "assistant",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 641,
+        "height": 320
+      },
+      {
+        "name": "reserve-value",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 92,
+        "height": 92
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 307,
+        "height": 134
+      },
+      {
+        "name": "export-containers",
+        "loaded": true,
+        "width": 307,
+        "height": 134
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 307,
+        "height": 134
+      },
+      {
+        "name": "evidence-desk",
+        "loaded": true,
+        "width": 200,
+        "height": 133
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full caption-bottom text-sm text-left",
+        "text": "Score #IssuerScoreReserve lifeReserve valueMarket capGap RBVCost / tonLicenses ≤"
+      },
+      {
+        "tag": "THEAD",
+        "className": "border-b border-line bg-surface-muted text-[12px] font-semibold text-muted",
+        "text": "Score #IssuerScoreReserve lifeReserve valueMarket capGap RBVCost / tonLicenses ≤"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover border-b border-line bg-surface",
+        "text": "Score #IssuerScoreReserve lifeReserve valueMarket capGap RBVCost / tonLicenses ≤"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 w-20 text-center",
+        "text": "Action"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line font-medium",
+        "text": "1AAAADIComplete core metricsAADI · Coal portfolio68.1100% weight · complete23.7 "
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "1AAAADIComplete core metricsAADI · Coal portfolio68.1100% weight · complete23.7 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "2BYBYANComplete core metricsBYAN · Coal portfolio63.2100% weight · complete25.7 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "3ITITMGComplete core metricsITMG · Coal portfolio56.9100% weight · complete14.8 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "4ADADROComplete core metricsADRO · Coal portfolio53.9100% weight · complete21.8 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "data-[state=selected]:bg-surface-hover group border-b border-line hover:bg-surface-hover transition-colors",
+        "text": "5GEGEMSComplete core metricsGEMS · Coal portfolio31.6100% weight · complete11.9 "
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": ""
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "landing",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 340,
+        "height": 227
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "site-operation",
+        "loaded": true,
+        "width": 316,
+        "height": 134
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 316,
+        "height": 134
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 316,
+        "height": 134
+      },
+      {
+        "name": "scenario-drivers",
+        "loaded": true,
+        "width": 316,
+        "height": 134
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "dashboard",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 340,
+        "height": 227
+      },
+      {
+        "name": "reserve-value",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "export-containers",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full text-left text-sm",
+        "text": "IssuerScore / coveragePrice −20%Δ RBVChina −30%Δ RBVLicenses ≤3 yearsΔ RBVBUMI29"
+      },
+      {
+        "tag": "THEAD",
+        "className": "bg-surface-muted text-[12px] text-muted",
+        "text": "IssuerScore / coveragePrice −20%Δ RBVChina −30%Δ RBVLicenses ≤3 yearsΔ RBV"
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "text": "IssuerScore / coveragePrice −20%Δ RBVChina −30%Δ RBVLicenses ≤3 yearsΔ RBV"
+      },
+      {
+        "tag": "TH",
+        "className": "whitespace-nowrap p-3",
+        "text": "China −30%Δ RBV"
+      },
+      {
+        "tag": "SPAN",
+        "className": "block text-[12px] font-normal",
+        "text": "Δ RBV"
+      },
+      {
+        "tag": "TH",
+        "className": "whitespace-nowrap p-3",
+        "text": "Licenses ≤3 yearsΔ RBV"
+      },
+      {
+        "tag": "SPAN",
+        "className": "block text-[12px] font-normal",
+        "text": "Δ RBV"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line",
+        "text": "BUMI29.2100% weight-100.0%-25.4%-11.9%ADMR34.685% weight-50.8%-24.0%-1.0%ITMG56."
+      },
+      {
+        "tag": "TR",
+        "className": "hover:bg-surface-hover",
+        "text": "BUMI29.2100% weight-100.0%-25.4%-11.9%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-25.4%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-11.9%"
+      },
+      {
+        "tag": "SPAN",
+        "className": "inline-block min-w-16 rounded-md px-2 py-1 text-right font-numeric bg-brand-soft text-brand",
+        "text": "-11.9%"
+      },
+      {
+        "tag": "TR",
+        "className": "hover:bg-surface-hover",
+        "text": "ADMR34.685% weight-50.8%-24.0%-1.0%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-24.0%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-1.0%"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "issuer",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 340,
+        "height": 227
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "reserve-value",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "BUTTON",
+        "className": "rounded-lg px-2.5 py-1 text-sm font-numeric font-bold transition-all bg-surface text-muted border border-line hover:border-line-strong hover:text-ink",
+        "text": "GEMS"
+      },
+      {
+        "tag": "BUTTON",
+        "className": "rounded-lg px-2.5 py-1 text-sm font-numeric font-bold transition-all bg-surface text-muted border border-line hover:border-line-strong hover:text-ink",
+        "text": "ITMG"
+      },
+      {
+        "tag": "BUTTON",
+        "className": "rounded-lg px-2.5 py-1 text-sm font-numeric font-bold transition-all bg-surface text-muted border border-line hover:border-line-strong hover:text-ink",
+        "text": "PTBA"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "compare",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 316,
+        "height": 155
+      },
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 316,
+        "height": 155
+      }
+    ],
+    "overflowing": [],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "map",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "site-operation",
+        "loaded": true,
+        "width": 332,
+        "height": 126
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      },
+      {
+        "tag": "SPAN",
+        "className": "",
+        "text": ""
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "scenario",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "scenario-drivers",
+        "loaded": true,
+        "width": 290,
+        "height": 170
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full caption-bottom text-sm text-left",
+        "text": "IssuerBaseline RBVScenario RBVDelta %Scenario gross profitRBV size rankModel bas"
+      },
+      {
+        "tag": "THEAD",
+        "className": "border-b border-line bg-surface-muted text-[12px] font-semibold text-muted",
+        "text": "IssuerBaseline RBVScenario RBVDelta %Scenario gross profitRBV size rankModel bas"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "IssuerBaseline RBVScenario RBVDelta %Scenario gross profitRBV size rankModel bas"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 text-left align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0",
+        "text": "Scenario gross profit"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 text-left align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0",
+        "text": "RBV size rank"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 text-left align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0",
+        "text": "Model basis"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line font-medium",
+        "text": "BYAN$18.54B$10.24B-44.78%$1.30B#1 → #1Revenue & costsAADI$15.75B$7.43B-52.84%$95"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover font-numeric",
+        "text": "BYAN$18.54B$10.24B-44.78%$1.30B#1 → #1Revenue & costs"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-ink-soft",
+        "text": "$1.30B"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0",
+        "text": "#1 → #1"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-sans text-sm text-muted",
+        "text": "Revenue & costs"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover font-numeric",
+        "text": "AADI$15.75B$7.43B-52.84%$956.04M#2 → #2Revenue & costs"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-ink-soft",
+        "text": "$956.04M"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0",
+        "text": "#2 → #2"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-sans text-sm text-muted",
+        "text": "Revenue & costs"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "cost-curve",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 316,
+        "height": 170
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full caption-bottom text-sm text-left",
+        "text": "IssuerCash cost / tonVolume / yearRealized price / tonMargin / tonBYAN$33.0045.3"
+      },
+      {
+        "tag": "THEAD",
+        "className": "border-b border-line bg-surface-muted text-[12px] font-semibold text-muted",
+        "text": "IssuerCash cost / tonVolume / yearRealized price / tonMargin / ton"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "IssuerCash cost / tonVolume / yearRealized price / tonMargin / ton"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 text-left align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0",
+        "text": "Margin / ton"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line font-medium",
+        "text": "BYAN$33.0045.3 Mt$85.00$52.00GEMS$38.0038.0 Mt$67.00$29.00AADI$43.0057.9 Mt$78.0"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "BYAN$33.0045.3 Mt$85.00$52.00"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-numeric",
+        "text": "$52.00"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "GEMS$38.0038.0 Mt$67.00$29.00"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-numeric",
+        "text": "$29.00"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "AADI$43.0057.9 Mt$78.00$35.00"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-numeric",
+        "text": "$35.00"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "DSSA$45.0033.5 Mt$76.00$31.00"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-numeric",
+        "text": "$31.00"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "ADRO$47.0023.5 Mt$82.00$35.00"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-numeric",
+        "text": "$35.00"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "valuation",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "valuation-lenses",
+        "loaded": true,
+        "width": 316,
+        "height": 170
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full caption-bottom text-sm text-left",
+        "text": "#IssuerFundamental scoreMarket capitalization (IDR)RBV vs Mkt Gap (%)Foreign fun"
+      },
+      {
+        "tag": "THEAD",
+        "className": "border-b border-line bg-surface-muted text-[12px] font-semibold text-muted",
+        "text": "#IssuerFundamental scoreMarket capitalization (IDR)RBV vs Mkt Gap (%)Foreign fun"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover",
+        "text": "#IssuerFundamental scoreMarket capitalization (IDR)RBV vs Mkt Gap (%)Foreign fun"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 text-right",
+        "text": "Market capitalization (IDR)"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 text-right",
+        "text": "RBV vs Mkt Gap (%)"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 text-right",
+        "text": "Foreign fund flows (30 days)"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 text-center",
+        "text": "Relative quadrant"
+      },
+      {
+        "tag": "TH",
+        "className": "h-12 px-4 align-middle font-semibold text-muted [&:has([role=checkbox])]:pr-0 text-right",
+        "text": "Action"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line font-medium",
+        "text": "1PTBAPTBA · Coal portfolio71.1Rp 37.3T—Rp 215.0BInsufficient dataAnalyze2AADIAAD"
+      },
+      {
+        "tag": "TR",
+        "className": "transition-colors hover:bg-surface-hover data-[state=selected]:bg-surface-hover font-numeric",
+        "text": "1PTBAPTBA · Coal portfolio71.1Rp 37.3T—Rp 215.0BInsufficient dataAnalyze"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right text-ink-soft",
+        "text": "Rp 37.3T"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right font-bold text-negative",
+        "text": "—"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right text-positive",
+        "text": "Rp 215.0B"
+      },
+      {
+        "tag": "TD",
+        "className": "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center",
+        "text": "Insufficient data"
+      },
+      {
+        "tag": "DIV",
+        "className": "gali-status border transition-colors border-info-line bg-info-soft text-info font-numeric",
+        "text": "Insufficient data"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "coverage",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "data-modules",
+        "loaded": true,
+        "width": 316,
+        "height": 170
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full text-left text-sm",
+        "text": "TickerCompany nameMetric completenessActionAADIAADI · Coal portfolioComplete cor"
+      },
+      {
+        "tag": "THEAD",
+        "className": "border-b border-line bg-surface text-[12px] uppercase tracking-wider text-muted",
+        "text": "TickerCompany nameMetric completenessAction"
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "text": "TickerCompany nameMetric completenessAction"
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3",
+        "text": "Action"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line",
+        "text": "AADIAADI · Coal portfolioComplete core metricsView profile ADMRADMR · Coal portf"
+      },
+      {
+        "tag": "TR",
+        "className": "hover:bg-surface-hover transition-colors",
+        "text": "AADIAADI · Coal portfolioComplete core metricsView profile "
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-3",
+        "text": "View profile "
+      },
+      {
+        "tag": "A",
+        "className": "inline-flex items-center gap-1 text-sm text-muted hover:text-brand transition-colors font-semibold",
+        "text": "View profile "
+      },
+      {
+        "tag": "svg",
+        "className": {},
+        "text": ""
+      },
+      {
+        "tag": "path",
+        "className": {},
+        "text": ""
+      },
+      {
+        "tag": "path",
+        "className": {},
+        "text": ""
+      },
+      {
+        "tag": "TR",
+        "className": "hover:bg-surface-hover transition-colors",
+        "text": "ADMRADMR · Coal portfolioComplete core metricsView profile "
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-3",
+        "text": "View profile "
+      },
+      {
+        "tag": "A",
+        "className": "inline-flex items-center gap-1 text-sm text-muted hover:text-brand transition-colors font-semibold",
+        "text": "View profile "
+      },
+      {
+        "tag": "svg",
+        "className": {},
+        "text": ""
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "methodology",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 316,
+        "height": 170
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "mtext",
+        "className": "",
+        "text": "total_reserves_Mt"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": "("
+      },
+      {
+        "tag": "mi",
+        "className": "",
+        "text": "c"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": ")"
+      },
+      {
+        "tag": "mtext",
+        "className": "",
+        "text": "eff_own"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": "("
+      },
+      {
+        "tag": "mi",
+        "className": "",
+        "text": "s"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": ","
+      },
+      {
+        "tag": "mi",
+        "className": "",
+        "text": "c"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": ")"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": "×"
+      },
+      {
+        "tag": "mtext",
+        "className": "",
+        "text": "production_volume"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": "("
+      },
+      {
+        "tag": "mi",
+        "className": "",
+        "text": "c"
+      },
+      {
+        "tag": "mo",
+        "className": "",
+        "text": ")"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  {
+    "feature": "assistant",
+    "viewport": 390,
+    "documentWidth": 390,
+    "images": [
+      {
+        "name": "mine-cutaway",
+        "loaded": true,
+        "width": 340,
+        "height": 227
+      },
+      {
+        "name": "reserve-value",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "reserve-clock",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 66,
+        "height": 66
+      },
+      {
+        "name": "coal-tonne",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "export-containers",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "license-window",
+        "loaded": true,
+        "width": 290,
+        "height": 134
+      },
+      {
+        "name": "evidence-desk",
+        "loaded": true,
+        "width": 290,
+        "height": 170
+      }
+    ],
+    "overflowing": [
+      {
+        "tag": "TABLE",
+        "className": "w-full text-left text-sm",
+        "text": "IssuerScore / coveragePrice −20%Δ RBVChina −30%Δ RBVLicenses ≤3 yearsΔ RBVBUMI29"
+      },
+      {
+        "tag": "THEAD",
+        "className": "bg-surface-muted text-[12px] text-muted",
+        "text": "IssuerScore / coveragePrice −20%Δ RBVChina −30%Δ RBVLicenses ≤3 yearsΔ RBV"
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "text": "IssuerScore / coveragePrice −20%Δ RBVChina −30%Δ RBVLicenses ≤3 yearsΔ RBV"
+      },
+      {
+        "tag": "TH",
+        "className": "whitespace-nowrap p-3",
+        "text": "China −30%Δ RBV"
+      },
+      {
+        "tag": "SPAN",
+        "className": "block text-[12px] font-normal",
+        "text": "Δ RBV"
+      },
+      {
+        "tag": "TH",
+        "className": "whitespace-nowrap p-3",
+        "text": "Licenses ≤3 yearsΔ RBV"
+      },
+      {
+        "tag": "SPAN",
+        "className": "block text-[12px] font-normal",
+        "text": "Δ RBV"
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-line",
+        "text": "BUMI29.2100% weight-100.0%-25.4%-11.9%ADMR34.685% weight-50.8%-24.0%-1.0%ITMG56."
+      },
+      {
+        "tag": "TR",
+        "className": "hover:bg-surface-hover",
+        "text": "BUMI29.2100% weight-100.0%-25.4%-11.9%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-25.4%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-11.9%"
+      },
+      {
+        "tag": "SPAN",
+        "className": "inline-block min-w-16 rounded-md px-2 py-1 text-right font-numeric bg-brand-soft text-brand",
+        "text": "-11.9%"
+      },
+      {
+        "tag": "TR",
+        "className": "hover:bg-surface-hover",
+        "text": "ADMR34.685% weight-50.8%-24.0%-1.0%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-24.0%"
+      },
+      {
+        "tag": "TD",
+        "className": "p-3",
+        "text": "-1.0%"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  }
+]

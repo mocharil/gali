@@ -19,6 +19,7 @@ class MiningSiteProperties(BaseModel):
     company_slug: str | None = None
     company_name: str | None = None
     issuer_symbol: str | None = None
+    issuer_symbols: list[str] = Field(default_factory=list)
     province: str | None = None
     city: str | None = None
     project_name: str | None = None

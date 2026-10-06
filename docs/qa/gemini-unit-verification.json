@@ -1,0 +1,130 @@
+{
+  "version": "0.5.1",
+  "generated_at": "2026-10-06T02:08:46.017Z",
+  "provider_tests": "mocked transport; no user service account or live Gemini request",
+  "live_provider_test": false,
+  "passed": 24,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Service account file with spaces; project inference; credential allowlist",
+      "passed": true,
+      "duration_ms": 3
+    },
+    {
+      "name": "Inline server secret and explicit billing project",
+      "passed": true,
+      "duration_ms": 47
+    },
+    {
+      "name": "No credentials requires explicit ADC; disabled Gemini never loads credentials",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Malformed, absent, wrong-type, ambiguous and invalid-key configuration fail safely",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Valid question, ticker normalization, history and active scenario",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Reject browser evidence, system roles, excessive history, credentials, and invalid parameters",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "Evidence derives from active server data; incomplete score ranks excluded",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "Server evidence preserves zeros and does not impute absent metrics",
+      "passed": true,
+      "duration_ms": 4
+    },
+    {
+      "name": "Unknown issuer and mixed/changing publication snapshots fail before generation",
+      "passed": true,
+      "duration_ms": 4
+    },
+    {
+      "name": "Active scenario uses deterministic engine; gross losses survive the RBV floor",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Dashboard brief aggregates match its separate resilience tests",
+      "passed": true,
+      "duration_ms": 6
+    },
+    {
+      "name": "Narrative placeholder values and citations resolve from server facts",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Reject invented references, uncited placeholders, raw numeric assertions, links and incomplete briefs",
+      "passed": true,
+      "duration_ms": 3
+    },
+    {
+      "name": "Safety blocks and truncated provider output never become an answer",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "Provider auth, model, quota and timeout failures are sanitized",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "Minute/hour allowances and failure cleanup",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "Concurrent billable calls are bounded",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "Cancellation and timeouts end waiting even when an SDK/auth promise is pending",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Service assembles an injected transport answer and unchanged-evidence cache",
+      "passed": true,
+      "duration_ms": 2
+    },
+    {
+      "name": "Changed source evidence and credentials invalidate answer reuse",
+      "passed": true,
+      "duration_ms": 1
+    },
+    {
+      "name": "Failed and aborted generations are not cached or rendered",
+      "passed": true,
+      "duration_ms": 2
+    },
+    {
+      "name": "Export includes evidence, snapshot, provenance and model limits",
+      "passed": true,
+      "duration_ms": 0
+    },
+    {
+      "name": "HTTP origin, body size/content type, malformed JSON and safe errors",
+      "passed": true,
+      "duration_ms": 6
+    },
+    {
+      "name": "Scenario URL attaches the displayed, bounded Studio parameters",
+      "passed": true,
+      "duration_ms": 0
+    }
+  ]
+}

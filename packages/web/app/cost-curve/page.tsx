@@ -1,293 +1,69 @@
 "use client";
 
+import { CostUnitEconomics } from "@/components/CostUnitEconomics";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import {
-  TrendingDown,
-  Layers,
-  ArrowRight,
-  AlertCircle,
-} from "lucide-react";
-
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceLine,
-} from "recharts";
+import { Layers } from "lucide-react";
+import { ResponsiveContainer, ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
 import { api } from "@/lib/api";
+import type { CostCurvePoint } from "@/lib/types";
+import { DataState } from "@/components/DataState";
 import { Skeleton } from "@/components/Skeleton";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 export default function CostCurvePage() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["cost-curve", "Coal"],
-    queryFn: () => api.getCostCurve("Coal"),
-  });
+  const query = useQuery({ queryKey: ["cost-curve", "Coal"], queryFn: () => api.getCostCurve("Coal") });
+  const points = query.data?.points ?? [];
+  const benchmark = query.data?.benchmark_price_usd ?? null;
+  const capacity = points.at(-1)?.cumulative_volume_mt ?? 0;
+  // A numeric X axis and explicit left/right boundaries make width equal to production.
+  const steps = points.flatMap((point, index) => [
+    { ...point, x: index === 0 ? 0 : points[index - 1].cumulative_volume_mt },
+    { ...point, x: point.cumulative_volume_mt },
+  ]);
+  if (query.isError) return <div className="p-6"><DataState error={query.error} onRetry={() => query.refetch()} /></div>;
 
-  const points = data?.points ?? [];
-  const benchmark = data?.benchmark_price_usd ?? 85;
-  const lowestCost = points.length > 0 ? points[0] : null;
-  const totalCapacity = points.length > 0 ? points[points.length - 1].cumulative_volume_mt : 0;
-
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 animate-fade-up">
-      {/* ── 1. Header Banner ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
-        <div>
-          <div className="inline-flex items-center gap-2 mb-2">
-            <Badge variant="success" className="gap-1.5 py-1 px-3">
-              <TrendingDown className="h-3.5 w-3.5" />
-              <span>M5 National Cash Cost Curve</span>
-            </Badge>
-          </div>
-          <h1 className="text-3xl font-black text-white">National Cost Curve — Coal</h1>
-          <p className="mt-1 max-w-3xl text-xs sm:text-sm text-slate-300">
-            Each step represents an IDX coal issuer, sorted from lowest to highest cash cost per ton.
-            Step width reflects annual production volume (Mt). Issuers below the benchmark price line
-            have a positive cash margin.
-          </p>
-        </div>
-      </div>
-
-      {/* ── 2. 3 Executive Metric Tiles (shadcn Cards) ── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="p-5 border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 hover:border-emerald-500/30 transition-all">
-          <CardHeader className="p-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Lowest-Cost Producer (Q1)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="font-mono text-2xl font-black text-emerald-400">
-                {lowestCost ? lowestCost.symbol : "—"}
-              </span>
-              <span className="font-mono text-sm text-slate-400">
-                {lowestCost ? `$${lowestCost.cash_cost_per_ton_usd.toFixed(2)}/t` : ""}
-              </span>
-            </div>
-            <p className="mt-2 text-[11px] text-slate-500">Highest cash margin at the current market price</p>
-          </CardContent>
-        </Card>
-
-        <Card className="p-5 border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 hover:border-amber-500/30 transition-all">
-          <CardHeader className="p-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Benchmark Reference Price (ICI-4 / FOB)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="mt-1 font-mono text-2xl font-black text-amber-400">
-              ${benchmark.toFixed(2)}/t
-            </div>
-            <p className="mt-2 text-[11px] text-slate-500">Operating breakeven line (cash breakeven)</p>
-          </CardContent>
-        </Card>
-
-        <Card className="p-5 border-slate-800/80 bg-gradient-to-b from-[#0e172a]/90 to-[#080d19]/90 hover:border-cyan-500/30 transition-all">
-          <CardHeader className="p-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Total Capacity Analyzed
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="mt-1 font-mono text-2xl font-black text-cyan-400">
-              {totalCapacity.toFixed(1)} Mt/yr
-            </div>
-            <p className="mt-2 text-[11px] text-slate-500">Cumulative annual production of the 7 complete issuers</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ── 3. Main Interactive Step Chart (shadcn Card) ── */}
-      <Card className="p-6 border-slate-800/80 bg-[#080d19]/90 space-y-4 shadow-2xl">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
-            <Layers className="h-4 w-4 text-amber-400" />
-            Cumulative Cost Step Curve
-          </CardTitle>
-          <Badge variant="secondary" className="font-mono text-[10px]">
-            X: Cumulative Capacity (Mt) | Y: Cash Cost ($/t)
-          </Badge>
-        </div>
-
-        {isLoading ? (
-          <div className="h-80 w-full flex items-center justify-center">
-            <Skeleton className="h-72 w-full rounded-xl" />
-          </div>
-        ) : points.length === 0 ? (
-          <div className="h-80 flex flex-col items-center justify-center text-slate-500">
-            <AlertCircle className="h-8 w-8 mb-2 opacity-50" />
-            <span>Cost curve data is not available yet</span>
-          </div>
-        ) : (
-          <div className="h-80 w-full pt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={points} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis
-                  dataKey="cumulative_volume_mt"
-                  stroke="#64748b"
-                  tick={{ fill: "#94a3b8", fontSize: 11 }}
-                  label={{
-                    value: "Cumulative Coal Production Capacity (Million Tons / Year)",
-                    position: "insideBottom",
-                    offset: -10,
-                    fill: "#94a3b8",
-                    fontSize: 12,
-                  }}
-                />
-                <YAxis
-                  stroke="#64748b"
-                  tick={{ fill: "#94a3b8", fontSize: 11 }}
-                  label={{
-                    value: "Cash Cost (USD / Ton)",
-                    angle: -90,
-                    position: "insideLeft",
-                    fill: "#94a3b8",
-                    fontSize: 12,
-                  }}
-                />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const d = payload[0].payload;
-                      const margin = benchmark - d.cash_cost_per_ton_usd;
-                      return (
-                        <div className="rounded-xl border border-slate-700 bg-slate-900/95 p-3.5 shadow-2xl backdrop-blur-md text-xs font-mono space-y-1">
-                          <div className="font-bold text-amber-400 text-sm">{d.symbol}</div>
-                          <div className="text-slate-300">{d.name}</div>
-                          <div className="text-slate-400 pt-1 border-t border-slate-800">
-                            Cash Cost: <span className="font-bold text-white">${d.cash_cost_per_ton_usd.toFixed(2)}/t</span>
-                          </div>
-                          <div className="text-slate-400">
-                            Volume: <span className="text-white">{d.production_mt.toFixed(1)} Mt</span> (Cumulative: {d.cumulative_volume_mt.toFixed(1)} Mt)
-                          </div>
-                          <div className={margin >= 0 ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
-                            Net Margin: ${margin.toFixed(2)}/t ({margin >= 0 ? "PROFIT" : "LOSS"})
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <ReferenceLine
-                  y={benchmark}
-                  stroke="#f59e0b"
-                  strokeDasharray="4 4"
-                  label={{
-                    value: `Benchmark: $${benchmark.toFixed(2)}/t`,
-                    fill: "#f59e0b",
-                    fontSize: 12,
-                    position: "insideTopRight",
-                  }}
-                />
-                <Area
-                  type="stepAfter"
-                  dataKey="cash_cost_per_ton_usd"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  fill="#10b981"
-                  fillOpacity={0.15}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </Card>
-
-      {/* ── 4. Detailed Cost Table (shadcn Table) ── */}
-      <Card className="border-slate-800/80 bg-[#080d19]/90 p-5 space-y-4 shadow-xl">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-            Cash Cost &amp; Margin Breakdown by Issuer
-          </CardTitle>
-          <Badge variant="secondary" className="font-mono text-[11px]">
-            {points.length} Issuers
-          </Badge>
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Issuer</TableHead>
-              <TableHead className="text-right">Volume (Mt)</TableHead>
-              <TableHead className="text-right">Cumulative (Mt)</TableHead>
-              <TableHead className="text-right">Cash Cost ($/t)</TableHead>
-              <TableHead className="text-right">Margin vs Benchmark</TableHead>
-              <TableHead className="text-center">Quartile Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {points.map((p, idx) => {
-              const margin = benchmark - p.cash_cost_per_ton_usd;
-              const isQ1 = idx < 2;
-              return (
-                <TableRow key={p.symbol} className="font-mono">
-                  <TableCell className="text-slate-500 font-bold">{idx + 1}</TableCell>
-                  <TableCell>
-                    <div className="font-bold text-white flex items-center gap-1.5">
-                      <span>{p.symbol}</span>
-                      {isQ1 && <Badge variant="success" className="text-[9px] px-1 py-0">Q1 Cost</Badge>}
-                    </div>
-                    <div className="text-[10px] text-slate-400 font-sans truncate max-w-[150px]">
-                      {p.name}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right text-slate-300">
-                    {p.annual_volume_mt.toFixed(1)}
-                  </TableCell>
-                  <TableCell className="text-right text-slate-400">
-                    {p.cumulative_volume_mt.toFixed(1)}
-                  </TableCell>
-                  <TableCell className="text-right font-bold text-white">
-                    ${p.cash_cost_per_ton_usd.toFixed(2)}
-                  </TableCell>
-                  <TableCell className={`text-right font-bold ${margin >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                    {margin >= 0 ? `+$${margin.toFixed(2)}` : `-$${Math.abs(margin).toFixed(2)}`}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant={margin >= 0 ? "success" : "destructive"}>
-                      {margin >= 0 ? "Positive Margin" : "Underwater"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="xs">
-                      <Link href={`/issuer/${p.symbol}`} className="gap-1 font-sans">
-                        <span>Detail</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Card>
+  return <div className="gali-page space-y-6">
+    <div className="border-b border-line pb-6">
+      <Badge variant="success" className="mb-3 gap-2"><Layers className="h-3.5 w-3.5" />M4 · Cost curve</Badge>
+      <h1 className="text-3xl font-bold text-ink">Understand the economics of one tonne.</h1>
+      <p className="mt-2 text-sm text-muted max-w-3xl">Issuers are ordered by lowest cash cost. Each step spans annual volume, using sales or production as a fallback, attributed by ownership. Coverage is limited to the published dataset.</p>
     </div>
-  );
+    {query.isLoading ? <Skeleton className="h-96 rounded-xl" /> : points.length === 0 ? <DataState empty /> : <>
+      <CostUnitEconomics points={points} />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className="p-5"><p className="text-sm text-muted">Lowest cash cost</p><p className="mt-2 text-2xl font-numeric text-positive">{points[0].symbol}</p><p className="mt-2 text-sm text-muted">${points[0].cash_cost_per_ton_usd.toFixed(2)} / ton</p></Card>
+        <Card className="p-5"><p className="text-sm text-muted">Price reference · Coal series</p><p className="mt-2 text-2xl font-numeric text-brand">{benchmark == null ? "—" : `$${benchmark.toFixed(2)}/t`}</p><p className="mt-2 text-sm text-muted">The benchmark is not adjusted for each product&apos;s quality.</p></Card>
+        <Card className="p-5"><p className="text-sm text-muted">Attributed volume analyzed</p><p className="mt-2 text-2xl font-numeric text-info">{capacity.toFixed(1)} Mt/year</p><p className="mt-2 text-sm text-muted">{points.length} issuers with available cost inputs.</p></Card>
+      </div>
+      <Card className="p-5 space-y-4 min-w-0"><CardTitle>Cost curve by annual volume</CardTitle>
+        <div className="h-80 w-full"><ResponsiveContainer width="100%" height="100%"><ComposedChart data={steps} margin={{ top: 15, right: 12, left: 0, bottom: 30 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+          <XAxis type="number" dataKey="x" domain={[0, capacity]} tick={{ fill: "var(--chart-axis)", fontSize: 12 }} label={{ value: "Cumulative volume (Mt/year)", position: "insideBottom", offset: -20, fill: "var(--chart-axis)", fontSize: 12 }} />
+          <YAxis tick={{ fill: "var(--chart-axis)", fontSize: 12 }} label={{ value: "USD/ton", angle: -90, position: "insideLeft", fill: "var(--chart-axis)", fontSize: 12 }} />
+          <Tooltip content={({ active, payload }) => {
+            if (!active || !payload?.length) return null;
+            const point = payload[0].payload as CostCurvePoint;
+            return <div className="rounded-lg border border-line-strong bg-surface p-3 text-sm space-y-1 shadow-panel">
+              <p className="font-numeric font-bold text-brand">{point.symbol}</p><p className="text-ink-soft">{point.name}</p>
+              <p className="text-ink-soft">Cash cost: ${point.cash_cost_per_ton_usd.toFixed(2)}/t</p>
+              <p className="text-muted">Volume: {point.annual_volume_mt.toFixed(1)} Mt/year</p>
+              <p className="text-muted">Cumulative: {point.cumulative_volume_mt.toFixed(1)} Mt/year</p>
+            </div>;
+          }} />
+          {benchmark != null && <ReferenceLine y={benchmark} stroke="var(--chart-gold)" strokeDasharray="4 4" label={{ value: `Coal $${benchmark.toFixed(2)}/t`, fill: "var(--chart-gold)", fontSize: 12, position: "insideTopRight" }} />}
+          <Area type="linear" dataKey="cash_cost_per_ton_usd" stroke="var(--chart-positive)" strokeWidth={2} fill="var(--chart-positive)" fillOpacity={0.15} isAnimationActive={false} />
+        </ComposedChart></ResponsiveContainer></div>
+        <p className="text-sm text-muted">The difference from the general benchmark is not a net profit margin. The table uses each issuer&apos;s realized price where available.</p>
+      </Card>
+      <Card className="p-5 space-y-4"><CardTitle>Cost curve inputs</CardTitle>
+        <Table><TableHeader><TableRow><TableHead>Issuer</TableHead><TableHead>Cash cost / ton</TableHead><TableHead>Volume / year</TableHead><TableHead>Realized price / ton</TableHead><TableHead>Margin / ton</TableHead></TableRow></TableHeader>
+          <TableBody>{points.map((point) => <TableRow key={point.symbol}><TableCell><Link href={`/issuer/${point.symbol}`} className="font-numeric text-brand hover:underline">{point.symbol}</Link></TableCell><TableCell className="font-numeric">${point.cash_cost_per_ton_usd.toFixed(2)}</TableCell><TableCell className="font-numeric">{point.annual_volume_mt.toFixed(1)} Mt</TableCell><TableCell className="font-numeric">{point.realized_price_per_ton_usd != null ? `$${point.realized_price_per_ton_usd.toFixed(2)}` : "—"}</TableCell><TableCell className="font-numeric">{point.unit_margin_usd != null ? `$${point.unit_margin_usd.toFixed(2)}` : "—"}</TableCell></TableRow>)}</TableBody>
+        </Table>
+        {(query.data?.partial_issuers_excluded?.length ?? 0) > 0 && <p className="text-sm text-brand">Insufficient inputs: {query.data?.partial_issuers_excluded?.join(", ")}. <Link href="/coverage" className="underline">See the reasons →</Link></p>}
+      </Card>
+    </>}
+  </div>;
 }

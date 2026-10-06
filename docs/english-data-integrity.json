@@ -1,0 +1,8 @@
+{
+  "compared_to_version": "0.4.1",
+  "protected_files": 86,
+  "changed_protected_files": [],
+  "dataset_byte_identical": true,
+  "scenario_reference_byte_identical": true,
+  "input_sha256": "13cfb5a198135fb85f02efca3d054856ab38e55f30cf6c52e87f6e3951b640b1"
+}

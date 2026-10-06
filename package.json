@@ -1,0 +1,20 @@
+{
+  "name": "gali",
+  "version": "0.5.1",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "node scripts/start-local.mjs",
+    "local": "node scripts/start-local.mjs",
+    "setup": "npm --prefix packages/web ci",
+    "build": "npm --prefix packages/web run demo:build",
+    "start": "npm --prefix packages/web run demo:start",
+    "sectors": "npm --prefix packages/web run sectors",
+    "test:local": "npm --prefix packages/web run test:local",
+    "test:analysis": "npm --prefix packages/web run test:simulation && npm --prefix packages/web run test:research",
+    "test:ai": "npm --prefix packages/web run test:ai",
+    "test:ai:output": "npm --prefix packages/web run test:ai:output"
+  }
+}

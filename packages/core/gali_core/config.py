@@ -142,6 +142,7 @@ class Settings(BaseSettings):
     cors_allow_origins: str = "http://localhost:3000"
     rate_limit_anon_per_min: int = 60
     rate_limit_keyed_per_min: int = 600
+    trust_proxy_headers: bool = False
     cache_ttl_seconds: int = 300
 
     # --- Ops ---------------------------------------------------------------

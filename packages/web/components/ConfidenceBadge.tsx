@@ -16,22 +16,22 @@ export function ConfidenceBadge({ dataQuality, confidencePct, className = "" }: 
   if (isComplete) {
     return (
       <div
-        className={`inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 ${className}`}
-        title={`Complete data across all relevant endpoints${pctLabel}`}
+        className={`inline-flex items-center gap-1 rounded-md border border-positive-line bg-positive-soft px-2 py-0.5 text-[12px] font-semibold text-positive ${className}`}
+        title={`RLI, RBV, and cash cost are available; other pillars may be incomplete. Weight coverage${pctLabel}`}
       >
         <CheckCircle className="h-3 w-3" />
-        <span>COMPLETE{pctLabel}</span>
+        <span>Complete core metrics{pctLabel}</span>
       </div>
     );
   }
 
   return (
     <div
-      className={`inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-400 ${className}`}
-      title={`Some fields are null -- see Evidence for the list${pctLabel}`}
+      className={`inline-flex items-center gap-1 rounded-md border border-brand-line bg-brand-soft px-2 py-0.5 text-[12px] font-semibold text-brand ${className}`}
+      title={`One or more core metrics are missing. Check the data sources. Weight coverage${pctLabel}`}
     >
       <AlertTriangle className="h-3 w-3" />
-      <span>{dataQuality === "PARSIAL" ? "PARTIAL" : dataQuality || "PARTIAL"}{pctLabel}</span>
+      <span>{dataQuality === "PARSIAL" ? "Partial core metrics" : dataQuality || "Partial core metrics"}{pctLabel}</span>
     </div>
   );
 }

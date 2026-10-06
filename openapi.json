@@ -305,12 +305,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "enum": [
+                "ground_truth_score",
+                "rli_years",
+                "reserve_backed_value_usd",
+                "cash_cost_per_ton_usd",
+                "license_cliff_3y",
+                "rbv_gap_pct"
+              ],
               "type": "string",
-              "description": "Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'",
+              "description": "Metric to rank by: one of ('ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'). An unlisted value is rejected with 422 rather than silently returning an empty list.",
               "default": "ground_truth_score",
               "title": "Metric"
             },
-            "description": "Metric to rank by: 'ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'"
+            "description": "Metric to rank by: one of ('ground_truth_score', 'rli_years', 'reserve_backed_value_usd', 'cash_cost_per_ton_usd', 'license_cliff_3y', 'rbv_gap_pct'). An unlisted value is rejected with 422 rather than silently returning an empty list."
           }
         ],
         "responses": {
@@ -345,6 +353,19 @@
         "summary": "Get National Cost Curve",
         "description": "Retrieve national cumulative cost curve curve points, unit margins, and benchmark breakevens.",
         "operationId": "get_national_cost_curve_v1_cost_curve_get",
+        "parameters": [
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^Coal$",
+              "default": "Coal",
+              "title": "Commodity"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -352,6 +373,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CostCurveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -531,7 +562,14 @@
             "title": "Run Id"
           },
           "benchmark_price_usd": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Benchmark Price Usd"
           },
           "points": {
@@ -600,7 +638,7 @@
           "gate_decision": {
             "type": "string",
             "title": "Gate Decision",
-            "default": "GO MENYEMPIT (Coal Titans \u2014 9 Emiten)"
+            "default": "GO NARROWED (Coal Titans \u2014 9 Issuers: 7 complete + 2 partial)"
           },
           "updated_at": {
             "type": "string",
@@ -1446,7 +1484,14 @@
             "title": "Volume At Risk Pct"
           },
           "revenue_at_risk_usd": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Revenue At Risk Usd"
           },
           "post_shock_gp_usd": {
@@ -1463,6 +1508,18 @@
           "is_partial": {
             "type": "boolean",
             "title": "Is Partial"
+          },
+          "model_basis": {
+            "type": "string",
+            "title": "Model Basis",
+            "default": "gross_profit_proxy"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
           }
         },
         "type": "object",
@@ -1745,6 +1802,13 @@
             ],
             "title": "Issuer Symbol"
           },
+          "issuer_symbols": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Issuer Symbols"
+          },
           "province": {
             "anyOf": [
               {
@@ -1948,6 +2012,8 @@
         "properties": {
           "price_shock_pct": {
             "type": "number",
+            "maximum": 2.0,
+            "minimum": -1.0,
             "title": "Price Shock Pct",
             "description": "Percentage shock to commodity benchmark price (-1.0 to 2.0)",
             "default": 0.0,

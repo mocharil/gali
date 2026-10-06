@@ -60,7 +60,7 @@ def compute_license_cliff(
     valid_licenses = [
         lic
         for lic in licenses
-        if (lic.get("match_confidence") is None or float(lic.get("match_confidence") or 1.0) >= min_confidence)
+        if lic.get("match_confidence") is not None and float(lic["match_confidence"]) >= min_confidence
     ]
 
     if not valid_licenses:
@@ -76,6 +76,7 @@ def compute_license_cliff(
             null_reason="no mining licenses linked with confidence >= min_match_confidence",
         )
 
+    incomplete_inputs = False
     total_area = 0.0
     cnc_area = 0.0
     exp_area_1y = 0.0
@@ -92,7 +93,8 @@ def compute_license_cliff(
     for lic in valid_licenses:
         area = float(lic.get("licensed_area_ha") or 0.0)
         if area <= 0:
-            area = 1.0  # Fallback 1 ha weight if area is missing to count the license
+            incomplete_inputs = True
+            continue
 
         total_area += area
 
@@ -110,6 +112,8 @@ def compute_license_cliff(
             except ValueError:
                 exp_date = None
 
+        if exp_date is None:
+            incomplete_inputs = True
         if exp_date is not None:
             days_left = max((exp_date - today).days, 0)
             weighted_days_sum += area * days_left
@@ -135,15 +139,17 @@ def compute_license_cliff(
 
     return LicenseCliffResult(
         symbol=symbol,
-        total_licensed_area_ha=round(total_area, 2),
+        total_licensed_area_ha=round(total_area, 2) if total_area > 0 else None,
         total_licenses_count=len(valid_licenses),
-        license_cliff_1y=round(cliff_1y, 2),
-        license_cliff_3y=round(cliff_3y, 2),
-        license_cliff_5y=round(cliff_5y, 2),
-        cnc_coverage_pct=round(cnc_pct, 2),
+        license_cliff_1y=round(cliff_1y, 2) if not incomplete_inputs else None,
+        license_cliff_3y=round(cliff_3y, 2) if not incomplete_inputs else None,
+        license_cliff_5y=round(cliff_5y, 2) if not incomplete_inputs else None,
+        cnc_coverage_pct=round(cnc_pct, 2) if not incomplete_inputs else None,
         weighted_days_to_expiry=round(weighted_days, 1) if weighted_days is not None else None,
         expiring_licenses_1y=exp_lic_1y,
         expiring_licenses_3y=exp_lic_3y,
         expiring_licenses_5y=exp_lic_5y,
-        null_reason=None,
+        null_reason="license area or expiry is missing; area-based risk cannot be established"
+        if incomplete_inputs
+        else None,
     )

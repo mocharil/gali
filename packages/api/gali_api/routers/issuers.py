@@ -48,7 +48,7 @@ async def list_issuers(
 
     items: list[IssuerSummary] = []
     for m, c in rows:
-        conf = (m.confidence or {}).get("effective_weight", 1.0) * 100.0
+        conf = (m.confidence or {}).get("effective_weight", 0.0) * 100.0
 
         items.append(
             IssuerSummary(

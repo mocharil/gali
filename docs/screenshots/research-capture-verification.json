@@ -1,0 +1,45 @@
+{
+  "evidence": [
+    {
+      "name": "research-scenario-desktop",
+      "path": "/scenario?price=-0.2&china=0.3&issuer=BYAN",
+      "width": 1440,
+      "height": 1000,
+      "overflow": false,
+      "screenshot": "docs/screenshots/research-scenario-desktop.png"
+    },
+    {
+      "name": "research-scenario-mobile",
+      "path": "/scenario?price=-0.2&china=0.3&issuer=BYAN",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "screenshot": "docs/screenshots/research-scenario-mobile.png"
+    },
+    {
+      "name": "research-gross-loss",
+      "path": "/scenario?price=-0.5&issuer=BUMI",
+      "width": 1440,
+      "height": 1000,
+      "overflow": false,
+      "screenshot": "docs/screenshots/research-gross-loss.png"
+    },
+    {
+      "name": "research-score-provisional",
+      "path": "/issuer/ADMR",
+      "width": 1440,
+      "height": 1000,
+      "overflow": false,
+      "screenshot": "docs/screenshots/research-score-provisional.png"
+    },
+    {
+      "name": "research-rbv-context",
+      "path": "/issuer/BYAN",
+      "width": 1440,
+      "height": 1000,
+      "overflow": false,
+      "screenshot": "docs/screenshots/research-rbv-context.png"
+    }
+  ],
+  "errors": []
+}

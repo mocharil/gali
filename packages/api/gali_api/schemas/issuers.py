@@ -14,12 +14,16 @@ class IssuerSummary(BaseModel):
     sub_sector: str | None = None
     data_quality: str = Field(..., description="'LENGKAP' (complete) or 'PARSIAL' (partial)")
     ground_truth_score: float | None = Field(default=None, description="M8 composite score (0-100)")
-    confidence_pct: float = Field(default=100.0, description="Effective weight utilized (0-100%)")
+    confidence_pct: float = Field(
+        default=0.0, description="Available score weight coverage (0-100%), not statistical confidence"
+    )
     rli_years: float | None = Field(default=None, description="M1 Reserve Life Index")
     reserve_backed_value_usd: float | None = Field(default=None, description="M2 Reserve-Backed Value in USD")
     market_cap_idr: float | None = None
     market_cap_usd: float | None = None
-    rbv_gap_pct: float | None = Field(default=None, description="M2 valuation premia / discount %")
+    rbv_gap_pct: float | None = Field(
+        default=None, description="M2 equity market cap vs gross-profit annuity proxy gap %, not fair value"
+    )
     license_cliff_3y: float | None = Field(default=None, description="M3 3-year concession expiry %")
     cash_cost_per_ton_usd: float | None = Field(default=None, description="M4 unit cash cost FOB")
     top_destination: str | None = Field(default=None, description="M6 top export market")

@@ -1,0 +1,185 @@
+{
+  "version": "0.5.0",
+  "suite": "Full UI regression after Stop fix",
+  "passed": 35,
+  "failed": 0,
+  "tests": [
+    {
+      "index": 1,
+      "test": "e2e/english.spec.ts:13:5 \u203a All research pages, profile tabs, evidence and search use English (12.6s)",
+      "passed": true
+    },
+    {
+      "index": 2,
+      "test": "e2e/english.spec.ts:38:5 \u203a English assistant prompts and downloaded research remain in English (4.9s)",
+      "passed": true
+    },
+    {
+      "index": 3,
+      "test": "e2e/english.spec.ts:81:5 \u203a Map labels load consistently across repeat navigation and viewport changes (7.6s)",
+      "passed": true
+    },
+    {
+      "index": 4,
+      "test": "e2e/gali.spec.ts:4:5 \u203a Landing \u2192 dashboard \u2192 issuer \u2192 evidence; assistant and search use API facts (1.9s)",
+      "passed": true
+    },
+    {
+      "index": 5,
+      "test": "e2e/gali.spec.ts:36:5 \u203a Scenario zero baseline, percent scale, CSV, presets and refresh persistence (5.6s)",
+      "passed": true
+    },
+    {
+      "index": 6,
+      "test": "e2e/gali.spec.ts:65:5 \u203a Compare correct pillars, distinct pair, shared URL and partial data (863ms)",
+      "passed": true
+    },
+    {
+      "index": 7,
+      "test": "e2e/gali.spec.ts:79:5 \u203a Cost curve tooltip, map location \u2192 issuer, coverage and divergence (1.6s)",
+      "passed": true
+    },
+    {
+      "index": 8,
+      "test": "e2e/gali.spec.ts:104:5 \u203a Failure and empty states: API 503, scenario error, empty dataset, missing issuer (5.7s)",
+      "passed": true
+    },
+    {
+      "index": 9,
+      "test": "e2e/gali.spec.ts:124:7 \u203a Responsive navigation and all routes at 1440x900 (13.0s)",
+      "passed": true
+    },
+    {
+      "index": 10,
+      "test": "e2e/gali.spec.ts:124:7 \u203a Responsive navigation and all routes at 1280x800 (12.1s)",
+      "passed": true
+    },
+    {
+      "index": 11,
+      "test": "e2e/gali.spec.ts:124:7 \u203a Responsive navigation and all routes at 768x1024 (10.8s)",
+      "passed": true
+    },
+    {
+      "index": 12,
+      "test": "e2e/gali.spec.ts:124:7 \u203a Responsive navigation and all routes at 390x844 (9.8s)",
+      "passed": true
+    },
+    {
+      "index": 13,
+      "test": "e2e/gemini.spec.ts:15:5 \u203a AI endpoints: missing credentials, origin check, bounded input, and no fabricated success (32ms)",
+      "passed": true
+    },
+    {
+      "index": 14,
+      "test": "e2e/gemini.spec.ts:28:5 \u203a Without credentials: data analysis works and Gemini setup is explicit (2.1s)",
+      "passed": true
+    },
+    {
+      "index": 15,
+      "test": "e2e/gemini.spec.ts:42:5 \u203a Configured Gemini: connection test, source-linked answers, follow-ups and Markdown export (3.8s)",
+      "passed": true
+    },
+    {
+      "index": 16,
+      "test": "e2e/gemini.spec.ts:69:5 \u203a Gemini errors remain errors and a manual retry can succeed (1.9s)",
+      "passed": true
+    },
+    {
+      "index": 17,
+      "test": "e2e/gemini.spec.ts:81:5 \u203a Stop and close cancel pending answers without late UI updates (2.4s)",
+      "passed": true
+    },
+    {
+      "index": 18,
+      "test": "e2e/gemini.spec.ts:97:5 \u203a Dashboard AI brief is requested explicitly and includes a balanced evidence view (2.0s)",
+      "passed": true
+    },
+    {
+      "index": 19,
+      "test": "e2e/gemini.spec.ts:108:5 \u203a Scenario AI uses the selected issuer and active parameters; switching clears prior answers (3.8s)",
+      "passed": true
+    },
+    {
+      "index": 20,
+      "test": "e2e/gemini.spec.ts:123:7 \u203a Gemini answer and evidence are responsive at 1440px (3.1s)",
+      "passed": true
+    },
+    {
+      "index": 21,
+      "test": "e2e/gemini.spec.ts:123:7 \u203a Gemini answer and evidence are responsive at 390px (1.3s)",
+      "passed": true
+    },
+    {
+      "index": 22,
+      "test": "e2e/research.spec.ts:3:5 \u203a Complete-score ranking is separated from provisional scores (726ms)",
+      "passed": true
+    },
+    {
+      "index": 23,
+      "test": "e2e/research.spec.ts:17:5 \u203a Landing leaders use complete scores after repeated desktop and mobile navigation (10.5s)",
+      "passed": true
+    },
+    {
+      "index": 24,
+      "test": "e2e/research.spec.ts:42:5 \u203a Scenario drivers, sensitivity, selected issuer and saved brief stay consistent (2.4s)",
+      "passed": true
+    },
+    {
+      "index": 25,
+      "test": "e2e/research.spec.ts:70:5 \u203a Gross losses remain visible despite the zero RBV floor (1.1s)",
+      "passed": true
+    },
+    {
+      "index": 26,
+      "test": "e2e/research.spec.ts:80:5 \u203a Issuer profile exposes model scope, weight sensitivity and working methodology anchors (2.4s)",
+      "passed": true
+    },
+    {
+      "index": 27,
+      "test": "e2e/simulation.spec.ts:3:5 \u203a Bundled dataset: source, all endpoints, validation, depth and offline map (4.6s)",
+      "passed": true
+    },
+    {
+      "index": 28,
+      "test": "e2e/simulation.spec.ts:53:5 \u203a Advanced scenario assumptions change outputs and persist across refresh (2.2s)",
+      "passed": true
+    },
+    {
+      "index": 29,
+      "test": "e2e/ui-polish.spec.ts:3:5 \u203a Mobile profile tabs, metric help and dashboard screening remain usable (1.4s)",
+      "passed": true
+    },
+    {
+      "index": 30,
+      "test": "e2e/ui-polish.spec.ts:42:5 \u203a Map grouping, combined filters, selection and reset reflect the published sites (1.3s)",
+      "passed": true
+    },
+    {
+      "index": 31,
+      "test": "e2e/visual-ui.spec.ts:3:5 \u203a Mine hotspots explain each lens and open the actual license scenario (3.8s)",
+      "passed": true
+    },
+    {
+      "index": 32,
+      "test": "e2e/visual-ui.spec.ts:20:5 \u203a Illustrated unit economics and valuation keep issuer values and missing data (682ms)",
+      "passed": true
+    },
+    {
+      "index": 33,
+      "test": "e2e/visual-ui.spec.ts:48:5 \u203a The geographic map uses exact dataset coordinates and supports zoom and pan (1.3s)",
+      "passed": true
+    },
+    {
+      "index": 34,
+      "test": "e2e/visual-ui.spec.ts:84:5 \u203a A device without WebGL retains geographic boundaries, filters and map controls (521ms)",
+      "passed": true
+    },
+    {
+      "index": 35,
+      "test": "e2e/visual-ui.spec.ts:106:5 \u203a Street detail is optional and a tile failure returns to bundled geography (2.8s)",
+      "passed": true
+    }
+  ],
+  "live_gemini": false,
+  "provider_responses": "Browser interception fixtures for configured Gemini cases; real server tests for missing credentials and input/origin rejection."
+}

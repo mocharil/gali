@@ -1,0 +1,465 @@
+{
+  "version": "0.4.1",
+  "frames": [
+    {
+      "name": "landing-desktop",
+      "route": "/",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 2025,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "dashboard-desktop",
+      "route": "/dashboard",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 2578,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "dashboard-full",
+      "route": "/dashboard",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 2578,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "issuer-byan",
+      "route": "/issuer/BYAN",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1310,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "issuer-valuation",
+      "route": "/issuer/BYAN",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1298,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "issuer-operations",
+      "route": "/issuer/BYAN",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 2229,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "issuer-score",
+      "route": "/issuer/BYAN",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1975,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "map-desktop",
+      "route": "/map",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1185,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "map-regional",
+      "route": "/map",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1300,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "compare-desktop",
+      "route": "/compare?a=ADRO&b=BYAN",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1794,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "cost-curve-desktop",
+      "route": "/cost-curve",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1660,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "divergence-desktop",
+      "route": "/divergence",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 1414,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "coverage-desktop",
+      "route": "/coverage",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 2395,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "methodology-desktop",
+      "route": "/methodology",
+      "viewport": 1440,
+      "width": 1440,
+      "height": 8539,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta",
+        "KaTeX_Main",
+        "KaTeX_Math",
+        "KaTeX_Size1"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "dashboard-mobile",
+      "route": "/dashboard",
+      "viewport": 390,
+      "width": 390,
+      "height": 5267,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "issuer-mobile",
+      "route": "/issuer/BYAN",
+      "viewport": 390,
+      "width": 390,
+      "height": 2339,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "map-mobile",
+      "route": "/map",
+      "viewport": 390,
+      "width": 390,
+      "height": 2015,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "landing-mobile",
+      "route": "/",
+      "viewport": 390,
+      "width": 390,
+      "height": 4121,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    },
+    {
+      "name": "navigation-mobile",
+      "route": "/dashboard",
+      "viewport": 390,
+      "width": 390,
+      "height": 5267,
+      "font": "jakarta, \"jakarta Fallback\", \"Plus Jakarta Sans\", Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "loadedFonts": [
+        "jakarta"
+      ],
+      "tokens": {
+        "--ink": "#142337",
+        "--muted": "#59697e",
+        "--subtle": "#657389",
+        "--brand": "#8b580c",
+        "--info": "#087185",
+        "--positive": "#0d7461",
+        "--negative": "#ad3647",
+        "--canvas": "#f7f8fa",
+        "--surface": "#fff"
+      }
+    }
+  ],
+  "contrastChecks": [
+    {
+      "token": "--ink",
+      "onSurface": 15.84517842795917,
+      "onCanvas": 14.91123158285129
+    },
+    {
+      "token": "--muted",
+      "onSurface": 5.6049755001817765,
+      "onCanvas": 5.274606914614769
+    },
+    {
+      "token": "--subtle",
+      "onSurface": 4.808944783577557,
+      "onCanvas": 4.525495857499498
+    },
+    {
+      "token": "--brand",
+      "onSurface": 6.001728873939871,
+      "onCanvas": 5.647974842548319
+    },
+    {
+      "token": "--info",
+      "onSurface": 5.658750315759181,
+      "onCanvas": 5.325212133864615
+    },
+    {
+      "token": "--positive",
+      "onSurface": 5.694323741526672,
+      "onCanvas": 5.358688790011223
+    },
+    {
+      "token": "--negative",
+      "onSurface": 6.184655278675516,
+      "onCanvas": 5.820119195231566
+    }
+  ],
+  "externalRequests": [],
+  "runtimeErrors": []
+}

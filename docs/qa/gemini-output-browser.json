@@ -1,0 +1,224 @@
+{
+  "version": "0.5.1",
+  "generated_at": "2026-10-06T02:08:44.737Z",
+  "live_provider_test": false,
+  "response_source": "Explicit browser fixtures built from server-grounded test prose",
+  "passed": 29,
+  "failed": 0,
+  "viewports": [
+    1440,
+    390,
+    320
+  ],
+  "screenshots_reviewed": [
+    "ai-output-comparison-mobile.png",
+    "ai-output-partial-evidence-mobile.png",
+    "ai-output-itmg-scenario-desktop.png"
+  ],
+  "duration_ms": 77634.119,
+  "tests": [
+    {
+      "name": "AI output: comparison at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 4443
+    },
+    {
+      "name": "AI output: active_itmg at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 4761
+    },
+    {
+      "name": "AI output: gross_loss at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3838
+    },
+    {
+      "name": "AI output: partial_data at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3343
+    },
+    {
+      "name": "AI output: provisional_score at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3744
+    },
+    {
+      "name": "AI output: dashboard_stress at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3975
+    },
+    {
+      "name": "AI output: out_of_scope at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3499
+    },
+    {
+      "name": "AI output: long_response at 1440px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 4442
+    },
+    {
+      "name": "AI output: comparison at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2496
+    },
+    {
+      "name": "AI output: active_itmg at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2074
+    },
+    {
+      "name": "AI output: gross_loss at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2004
+    },
+    {
+      "name": "AI output: partial_data at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2178
+    },
+    {
+      "name": "AI output: provisional_score at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1790
+    },
+    {
+      "name": "AI output: dashboard_stress at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1113
+    },
+    {
+      "name": "AI output: out_of_scope at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1918
+    },
+    {
+      "name": "AI output: long_response at 390px",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1587
+    },
+    {
+      "name": "AI scenario source link preserves ITMG and the active parameters",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3714
+    },
+    {
+      "name": "At narrow mobile width, long answers wrap and follow-ups reveal the latest summary",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1024
+    },
+    {
+      "name": "Unverified, truncated and unavailable provider outputs show readable errors with no answer",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2396
+    },
+    {
+      "name": "Limited answers retain their status, categories, exact facts and references in downloads",
+      "file": "gemini-output.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1448
+    },
+    {
+      "name": "AI endpoints: missing credentials, origin check, bounded input, and no fabricated success",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 53
+    },
+    {
+      "name": "Without credentials: data analysis works and Gemini setup is explicit",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3018
+    },
+    {
+      "name": "Configured Gemini: connection test, source-linked answers, follow-ups and Markdown export",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3820
+    },
+    {
+      "name": "Gemini errors remain errors and a manual retry can succeed",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1873
+    },
+    {
+      "name": "Stop and close cancel pending answers without late UI updates",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2188
+    },
+    {
+      "name": "Dashboard AI brief is requested explicitly and includes a balanced evidence view",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2067
+    },
+    {
+      "name": "Scenario AI uses the selected issuer and active parameters; switching clears prior answers",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 2203
+    },
+    {
+      "name": "Gemini answer and evidence are responsive at 1440px",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 3951
+    },
+    {
+      "name": "Gemini answer and evidence are responsive at 390px",
+      "file": "gemini.spec.ts",
+      "passed": true,
+      "attempts": 1,
+      "duration_ms": 1733
+    }
+  ]
+}

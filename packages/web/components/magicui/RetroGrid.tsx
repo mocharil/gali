@@ -35,8 +35,8 @@ export function RetroGrid({
       </div>
 
       {/* Soft gradient masks to blend into dark background */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#060911] via-[#060911]/60 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#060911] via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-surface" />
+      <div className="absolute inset-0 bg-surface" />
     </div>
   );
 }

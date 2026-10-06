@@ -48,7 +48,7 @@ def compute_quality_adjustment(
     products: list[dict[str, Any]],
     realized_price_per_ton_usd: float | None,
     benchmark_prices_map: dict[str, float],
-    default_benchmark_price: float = 102.87,
+    default_benchmark_price: float | None = None,
 ) -> QualityResult:
     """Compute M5 quality metrics for an issuer.
 
@@ -77,16 +77,19 @@ def compute_quality_adjustment(
     # Determine benchmark price
     bench_price = benchmark_prices_map.get(grade) or benchmark_prices_map.get("Coal") or default_benchmark_price
 
+    reference_grade = (
+        grade if grade in benchmark_prices_map else "Coal (general reference)" if bench_price is not None else None
+    )
     quality_discount = None
-    if realized_price_per_ton_usd is not None and bench_price > 0:
+    if realized_price_per_ton_usd is not None and bench_price is not None and bench_price > 0:
         quality_discount = ((bench_price - realized_price_per_ton_usd) / bench_price) * 100.0
 
     if weighted_cv is None and realized_price_per_ton_usd is None:
         return QualityResult(
             symbol=symbol,
             weighted_cv_kcal=None,
-            benchmark_grade=grade,
-            benchmark_price_usd=round(bench_price, 2),
+            benchmark_grade=reference_grade,
+            benchmark_price_usd=round(bench_price, 2) if bench_price is not None else None,
             realized_price_per_ton_usd=None,
             quality_discount_pct=None,
             products_count=len(products),
@@ -97,8 +100,8 @@ def compute_quality_adjustment(
     return QualityResult(
         symbol=symbol,
         weighted_cv_kcal=round(weighted_cv, 1) if weighted_cv is not None else None,
-        benchmark_grade=grade,
-        benchmark_price_usd=round(bench_price, 2),
+        benchmark_grade=reference_grade,
+        benchmark_price_usd=round(bench_price, 2) if bench_price is not None else None,
         realized_price_per_ton_usd=round(realized_price_per_ton_usd, 2)
         if realized_price_per_ton_usd is not None
         else None,

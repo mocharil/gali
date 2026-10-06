@@ -40,7 +40,7 @@ def compute_issuer_cash_cost(
     links: list[dict[str, Any]],
     financials_map: dict[str, dict[str, Any]],
     performance_map: dict[str, dict[str, Any]],
-    benchmark_price_usd: float = 100.0,
+    benchmark_price_usd: float | None = None,
 ) -> CashCostResult:
     """Compute unit cash cost metrics for a single issuer."""
     total_attr_cost = 0.0
@@ -101,7 +101,12 @@ def compute_issuer_cash_cost(
     unit_margin = (realized_price - cash_cost) if realized_price is not None else None
 
     breakeven_price = None
-    if realized_price is not None and realized_price > 0 and benchmark_price_usd > 0:
+    if (
+        realized_price is not None
+        and realized_price > 0
+        and benchmark_price_usd is not None
+        and benchmark_price_usd > 0
+    ):
         breakeven_price = benchmark_price_usd * (cash_cost / realized_price)
 
     return CashCostResult(

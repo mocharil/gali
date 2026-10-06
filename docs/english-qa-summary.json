@@ -1,0 +1,138 @@
+{
+  "app_version": "0.4.2",
+  "language": "English",
+  "html_lang": "en",
+  "metadata_locale": "en_US",
+  "formatting_locale": "en-US",
+  "browser_tests": {
+    "expected": 21,
+    "unexpected": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "duration": 154930.772
+  },
+  "browser_test_cases": [
+    {
+      "title": "All research pages, profile tabs, evidence and search use English",
+      "status": "expected"
+    },
+    {
+      "title": "English assistant prompts and downloaded research remain in English",
+      "status": "expected"
+    },
+    {
+      "title": "Map labels load consistently across repeat navigation and viewport changes",
+      "status": "expected"
+    },
+    {
+      "title": "Landing \u2192 dashboard \u2192 issuer \u2192 evidence; assistant and search use API facts",
+      "status": "expected"
+    },
+    {
+      "title": "Scenario zero baseline, percent scale, CSV, presets and refresh persistence",
+      "status": "expected"
+    },
+    {
+      "title": "Compare correct pillars, distinct pair, shared URL and partial data",
+      "status": "expected"
+    },
+    {
+      "title": "Cost curve tooltip, map location \u2192 issuer, coverage and divergence",
+      "status": "expected"
+    },
+    {
+      "title": "Failure and empty states: API 503, scenario error, empty dataset, missing issuer",
+      "status": "expected"
+    },
+    {
+      "title": "Responsive navigation and all routes at 1440x900",
+      "status": "expected"
+    },
+    {
+      "title": "Responsive navigation and all routes at 1280x800",
+      "status": "expected"
+    },
+    {
+      "title": "Responsive navigation and all routes at 768x1024",
+      "status": "expected"
+    },
+    {
+      "title": "Responsive navigation and all routes at 390x844",
+      "status": "expected"
+    },
+    {
+      "title": "Complete-score ranking is separated from provisional scores",
+      "status": "expected"
+    },
+    {
+      "title": "Landing leaders use complete scores after repeated desktop and mobile navigation",
+      "status": "expected"
+    },
+    {
+      "title": "Scenario drivers, sensitivity, selected issuer and saved brief stay consistent",
+      "status": "expected"
+    },
+    {
+      "title": "Gross losses remain visible despite the zero RBV floor",
+      "status": "expected"
+    },
+    {
+      "title": "Issuer profile exposes model scope, weight sensitivity and working methodology anchors",
+      "status": "expected"
+    },
+    {
+      "title": "Bundled dataset: source, all endpoints, validation, depth and offline map",
+      "status": "expected"
+    },
+    {
+      "title": "Advanced scenario assumptions change outputs and persist across refresh",
+      "status": "expected"
+    },
+    {
+      "title": "Mobile profile tabs, metric help and dashboard screening remain usable",
+      "status": "expected"
+    },
+    {
+      "title": "Map grouping, combined filters, selection and reset reflect the published sites",
+      "status": "expected"
+    }
+  ],
+  "responsive_viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      1280,
+      800
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "routes_per_responsive_viewport": 11,
+  "english_audit_routes": 13,
+  "visual_frames": 19,
+  "runtime_errors": 0,
+  "external_requests": 0,
+  "minimum_text_contrast": 4.53,
+  "production_build": "passed",
+  "typescript_check": "passed in production build",
+  "eslint": "passed",
+  "research_tests": "passed, including English assistant routing and full numeric/null preservation",
+  "analytical_integrity": {
+    "compared_to_version": "0.4.1",
+    "protected_files": 86,
+    "changed_protected_files": [],
+    "dataset_byte_identical": true,
+    "scenario_reference_byte_identical": true,
+    "input_sha256": "13cfb5a198135fb85f02efca3d054856ab38e55f30cf6c52e87f6e3951b640b1"
+  },
+  "dataset_mode_verified": "simulation",
+  "public_deployment_updated": false
+}

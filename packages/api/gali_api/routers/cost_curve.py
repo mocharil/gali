@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import redis.asyncio as aioredis
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from gali_api.cache import get_cached_json, make_cache_key, set_cached_json
 from gali_api.dependencies import get_db, get_published_run_id, get_redis
 from gali_api.schemas.cost_curve import CostCurvePoint, CostCurveResponse
@@ -16,25 +16,31 @@ router = APIRouter(prefix="/v1/cost-curve", tags=["National Cost Curve"])
 
 @router.get("", response_model=CostCurveResponse)
 async def get_national_cost_curve(
+    commodity: str = Query("Coal", pattern="^Coal$"),
     db: AsyncSession = Depends(get_db),
     run_id: str = Depends(get_published_run_id),
     redis: aioredis.Redis | None = Depends(get_redis),
 ) -> CostCurveResponse:
     """Retrieve national cumulative cost curve curve points, unit margins, and benchmark breakevens."""
-    cache_key = make_cache_key("cost-curve", run_id, "coal", {})
+    cache_key = make_cache_key("cost-curve", run_id, commodity, {})
     cached = await get_cached_json(redis, cache_key)
     if cached:
         return CostCurveResponse.model_validate(cached)
 
-    # 1. Fetch latest coal benchmark price
+    # 1. Fetch benchmark as of the published run; do not mix later ingestion into the run.
+    as_of = (
+        await db.execute(select(IssuerMetrics.as_of).where(IssuerMetrics.run_id == run_id).limit(1))
+    ).scalar_one_or_none()
+    # Historical snapshot (legacy runs lack a saved Coal reference).
     price_stmt = (
         select(CommodityPrice.price)
-        .where(CommodityPrice.commodity == "Coal")
+        .where(CommodityPrice.commodity == "Coal", CommodityPrice.observed_on <= as_of)
         .order_by(desc(CommodityPrice.observed_on))
         .limit(1)
     )
     bench_price_res = await db.execute(price_stmt)
-    bench_price = float(bench_price_res.scalar_one_or_none() or 102.87)
+    raw_benchmark = bench_price_res.scalar_one_or_none()
+    bench_price = float(raw_benchmark) if raw_benchmark is not None else None
 
     # 2. Fetch metrics
     stmt = (
@@ -44,8 +50,13 @@ async def get_national_cost_curve(
     )
     rows = (await db.execute(stmt)).all()
 
-    valid_rows = [(m, c) for m, c in rows if m.cash_cost_per_ton_usd is not None]
-    partial_excluded = [m.symbol for m, c in rows if m.cash_cost_per_ton_usd is None]
+    valid_rows = [
+        (m, c)
+        for m, c in rows
+        if m.cash_cost_per_ton_usd is not None
+        and (m.evidence or {}).get("provenance", {}).get("cost_curve_annual_volume_mt", 0)
+    ]
+    partial_excluded = [m.symbol for m, c in rows if (m, c) not in valid_rows]
 
     # Sort ascending by cash cost
     valid_rows.sort(key=lambda item: item[0].cash_cost_per_ton_usd or 0.0)

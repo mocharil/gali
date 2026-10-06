@@ -1,0 +1,46 @@
+{
+  "audit_date": "2026-10-05",
+  "fixture_status": "Explicit synthetic QA fixtures, never an automatic production fallback",
+  "frontend": {
+    "typecheck": "pass",
+    "lint": "pass",
+    "production_build": "pass",
+    "openapi_snapshots": "match runtime"
+  },
+  "python": {
+    "ruff_check": "pass",
+    "ruff_format_files": 96,
+    "mypy_core_files": 36,
+    "core_api_tests": {
+      "passed": 93,
+      "failed": 1,
+      "failed_case": "packages/core/tests/test_models.py::test_tier_check_constraint",
+      "failure": "PGlite socket gateway rollback: received 0 results from command ROLLBACK"
+    },
+    "pipeline_tests": {
+      "passed": 4,
+      "failed": 0
+    },
+    "dagster_definitions": "load validation passed"
+  },
+  "browser": {
+    "engine": "Chromium",
+    "passed": 9,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "duration_ms": 103069.394,
+    "routes": 11,
+    "viewports": [
+      "1440x900",
+      "1280x800",
+      "768x1024",
+      "390x844"
+    ]
+  },
+  "limits": [
+    "Native PostgreSQL 16, real Redis, full Sectors ingest, Docker images, remote CI and final deployment not validated",
+    "Basemap/WebGL rendering unsuccessful in QA; location list/detail/profile fallback verified",
+    "No LLM integration; data assistant is explicitly rule-based"
+  ]
+}

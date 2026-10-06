@@ -68,7 +68,7 @@ def compute_destination_hhi(
             pct = float(d.get("pct_of_sales_volume") or 0.0)
             country_pcts[c] = country_pcts.get(c, 0.0) + pct
 
-    if not country_pcts:
+    if not country_pcts or sum(country_pcts.values()) <= 0:
         return DestinationResult(
             symbol=symbol,
             destination_hhi=None,

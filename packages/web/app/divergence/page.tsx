@@ -1,5 +1,6 @@
 "use client";
 
+import { ValuationLens } from "@/components/ValuationLens";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
@@ -12,6 +13,8 @@ import {
 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { quadrantLabel } from "@/lib/market";
+import { DataState } from "@/components/DataState";
 import { Skeleton } from "@/components/Skeleton";
 import {
   Card,
@@ -29,7 +32,7 @@ import {
 } from "@/components/ui/table";
 
 export default function DivergencePage() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["flow-overlay"],
     queryFn: () => api.getFlowOverlay(),
   });
@@ -37,80 +40,83 @@ export default function DivergencePage() {
   const issuers = data?.issuers ?? [];
   const sorted = [...issuers].sort((a, b) => (b.ground_truth_score ?? -1) - (a.ground_truth_score ?? -1));
 
+  if (error) return <div className="mx-auto max-w-7xl p-6"><DataState error={error} onRetry={() => void refetch()} /></div>;
+  if (!isLoading && !issuers.length) return <div className="mx-auto max-w-7xl p-6"><DataState empty /></div>;
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 animate-fade-up">
+    <div className="gali-page space-y-8 animate-fade-up">
       {/* ── 1. Header Banner ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
         <div>
           <div className="inline-flex items-center gap-2 mb-2">
-            <Badge variant="secondary" className="gap-1.5 py-1 px-3 border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
-              <Activity className="h-3.5 w-3.5 text-indigo-400" />
-              <span>M9 Market Divergence &amp; Flow Overlay</span>
+            <Badge variant="secondary" className="gap-1.5 py-1 px-3 border-info-line bg-info-soft text-info">
+              <Activity className="h-3.5 w-3.5 text-info" />
+              <span>M9 · Valuation positions &amp; fund flows</span>
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-white">Market Divergence Engine</h1>
-          <p className="mt-1 max-w-3xl text-xs sm:text-sm text-slate-300">
-            Compares the Ground Truth Score (the state of physical reserves and mining fundamentals) against capital-market
-            valuation and foreign fund flow, to identify issuers that are mispriced or trading at a fundamental discount.
+          <h1 className="text-3xl font-bold text-ink">Where reserve value meets market price.</h1>
+          <p className="mt-1 max-w-3xl text-sm sm:text-sm text-ink-soft">
+            Compare fundamental scores, valuation positions, and fund flows to explore relative differences between issuers. Classification uses peers with complete gaps and scores. A position relative to the median does not establish fair equity value.
           </p>
         </div>
       </div>
 
-      {/* ── 2. 4 Quadrants Explanation Cards (shadcn Cards) ── */}
+      <ValuationLens />
+      {/* ── 2. 4 Kuadrans Explanation Cards (shadcn Cards) ── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-emerald-500/30 bg-emerald-500/5 p-5 space-y-2 hover:border-emerald-500/50 transition-all">
+        <Card className="border-positive-line bg-positive-soft p-5 space-y-2 hover:border-positive-line transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Quadrant I</span>
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span className="text-sm font-bold uppercase tracking-wider text-positive">Quadrant I</span>
+            <ShieldCheck className="h-4 w-4 text-positive" />
           </div>
-          <div className="font-bold text-white text-sm">Strong Fundamentals / Discounted</div>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            Reserve score &gt; 50, long mine life, market valuation still below intrinsic Reserve-Backed Value.
+          <div className="font-bold text-ink text-sm">Lower gap / higher score</div>
+          <p className="text-[12px] text-muted leading-relaxed">
+            RBV gap percentile below 50 and score percentile of at least 50 within the dataset.
           </p>
         </Card>
 
-        <Card className="border-cyan-500/30 bg-cyan-500/5 p-5 space-y-2 hover:border-cyan-500/50 transition-all">
+        <Card className="border-info-line bg-info-soft p-5 space-y-2 hover:border-info-line transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Quadrant II</span>
-            <TrendingUp className="h-4 w-4 text-cyan-400" />
+            <span className="text-sm font-bold uppercase tracking-wider text-info">Quadrant II</span>
+            <TrendingUp className="h-4 w-4 text-info" />
           </div>
-          <div className="font-bold text-white text-sm">Premium / Fair Valued</div>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            High fundamentals, and the market rewards them with a fair or slightly premium valuation.
+          <div className="font-bold text-ink text-sm">Higher gap / higher score</div>
+          <p className="text-[12px] text-muted leading-relaxed">
+            Both RBV gap and score percentiles are at least 50 within the dataset.
           </p>
         </Card>
 
-        <Card className="border-amber-500/30 bg-amber-500/5 p-5 space-y-2 hover:border-amber-500/50 transition-all">
+        <Card className="border-brand-line bg-brand-soft p-5 space-y-2 hover:border-brand-line transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Quadrant III</span>
-            <TrendingDown className="h-4 w-4 text-amber-400" />
+            <span className="text-sm font-bold uppercase tracking-wider text-brand">Quadrant III</span>
+            <TrendingDown className="h-4 w-4 text-brand" />
           </div>
-          <div className="font-bold text-white text-sm">Speculative / Overvalued</div>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            High share price but depleting reserves or high licensing risk (license cliff).
+          <div className="font-bold text-ink text-sm">Higher gap / lower score</div>
+          <p className="text-[12px] text-muted leading-relaxed">
+            RBV gap percentile of at least 50 and score percentile below 50 within the dataset.
           </p>
         </Card>
 
-        <Card className="border-rose-500/30 bg-rose-500/5 p-5 space-y-2 hover:border-rose-500/50 transition-all">
+        <Card className="border-negative-line bg-negative-soft p-5 space-y-2 hover:border-negative-line transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Quadrant IV</span>
-            <Info className="h-4 w-4 text-rose-400" />
+            <span className="text-sm font-bold uppercase tracking-wider text-negative">Quadrant IV</span>
+            <Info className="h-4 w-4 text-negative" />
           </div>
-          <div className="font-bold text-white text-sm">Depleting / High Risk</div>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            Low physical reserves, mine life &lt; 10 yrs, operating costs above the 3rd quartile.
+          <div className="font-bold text-ink text-sm">Lower gap / lower score</div>
+          <p className="text-[12px] text-muted leading-relaxed">
+            Both RBV gap and score percentiles are below 50 within the dataset.
           </p>
         </Card>
       </div>
 
       {/* ── 3. Main Divergence Table (shadcn Table) ── */}
-      <Card className="border-slate-800/80 bg-[#080d19]/90 p-5 space-y-4 shadow-2xl">
+      <Card className="border-line bg-surface p-5 space-y-4 shadow-panel">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-200">
-            IDX Coal Issuer Divergence Matrix
+          <CardTitle className="text-lg font-semibold tracking-tight text-ink">
+            Relative positions of coal issuers
           </CardTitle>
-          <Badge variant="secondary" className="font-mono text-[11px]">
-            Sorted by Ground Truth Score
+          <Badge variant="secondary" className="font-numeric text-[12px]">
+            Ordered by fundamental score
           </Badge>
         </div>
 
@@ -126,49 +132,44 @@ export default function DivergencePage() {
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
                 <TableHead>Issuer</TableHead>
-                <TableHead className="text-right">Physical Score (M8)</TableHead>
-                <TableHead className="text-right">Market Cap (IDR)</TableHead>
+                <TableHead className="text-right">Fundamental score</TableHead>
+                <TableHead className="text-right">Market capitalization (IDR)</TableHead>
                 <TableHead className="text-right">RBV vs Mkt Gap (%)</TableHead>
-                <TableHead className="text-right">Foreign Flow (30D)</TableHead>
-                <TableHead className="text-center">Divergence Quadrant</TableHead>
+                <TableHead className="text-right">Foreign fund flows (30 days)</TableHead>
+                <TableHead className="text-center">Relative quadrant</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.map((item, idx) => {
-                const score = item.ground_truth_score ?? 0;
-                const quadrant = item.quadrant ?? "Quadrant II (Fair)";
+                const score = item.ground_truth_score;
+                const quadrant = quadrantLabel(item.quadrant);
                 const gap = item.rbv_gap_pct;
                 const flow = item.net_foreign_flow_30d_idr;
 
                 let badgeVariant: "success" | "cyan" | "warning" | "destructive" = "cyan";
-                if (quadrant.includes("I") || quadrant.toLowerCase().includes("terdiskon")) {
-                  badgeVariant = "success";
-                } else if (quadrant.includes("IV") || quadrant.toLowerCase().includes("menipis") || quadrant.toLowerCase().includes("risk")) {
-                  badgeVariant = "destructive";
-                } else if (quadrant.includes("III") || quadrant.toLowerCase().includes("spekulatif")) {
-                  badgeVariant = "warning";
-                }
+                if (quadrant === "Higher gap / lower score" || quadrant === "Lower gap / lower score") badgeVariant = "warning";
+
 
                 return (
-                  <TableRow key={item.symbol} className="font-mono">
-                    <TableCell className="text-slate-500 font-bold">{idx + 1}</TableCell>
+                  <TableRow key={item.symbol} className="font-numeric">
+                    <TableCell className="text-muted font-bold">{idx + 1}</TableCell>
                     <TableCell>
-                      <div className="font-bold text-white">{item.symbol}</div>
-                      <div className="text-[10px] text-slate-400 font-sans truncate max-w-[160px]">
+                      <div className="font-bold text-ink">{item.symbol}</div>
+                      <div className="text-[12px] text-muted font-sans truncate max-w-[160px]">
                         {item.name}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-black text-amber-400 text-sm">
-                      {score > 0 ? score.toFixed(1) : "—"}
+                    <TableCell className="text-right font-bold text-brand text-sm">
+                      {score != null ? score.toFixed(1) : "—"}
                     </TableCell>
-                    <TableCell className="text-right text-slate-300">
+                    <TableCell className="text-right text-ink-soft">
                       {item.market_cap_idr != null ? `Rp ${(item.market_cap_idr / 1e12).toFixed(1)}T` : "—"}
                     </TableCell>
-                    <TableCell className={`text-right font-bold ${gap != null && gap > 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                    <TableCell className={`text-right font-bold ${gap != null && gap > 0 ? "text-positive" : "text-negative"}`}>
                       {gap != null ? `${gap > 0 ? "+" : ""}${gap.toFixed(1)}%` : "—"}
                     </TableCell>
-                    <TableCell className={`text-right ${flow != null && flow >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                    <TableCell className={`text-right ${flow != null && flow >= 0 ? "text-positive" : "text-negative"}`}>
                       {flow != null ? `Rp ${(flow / 1e9).toFixed(1)}B` : "—"}
                     </TableCell>
                     <TableCell className="text-center">

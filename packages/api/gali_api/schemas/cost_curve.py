@@ -20,6 +20,6 @@ class CostCurvePoint(BaseModel):
 class CostCurveResponse(BaseModel):
     commodity: str = "Coal"
     run_id: str
-    benchmark_price_usd: float
+    benchmark_price_usd: float | None
     points: list[CostCurvePoint]
     partial_issuers_excluded: list[str] = Field(default_factory=list)

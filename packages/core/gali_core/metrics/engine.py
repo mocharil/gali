@@ -39,6 +39,7 @@ from gali_core.metrics.destination import compute_destination_hhi
 from gali_core.metrics.evidence import build_evidence_payload
 from gali_core.metrics.license_cliff import compute_license_cliff
 from gali_core.metrics.market_divergence import compute_market_divergence
+from gali_core.metrics.periods import latest_year_rows
 from gali_core.metrics.quality import compute_quality_adjustment
 from gali_core.metrics.rbv import compute_rbv
 from gali_core.metrics.rli import compute_rli
@@ -95,6 +96,11 @@ async def run_metric_pipeline(
     )
     issuers = res_issuers.scalars().all()
     symbols = [i.symbol for i in issuers]
+    if not symbols:
+        await session.rollback()
+        raise MetricValidationError(
+            "No in-universe issuer data. Ingest Sectors data and resolve the ownership graph before publishing metrics."
+        )
 
     # 3. Fetch graph links
     res_links = await session.execute(select(IssuerMiningLink).where(IssuerMiningLink.symbol.in_(symbols)))
@@ -102,12 +108,15 @@ async def run_metric_pipeline(
     links_by_symbol: dict[str, list[dict[str, Any]]] = {s: [] for s in symbols}
     all_company_slugs: set[str] = set()
     for edge_link in all_links:
+        if edge_link.confidence is None or edge_link.confidence < ASSUMPTIONS.min_match_confidence:
+            continue
         links_by_symbol[edge_link.symbol].append(
             {
                 "company_slug": edge_link.company_slug,
                 "effective_ownership_pct": edge_link.effective_ownership_pct,
                 "confidence": edge_link.confidence,
                 "method": edge_link.method,
+                "path": edge_link.path,
             }
         )
         all_company_slugs.add(edge_link.company_slug)
@@ -117,7 +126,7 @@ async def run_metric_pipeline(
         select(CompanyPerformance).where(CompanyPerformance.company_slug.in_(list(all_company_slugs)))
     )
     perf_map: dict[str, dict[str, Any]] = {}
-    for p in res_perf.scalars().all():
+    for p in latest_year_rows(res_perf.scalars().all()):
         perf_map[p.company_slug] = {
             "total_reserves_mt": p.total_reserves_mt,
             "proven_reserves_mt": p.proven_reserves_mt,
@@ -131,7 +140,7 @@ async def run_metric_pipeline(
         select(CompanyFinancials).where(CompanyFinancials.company_slug.in_(list(all_company_slugs)))
     )
     fin_map: dict[str, dict[str, Any]] = {}
-    for f in res_fin.scalars().all():
+    for f in latest_year_rows(res_fin.scalars().all()):
         fin_map[f.company_slug] = {
             "revenue_usd": f.revenue_usd,
             "cost_of_revenue_usd": f.cost_of_revenue_usd,
@@ -144,7 +153,7 @@ async def run_metric_pipeline(
         select(CompanyProduct).where(CompanyProduct.company_slug.in_(list(all_company_slugs)))
     )
     prod_map: dict[str, list[dict[str, Any]]] = {slug: [] for slug in all_company_slugs}
-    for pr in res_prod.scalars().all():
+    for pr in latest_year_rows(res_prod.scalars().all()):
         prod_map[pr.company_slug].append(
             {
                 "product_name": pr.product_name,
@@ -175,7 +184,7 @@ async def run_metric_pipeline(
         select(SalesDestination).where(SalesDestination.company_slug.in_(list(all_company_slugs)))
     )
     dest_map: dict[str, list[dict[str, Any]]] = {slug: [] for slug in all_company_slugs}
-    for dst in res_dest.scalars().all():
+    for dst in latest_year_rows(res_dest.scalars().all()):
         dest_map[dst.company_slug].append(
             {
                 "country": dst.country,
@@ -207,25 +216,33 @@ async def run_metric_pipeline(
 
     # 5. Fetch market cap & foreign flows
     res_mcap = await session.execute(select(IdxCompany).where(IdxCompany.symbol.in_(symbols)))
-    mcap_map: dict[str, float] = {c.symbol: float(c.market_cap_idr or 0.0) for c in res_mcap.scalars().all()}
+    mcap_map: dict[str, float | None] = {
+        c.symbol: float(c.market_cap_idr) if c.market_cap_idr is not None else None for c in res_mcap.scalars().all()
+    }
 
     res_flows = await session.execute(
         select(ForeignFlow.symbol, text("SUM(net_foreign_inflow)"))
-        .where(ForeignFlow.symbol.in_(symbols))
+        .where(
+            ForeignFlow.symbol.in_(symbols),
+            ForeignFlow.date > today - dt.timedelta(days=30),
+            ForeignFlow.date <= today,
+        )
         .group_by(ForeignFlow.symbol)
     )
     flow_map: dict[str, float] = {row[0]: float(row[1] or 0.0) for row in res_flows.all()}
 
     # 6. Fetch latest commodity benchmark prices
     res_prices = await session.execute(
-        select(CommodityPrice).order_by(CommodityPrice.commodity, desc(CommodityPrice.observed_on))
+        select(CommodityPrice)
+        .where(CommodityPrice.observed_on <= today)
+        .order_by(CommodityPrice.commodity, desc(CommodityPrice.observed_on))
     )
     bench_price_map: dict[str, float] = {}
     for bp in res_prices.scalars().all():
         if bp.commodity not in bench_price_map:
             bench_price_map[bp.commodity] = float(bp.price)
 
-    coal_bench_price = bench_price_map.get("Coal", 102.87)
+    coal_bench_price = bench_price_map.get("Coal")
 
     # 7. Compute M1 to M7 per issuer
     rli_results: dict[str, Any] = {}
@@ -235,12 +252,26 @@ async def run_metric_pipeline(
     quality_results: dict[str, Any] = {}
     dest_results: dict[str, Any] = {}
     contract_results: dict[str, Any] = {}
+    model_links_by_symbol: dict[str, list[dict[str, Any]]] = {}
 
     for sym in symbols:
         l_list = links_by_symbol.get(sym, [])
+        # A graph's issuer identity can be linked to itself without operating
+        # records. Keep that node in the graph, but not in the operator model.
+        model_links = [
+            link
+            for link in l_list
+            if not (
+                len(l_list) > 1
+                and link.get("path") == [link["company_slug"]]
+                and link["company_slug"] not in perf_map
+                and link["company_slug"] not in fin_map
+            )
+        ]
+        model_links_by_symbol[sym] = model_links
 
         # M1
-        rli_res = compute_rli(sym, l_list, perf_map)
+        rli_res = compute_rli(sym, model_links, perf_map)
         rli_results[sym] = rli_res
 
         # M2
@@ -248,7 +279,7 @@ async def run_metric_pipeline(
         rbv_res = compute_rbv(
             symbol=sym,
             rli_years=rli_res.rli_years,
-            links=l_list,
+            links=model_links,
             financials_map=fin_map,
             market_cap_idr=mcap_idr,
             discount_rate=ASSUMPTIONS.discount_rate,
@@ -291,7 +322,15 @@ async def run_metric_pipeline(
         # M6
         all_sym_dests: list[dict[str, Any]] = []
         for lnk in l_list:
-            all_sym_dests.extend(dest_map.get(lnk["company_slug"], []))
+            ownership = lnk["effective_ownership_pct"] / 100.0
+            all_sym_dests.extend(
+                {
+                    **dst,
+                    "volume": (dst.get("volume") or 0.0) * ownership,
+                    "pct_of_sales_volume": (dst.get("pct_of_sales_volume") or 0.0) * ownership,
+                }
+                for dst in dest_map.get(lnk["company_slug"], [])
+            )
         dest_res = compute_destination_hhi(sym, all_sym_dests)
         dest_results[sym] = dest_res
 
@@ -311,6 +350,8 @@ async def run_metric_pipeline(
         {
             "symbol": sym,
             "rli_years": rli_results[sym].rli_years,
+            "reserve_backed_value_usd": rbv_results[sym].reserve_backed_value_usd,
+            "cash_cost_per_ton_usd": cost_curve_map[sym].cash_cost_per_ton_usd,
             "license_cliff_3y": cliff_results[sym].license_cliff_3y,
             "cost_curve_percentile": cost_curve_map[sym].cost_curve_percentile,
             "destination_hhi": dest_results[sym].destination_hhi,
@@ -328,16 +369,29 @@ async def run_metric_pipeline(
             "symbol": sym,
             "rbv_gap_pct": rbv_results[sym].rbv_gap_pct,
             "ground_truth_score": score_map[sym].ground_truth_score,
+            "confidence": score_map[sym].confidence,
         }
         for sym in symbols
     ]
     div_results_list = compute_market_divergence(div_inputs, foreign_flows_map=flow_map)
     div_map = {d.symbol: d for d in div_results_list}
 
-    # 11. Fetch raw_response_ids for evidence mapping
-    res_raw = await session.execute(select(RawResponse.id, RawResponse.endpoint).where(RawResponse.status_code == 200))
-    raw_responses_lookup = res_raw.all()
-    all_raw_ids = [r[0] for r in raw_responses_lookup]
+    # References describe relevant cached endpoints, not exact field-level lineage.
+    # Keep the latest successful response per endpoint and pagination/query key.
+    res_raw = await session.execute(
+        select(RawResponse).where(RawResponse.status_code == 200).order_by(desc(RawResponse.fetched_at))
+    )
+    latest_raw: dict[tuple[str, str], RawResponse] = {}
+    for raw in res_raw.scalars().all():
+        latest_raw.setdefault((raw.endpoint, raw.params_hash), raw)
+    shared_endpoints = {
+        "/v2/mining/companies/",
+        "/v2/mining/licenses/",
+        "/v2/mining/sites/",
+        "/v2/mining/contracts/",
+        "/v2/companies/",
+        "/v2/mining/commodities/Coal/price/",
+    }
 
     # 12. Assemble and write IssuerMetrics rows
     created_metric_rows: list[IssuerMetrics] = []
@@ -364,6 +418,14 @@ async def run_metric_pipeline(
             null_fields.append(
                 {"field": "cash_cost_per_ton_usd", "reason": cc.null_reason or "missing cost of revenue"}
             )
+        if cliff.license_cliff_3y is None:
+            null_fields.append(
+                {"field": "license_cliff_3y", "reason": cliff.null_reason or "missing license dates or areas"}
+            )
+        if qual.benchmark_price_usd is None:
+            null_fields.append(
+                {"field": "benchmark_price_usd", "reason": "no commodity reference price in the dataset"}
+            )
         if dst.destination_hhi is None:
             null_fields.append(
                 {"field": "destination_hhi", "reason": dst.null_reason or "no sales destination data reported"}
@@ -371,6 +433,10 @@ async def run_metric_pipeline(
         if ct.contractor_hhi is None:
             null_fields.append(
                 {"field": "contractor_hhi", "reason": ct.null_reason or "no mining contractor contracts recorded"}
+            )
+        if ct.contract_cliff_12m is None:
+            null_fields.append(
+                {"field": "contract_cliff_12m", "reason": ct.null_reason or "missing contract end dates"}
             )
 
         field_prov = {
@@ -382,15 +448,68 @@ async def run_metric_pipeline(
             "top_export_country": dst.top_destination,
             "top_export_country_pct": dst.top_destination_pct,
             "quadrant": div.quadrant,
+            "rbv_model": {
+                "basis": "gross_profit_annuity_proxy",
+                "financial_coverage_pct": rbv.financial_coverage_pct,
+                "warnings": list(rbv.warnings),
+                "scope": "Gross profit excludes overhead, tax, reinvestment and the enterprise-to-equity bridge; not fair value.",
+                "included_operator_slugs": [link["company_slug"] for link in model_links_by_symbol[sym]],
+                "excluded_identity_links": [
+                    link["company_slug"]
+                    for link in links_by_symbol.get(sym, [])
+                    if link not in model_links_by_symbol[sym]
+                ],
+            },
         }
 
+        entity_slugs = {link["company_slug"] for link in links_by_symbol.get(sym, [])}
+        related_sources = [
+            raw
+            for raw in latest_raw.values()
+            if raw.endpoint in shared_endpoints or raw.endpoint.rstrip("/").split("/")[-1] in entity_slugs | {sym}
+        ]
+        field_prov["reference_scope"] = (
+            "Latest relevant cached endpoints, including shared registries; not exact field-level lineage"
+        )
+        field_prov["performance_years"] = {slug: perf_map[slug]["year"] for slug in entity_slugs if slug in perf_map}
+        field_prov["financial_years"] = {slug: fin_map[slug]["year"] for slug in entity_slugs if slug in fin_map}
         evidence_payload = build_evidence_payload(
             symbol=sym,
-            raw_response_ids=all_raw_ids[:20],  # Link to verified cached responses
+            raw_response_ids=[raw.id for raw in related_sources],
             field_provenance=field_prov,
             null_fields=null_fields,
             assumptions=assumptions_snapshot,
         )
+        evidence_payload["source_references"] = [
+            {"id": raw.id, "endpoint": raw.endpoint, "fetched_at": raw.fetched_at.isoformat()}
+            for raw in related_sources
+        ]
+        # Capture simulation inputs with the published run, so later ingestion
+        # cannot change an old run's scenario baseline or destination exposure.
+        scenario_revenue = 0.0
+        scenario_cost = 0.0
+        has_scenario_financials = False
+        for link in links_by_symbol.get(sym, []):
+            financials = fin_map.get(link["company_slug"], {})
+            revenue, cost = financials.get("revenue_usd"), financials.get("cost_of_revenue_usd")
+            if revenue is not None and cost is not None:
+                ownership = link["effective_ownership_pct"] / 100.0
+                scenario_revenue += revenue * ownership
+                scenario_cost += cost * ownership
+                has_scenario_financials = True
+        reconciled = (
+            has_scenario_financials
+            and rbv.attributable_gross_profit_usd is not None
+            and math.isclose(
+                scenario_revenue - scenario_cost, rbv.attributable_gross_profit_usd, rel_tol=1e-6, abs_tol=1.0
+            )
+        )
+        evidence_payload["scenario_inputs"] = {
+            "attributable_revenue_usd": scenario_revenue if reconciled else None,
+            "attributable_cost_usd": scenario_cost if reconciled else None,
+            "destinations": dst.destinations,
+            "discount_rate": ASSUMPTIONS.discount_rate,
+        }
 
         row = IssuerMetrics(
             run_id=run_id,
@@ -468,6 +587,13 @@ async def run_metric_pipeline(
             run_obj.status = "failed"
             await session.commit()
             raise MetricValidationError(f"Sanity check failed: {r.symbol} evidence payload is empty")
+
+    if not any(row.reserve_backed_value_usd is not None for row in created_metric_rows):
+        run_obj.status = "failed"
+        await session.commit()
+        raise MetricValidationError(
+            "No usable RBV calculations. Ingest operating data and financials before publication."
+        )
 
     # 14. Gate validation passed -> flip Blue/Green published pointer
     run_obj.status = "validated"

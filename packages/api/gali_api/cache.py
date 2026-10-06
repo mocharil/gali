@@ -17,7 +17,7 @@ def make_cache_key(prefix: str, run_id: str, endpoint: str, params: dict[str, An
     """Generate a deterministic versioned cache key."""
     sorted_params = json.dumps(params, sort_keys=True, default=str)
     param_hash = hashlib.sha256(sorted_params.encode("utf-8")).hexdigest()[:16]
-    return f"gali:v1:{run_id}:{prefix}:{endpoint}:{param_hash}"
+    return f"gali:research-v4:{run_id}:{prefix}:{endpoint}:{param_hash}"
 
 
 async def get_cached_json(redis: aioredis.Redis | None, key: str) -> dict[str, Any] | list[Any] | None:

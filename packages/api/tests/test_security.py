@@ -166,6 +166,7 @@ async def test_rate_limit_429_when_exceeded():
         settings_obj = mock.MagicMock()
         settings_obj.rate_limit_anon_per_min = anon_limit
         settings_obj.rate_limit_keyed_per_min = 600
+        settings_obj.trust_proxy_headers = False
         mock_cfg.return_value = settings_obj
 
         client = TestClient(mini, raise_server_exceptions=False)
@@ -242,8 +243,8 @@ async def test_rate_limit_exempt_paths_not_counted():
 
 
 @pytest.mark.anyio
-async def test_rate_limit_keyed_uses_higher_limit():
-    """Keyed requests (X-API-Key header) must use rate_limit_keyed_per_min, not anon limit."""
+async def test_forged_api_key_and_proxy_headers_cannot_bypass_public_limit():
+    """Unvalidated API keys and spoofed proxy headers cannot create a fresh quota bucket."""
     anon_limit = 2
     keyed_limit = 100
 
@@ -278,6 +279,7 @@ async def test_rate_limit_keyed_uses_higher_limit():
         settings_obj = mock.MagicMock()
         settings_obj.rate_limit_anon_per_min = anon_limit
         settings_obj.rate_limit_keyed_per_min = keyed_limit
+        settings_obj.trust_proxy_headers = False
         mock_cfg.return_value = settings_obj
 
         client = TestClient(mini, raise_server_exceptions=False)
@@ -290,17 +292,13 @@ async def test_rate_limit_keyed_uses_higher_limit():
         resp = client.get("/data")
         assert resp.status_code == 429, "Anon limit not enforced"
 
-        # With API key: should not 429 until keyed_limit (well above anon_limit)
-        # Verify the key used contains "keyed" tier marker
-        for _key in tracking_redis.keys_seen:
-            if "keyed" in _key:
-                break
-        else:
-            # No keyed key yet — do one keyed request and check
-            resp = client.get("/data", headers={"X-API-Key": "test-key-abc123"})
-            assert resp.status_code == 200, "Keyed request blocked at anon limit"
-            keyed_keys = [k for k in tracking_redis.keys_seen if "keyed" in k]
-            assert keyed_keys, "Keyed request did not use 'keyed' tier key"
+        for fake_key in ["key-a", "key-b"]:
+            resp = client.get(
+                "/data", headers={"X-API-Key": fake_key, "X-Real-IP": "1.2.3.4", "X-Forwarded-For": "9.8.7.6"}
+            )
+            assert resp.status_code == 429
+        assert len(set(tracking_redis.keys_seen)) == 1
+        assert all(":anon:" in key for key in tracking_redis.keys_seen)
 
 
 def test_redis_dependency_loop_lifecycle():

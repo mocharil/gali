@@ -32,11 +32,21 @@ on:
 
 jobs:
   ingest:
+    if: ${{ vars.GALI_REFRESH_ENABLED == 'true' && vars.GALI_PROJECT_FROZEN != 'true' }}
     name: "gali ingest --tier ${{ github.event.inputs.tier || 'hot' }}"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
+      - name: Enforce competition deadline
+        run: |
+          python - <<'PY_GUARD'
+          import datetime as dt
+          import sys
+          freeze = dt.datetime(2026, 10, 8, 16, 59, tzinfo=dt.timezone.utc)
+          if dt.datetime.now(dt.timezone.utc) >= freeze:
+              sys.exit("Project deadline passed; refresh is frozen")
+          PY_GUARD
       - name: Checkout repository
         uses: actions/checkout@v4
 
