@@ -4,7 +4,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { VisualAsset } from "@/components/VisualAsset";
 import { Scale } from "lucide-react";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, Tooltip } from "recharts";
@@ -15,11 +15,13 @@ import { SCORE_PILLARS, pillarValue, isScoreRankable } from "@/lib/scores";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { ScoreCoverage } from "@/components/ScoreCoverage";
 import { DataState } from "@/components/DataState";
-import { Skeleton } from "@/components/Skeleton";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/LoadingState";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { IssuerLogo } from "@/components/IssuerLogo";
+import { IssuerPicker } from "@/components/IssuerPicker";
 
 const PRESETS = [["ADRO", "BYAN"], ["PTBA", "ITMG"], ["ADRO", "ADMR"], ["ITMG", "GEMS"]];
 function number(value: number | null | undefined, suffix = "", digits = 1) {
@@ -78,14 +80,25 @@ export default function ComparePage() {
       <h1 className="text-3xl font-bold text-ink">Two issuers. Clear trade-offs.</h1>
       <p className="mt-2 text-sm text-muted max-w-3xl">Two issuers from the same active dataset. Read physical metrics alongside data quality before drawing conclusions.</p>
     </div>
-    <div className="flex flex-wrap gap-2">{PRESETS.map(([pa, pb]) => <Button variant="outline" size="sm" key={`${pa}-${pb}`} onClick={() => selectPair(pa, pb)}>{pa} vs {pb}</Button>)}</div>
+    <div className="flex flex-wrap gap-2">
+      {PRESETS.map(([pa, pb]) => (
+        <Button variant="outline" size="sm" key={`${pa}-${pb}`} onClick={() => selectPair(pa, pb)} className="gap-1.5 h-8">
+          <IssuerLogo symbol={pa} size="xs" />
+          <span>{pa}</span>
+          <span className="text-muted text-xs">vs</span>
+          <IssuerLogo symbol={pb} size="xs" />
+          <span>{pb}</span>
+        </Button>
+      ))}
+    </div>
     <div className="grid sm:grid-cols-2 gap-4">
       {[{ symbol: tickerA, detail: a, side: "A" }, { symbol: tickerB, detail: b, side: "B" }].map(({ symbol, detail, side }) => <Card key={side} className="p-5 space-y-3">
-        <div className="flex flex-wrap justify-between items-center gap-2"><label htmlFor={`issuer-${side}`} className={side === "A" ? "text-brand text-sm" : "text-info text-sm"}>Issuer {side}</label>{detail && <><ConfidenceBadge dataQuality={detail.data_quality} /><ScoreCoverage coverage={typeof detail.confidence?.effective_weight === "number" ? detail.confidence.effective_weight * 100 : null} eligible={isScoreRankable({ data_quality: detail.data_quality, ground_truth_score: detail.ground_truth_score, confidence_pct: typeof detail.confidence?.effective_weight === "number" ? detail.confidence.effective_weight * 100 : 0 })} /></>}</div>
-        <select id={`issuer-${side}`} value={symbol} onChange={(e) => selectPair(side === "A" ? e.target.value : tickerA, side === "B" ? e.target.value : tickerB)} className="w-full min-w-0 rounded-lg border border-line-strong bg-surface p-3 text-sm text-ink">
-          {!issuers.data?.some((issuer) => issuer.symbol === symbol) && <option value={symbol}>{symbol}</option>}
-          {issuers.data?.map((issuer) => <option key={issuer.symbol} value={issuer.symbol} disabled={issuer.symbol === (side === "A" ? tickerB : tickerA)}>{issuer.symbol} — {issuer.name}</option>)}
-        </select>
+        <div className="space-y-3">
+          <IssuerPicker label={`Issuer ${side}`} tone={side === "A" ? "brand" : "info"} value={symbol} onChange={(next) => selectPair(side === "A" ? next : tickerA, side === "B" ? next : tickerB)}
+            options={(issuers.data ?? []).map((issuer) => ({ symbol: issuer.symbol, name: issuer.name, score: issuer.ground_truth_score }))}
+            disabled={{ [side === "A" ? tickerB : tickerA]: `Selected as Issuer ${side === "A" ? "B" : "A"}` }} className="w-full" />
+          {detail && <div className="flex flex-wrap items-center gap-2"><ConfidenceBadge dataQuality={detail.data_quality} /><ScoreCoverage coverage={typeof detail.confidence?.effective_weight === "number" ? detail.confidence.effective_weight * 100 : null} eligible={isScoreRankable({ data_quality: detail.data_quality, ground_truth_score: detail.ground_truth_score, confidence_pct: typeof detail.confidence?.effective_weight === "number" ? detail.confidence.effective_weight * 100 : 0 })} /></div>}
+        </div>
         <VisualAsset name="mine-cutaway" className="gali-comparison-art" />
         {detail && <dl className="space-y-2">{[
           { label: "Reserve life", value: number(detail.rli_years, " years") },
@@ -95,7 +108,7 @@ export default function ComparePage() {
         {detail && <div className="flex justify-between text-sm gap-3"><span className="text-muted">Score <span className="font-numeric text-ink">{number(detail.ground_truth_score)}</span> · RBV <span className="font-numeric text-ink">{usd(detail.reserve_backed_value_usd)}</span></span><Link href={`/issuer/${symbol}`} className="text-brand hover:underline">Profile →</Link></div>}
       </Card>)}
     </div>
-    {error ? <DataState error={error} onRetry={() => { issuers.refetch(); queryA.refetch(); queryB.refetch(); }} /> : loading ? <Skeleton className="h-80 rounded-xl" /> : a && b ? <>
+    {error ? <DataState error={error} onRetry={() => Promise.all([issuers.refetch(), queryA.refetch(), queryB.refetch()])} /> : loading ? <LoadingState label={`Loading ${tickerA} and ${tickerB} comparison…`} skeleton /> : a && b ? <>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5 space-y-4 min-w-0"><CardTitle>Five pillars of the fundamental score</CardTitle>
           {allPillarsPresent ? <div className="h-80"><ResponsiveContainer width="100%" height="100%"><RadarChart data={radar} outerRadius="65%"><PolarGrid stroke="var(--line)" /><PolarAngleAxis dataKey="label" tick={{ fill: "var(--chart-axis)", fontSize: 12 }} /><PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} /><Radar isAnimationActive={!reducedMotion} animationDuration={220} name={tickerA} dataKey="a" stroke="var(--chart-gold)" fill="var(--chart-gold)" fillOpacity={0.2} /><Radar isAnimationActive={!reducedMotion} animationDuration={220} name={tickerB} dataKey="b" stroke="var(--chart-cyan)" fill="var(--chart-cyan)" fillOpacity={0.2} /><Legend formatter={(value) => <span className="text-muted">{value}</span>} /><Tooltip contentStyle={{ backgroundColor: "var(--surface)", borderColor: "var(--line)" }} /></RadarChart></ResponsiveContainer></div>
@@ -106,7 +119,7 @@ export default function ComparePage() {
           <Button asChild variant="outline"><Link href={`/scenario?a=${tickerA}&b=${tickerB}`}>Test a scenario across all issuers →</Link></Button>
         </Card>
       </div>
-      <Card className="p-5 space-y-4"><CardTitle>Comparison metrics</CardTitle><Table><TableHeader><TableRow><TableHead>Metric</TableHead><TableHead>{tickerA}</TableHead><TableHead>{tickerB}</TableHead></TableRow></TableHeader><TableBody>
+      <Card className="p-5 space-y-4"><CardTitle>Comparison metrics</CardTitle><Table><TableHeader><TableRow><TableHead>Metric</TableHead><TableHead><div className="inline-flex items-center gap-1.5"><IssuerLogo symbol={tickerA} size="xs" /><span>{tickerA}</span></div></TableHead><TableHead><div className="inline-flex items-center gap-1.5"><IssuerLogo symbol={tickerB} size="xs" /><span>{tickerB}</span></div></TableHead></TableRow></TableHeader><TableBody>
         {METRICS.map((metric) => <TableRow key={metric.key}><TableCell>{metric.label}</TableCell><TableCell className="font-numeric text-brand">{metric.format(a[metric.key] as number | null)}</TableCell><TableCell className="font-numeric text-info">{metric.format(b[metric.key] as number | null)}</TableCell></TableRow>)}
         <TableRow><TableCell>Largest sales destination</TableCell>{[a, b].map((issuer) => <TableCell key={issuer.symbol}>{issuer.top_destination ?? "—"}{issuer.top_destination_pct != null ? ` (${issuer.top_destination_pct.toFixed(1)}%)` : ""}</TableCell>)}</TableRow>
         <TableRow><TableCell>Data as of</TableCell><TableCell>{a.as_of}</TableCell><TableCell>{b.as_of}</TableCell></TableRow>

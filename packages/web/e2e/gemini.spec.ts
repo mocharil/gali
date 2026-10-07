@@ -25,16 +25,16 @@ test("AI endpoints: missing credentials, origin check, bounded input, and no fab
   const check = await request.post("/api/ai/check"); expect(check.status()).toBe(503);
 });
 
-test("Without credentials: data analysis works and Gemini setup is explicit", async ({ page }) => {
+test("Without credentials: data analysis works and AI setup is explicit", async ({ page }) => {
   await page.goto("/dashboard");
   const dialog = await open(page);
   await expect(dialog.getByRole("button", { name: "Data analysis", exact: true })).toHaveAttribute("aria-pressed", "true");
   await dialog.getByLabel("Analysis question").fill("Compare BUMI and BYAN");
   await dialog.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(dialog).toContainText("Comparison BUMI and BYAN");
-  await dialog.getByRole("button", { name: "Gemini analysis", exact: true }).click();
+  await dialog.getByRole("button", { name: "AI analysis", exact: true }).click();
   await expect(dialog).toContainText("Setup required");
-  await expect(dialog.getByRole("button", { name: "Ask Gemini", exact: true })).toBeDisabled();
+  await expect(dialog.getByRole("button", { name: "Ask AI", exact: true })).toBeDisabled();
   await dialog.getByRole("button", { name: "Use data analysis" }).click();
   await expect(dialog).toContainText("Comparison BUMI and BYAN");
 });
@@ -46,11 +46,11 @@ test("Configured Gemini: connection test, source-linked answers, follow-ups and 
   await page.route("**/api/ai/analyze", (route) => { posted = [...posted, route.request().postDataJSON()]; return route.fulfill({ json: { ...fixture, request_id: `fixture-${posted.length}` } }); });
   await page.goto("/dashboard");
   const dialog = await open(page);
-  await expect(dialog.getByRole("button", { name: "Gemini analysis", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog.getByRole("button", { name: "AI analysis", exact: true })).toHaveAttribute("aria-pressed", "true");
   await dialog.getByRole("button", { name: "Test connection", exact: true }).click();
   await expect(dialog).toContainText("Access verified");
   await dialog.getByLabel("Analysis question").fill("Compare BUMI and BYAN's strengths and risks");
-  await dialog.getByRole("button", { name: "Ask Gemini", exact: true }).click();
+  await dialog.getByRole("button", { name: "Ask AI", exact: true }).click();
   const answer = dialog.getByTestId("ai-answer").last(); await expect(answer).toContainText(fixture.summary.text);
   expect(posted[0].mode).toBe("chat"); expect(posted[0].issuers).toBeUndefined(); expect(posted[0].context).toBeUndefined();
   await answer.getByText(/^View evidence/).click();
@@ -69,11 +69,11 @@ test("Configured Gemini: connection test, source-linked answers, follow-ups and 
 test("Gemini errors remain errors and a manual retry can succeed", async ({ page }) => {
   await setup(page); let count = 0;
   await page.route("**/api/ai/analyze", (route) => ++count === 1
-    ? route.fulfill({ status: 429, json: { detail: "Gemini is at its request limit. Wait a moment and try again.", code: "AI_QUOTA" } })
+    ? route.fulfill({ status: 429, json: { detail: "The AI service is at its request limit. Wait a moment and try again.", code: "AI_QUOTA" } })
     : route.fulfill({ json: fixture }));
   await page.goto("/dashboard"); const dialog = await open(page);
   await dialog.getByLabel("Analysis question").fill("What risks should I investigate?");
-  await dialog.getByRole("button", { name: "Ask Gemini", exact: true }).click();
+  await dialog.getByRole("button", { name: "Ask AI", exact: true }).click();
   await expect(dialog.getByRole("alert")).toContainText("request limit"); await expect(dialog.getByTestId("ai-answer")).toHaveCount(0);
   await dialog.getByRole("button", { name: "Try again", exact: true }).click(); await expect(dialog.getByTestId("ai-answer")).toHaveCount(1);
 });
@@ -85,11 +85,11 @@ test("Stop and close cancel pending answers without late UI updates", async ({ p
     await route.fulfill({ json: fixture }).catch(() => undefined);
   });
   await page.goto("/dashboard"); const dialog = await open(page);
-  await dialog.getByLabel("Analysis question").fill("Explain BUMI"); await dialog.getByRole("button", { name: "Ask Gemini", exact: true }).click();
+  await dialog.getByLabel("Analysis question").fill("Explain BUMI"); await dialog.getByRole("button", { name: "Ask AI", exact: true }).click();
   await expect(dialog.getByRole("button", { name: "Stop analysis", exact: true })).toBeVisible();
   await expect.poll(() => Boolean(release)).toBe(true); await dialog.getByRole("button", { name: "Stop analysis", exact: true }).click(); release!();
-  await expect(dialog.getByRole("button", { name: "Ask Gemini", exact: true })).toBeEnabled(); await expect(dialog.getByTestId("ai-answer")).toHaveCount(0);
-  release = undefined; await dialog.getByRole("button", { name: "Ask Gemini", exact: true }).click(); await expect.poll(() => Boolean(release)).toBe(true);
+  await expect(dialog.getByRole("button", { name: "Ask AI", exact: true })).toBeEnabled(); await expect(dialog.getByTestId("ai-answer")).toHaveCount(0);
+  release = undefined; await dialog.getByRole("button", { name: "Ask AI", exact: true }).click(); await expect.poll(() => Boolean(release)).toBe(true);
   await page.keyboard.press("Escape"); release!(); await expect(dialog).toBeHidden();
   await open(page); await expect(dialog.getByTestId("ai-answer")).toHaveCount(0);
 });
@@ -115,7 +115,7 @@ test("Scenario AI uses the selected issuer and active parameters; switching clea
   await panel.getByRole("button", { name: "Generate AI brief", exact: true }).click(); await expect(panel.getByTestId("ai-answer")).toBeVisible(); expect(posted[1].symbols).toEqual(["PTBA"]);
   await page.getByRole("button", { name: "Reset", exact: true }).click(); await expect(panel.getByTestId("ai-answer")).toHaveCount(0);
   const dialog = await open(page); await expect(dialog).toContainText("Scenario Studio parameters attached");
-  await dialog.getByLabel("Analysis question").fill("Explain the active scenario"); await dialog.getByRole("button", { name: "Ask Gemini", exact: true }).click(); await expect(dialog.getByTestId("ai-answer")).toBeVisible();
+  await dialog.getByLabel("Analysis question").fill("Explain the active scenario"); await dialog.getByRole("button", { name: "Ask AI", exact: true }).click(); await expect(dialog.getByTestId("ai-answer")).toBeVisible();
   expect(posted[2].mode).toBe("chat"); expect(posted[2].symbols).toEqual(["PTBA"]); expect(posted[2].scenario).toMatchObject({ price_shock_pct: 0, discount_rate: .12, variable_cost_share: .65, license_cliff_expiry_shock: false, destination_shocks: {} });
 });
 
@@ -125,7 +125,7 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 }); await setup(page);
     await page.route("**/api/ai/analyze", (route) => route.fulfill({ json: fixture })); await page.goto("/dashboard");
     const dialog = await open(page); await dialog.getByLabel("Analysis question").fill("Compare BUMI and BYAN");
-    await dialog.getByRole("button", { name: width === 390 ? "Ask" : "Ask Gemini", exact: true }).click();
+    await dialog.getByRole("button", { name: width === 390 ? "Ask" : "Ask AI", exact: true }).click();
     await expect(dialog.getByTestId("ai-answer")).toBeVisible();
     const dimensions = await dialog.evaluate((element) => ({ width: element.scrollWidth, client: element.clientWidth, document: document.documentElement.scrollWidth, viewport: window.innerWidth }));
     expect(dimensions.width).toBeLessThanOrEqual(dimensions.client + 1); expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);

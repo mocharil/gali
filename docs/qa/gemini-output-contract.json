@@ -1,6 +1,6 @@
 {
-  "version": "0.5.1",
-  "generated_at": "2026-10-06T02:08:46.685Z",
+  "version": "0.5.2",
+  "generated_at": "2026-10-07T05:44:35.266Z",
   "live_provider_test": false,
   "response_source": "Authored test-only prose validated against real server-built evidence; no Gemini request",
   "scenarios": [

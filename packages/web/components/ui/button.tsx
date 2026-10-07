@@ -1,15 +1,18 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "amber" | "cyan";
   size?: "default" | "sm" | "lg" | "icon" | "xs";
   asChild?: boolean;
+  loading?: boolean;
+  loadingText?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
+  ({ className, variant = "default", size = "default", asChild = false, loading = false, loadingText = "Working…", ...props }, ref) => {
     const variantStyles = {
       default: "gali-button-primary",
       destructive: "bg-negative-soft text-negative border border-negative-line hover:bg-negative-soft hover:border-negative-line",
@@ -50,8 +53,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return (
-      <button className={buttonClassName} ref={ref} {...restProps}>
-        {children}
+      <button className={buttonClassName} ref={ref} {...restProps} disabled={loading || restProps.disabled} aria-busy={loading || undefined} data-loading={loading || undefined}>
+        {loading ? <><Loader2 aria-hidden="true" className="h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none" />{loadingText}</> : children}
       </button>
     );
   }

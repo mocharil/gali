@@ -12,12 +12,9 @@ import {
   Scale,
   Clock,
   ArrowRight,
-  ExternalLink,
   X,
   Bot,
-  Compass,
   CornerDownLeft,
-  ChevronRight,
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";

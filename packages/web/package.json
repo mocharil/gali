@@ -1,6 +1,6 @@
 {
   "name": "@gali/web",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
@@ -18,8 +18,10 @@
     "local": "node scripts/run-mode.mjs simulation dev",
     "test:local": "node scripts/run-browser-tests.mjs",
     "test:research": "node scripts/test-research.mjs",
+    "test:methodology": "node scripts/test-methodology.mjs",
     "test:ai": "node scripts/test-ai.mjs && node scripts/test-ai-output.mjs",
-    "test:ai:output": "node scripts/test-ai-output.mjs"
+    "test:ai:output": "node scripts/test-ai-output.mjs",
+    "test:loading": "node scripts/run-browser-tests.mjs loading.spec.ts"
   },
   "dependencies": {
     "@google/genai": "2.27.0",

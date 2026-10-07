@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { MapPin, X, Copy, Search, ArrowUpRight } from "lucide-react";
 import type { GeoJSONFeature } from "@/lib/types";
 import { api } from "@/lib/api";
 import { useHydrated } from "@/lib/useHydrated";
 import { issuerColor, siteColor, siteSymbols } from "@/lib/sites";
 import { DataState } from "@/components/DataState";
+import { ActionButton } from "./ActionButton";
+import { LoadingState } from "./LoadingState";
 import { GeographicSitesMap } from "@/components/GeographicSitesMap";
 import { VisualAsset } from "@/components/VisualAsset";
+import { IssuerLogo } from "@/components/IssuerLogo";
 
 export function MiningSitesMap({ compact = false, className = "" }: { compact?: boolean; className?: string }) {
   const detailRef = useRef<HTMLDivElement>(null);
@@ -70,7 +73,7 @@ export function MiningSitesMap({ compact = false, className = "" }: { compact?: 
       <div className="min-w-0 space-y-3">
         <div className={`relative overflow-hidden rounded-2xl border border-line bg-surface ${className || (compact ? "h-[280px]" : "h-[320px] sm:h-[420px]")}`} aria-label="Mining site map">
           {!query.isLoading && <GeographicSitesMap key={mapRevision} sites={visible} selected={selected} onSelect={choose} />}
-          {query.isLoading && <div className="absolute inset-0 grid place-items-center bg-surface text-sm text-ink-soft" role="status">Loading sites from the dataset…</div>}
+          {query.isLoading && <div className="absolute inset-0 grid place-items-center bg-surface p-4"><LoadingState label="Loading mining sites…" description="Preparing site coordinates and issuer relationships." /></div>}
           {compact && <Link href="/map" className="absolute bottom-3 right-3 rounded-xl border border-line bg-surface px-3 py-2 text-[12px] font-medium text-info">Open the full map →</Link>}
         </div>
         <div className="gali-card p-4"><div className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Issuer legend">{visibleSymbols.map((symbol) => <span key={symbol} className="inline-flex items-center gap-1.5 text-[12px] text-ink-soft"><span className="h-2.5 w-2.5 rounded-full" style={{ background: issuerColor(symbol) }} />{symbol}</span>)}</div><p className="mt-2 text-[11px] leading-relaxed text-muted">Colors follow the primary issuer; shared sites may link to several issuers. Open a group to explore its sites. Individual marker sizes reflect production when available. Country borders are not mining-license boundaries.</p></div>
@@ -78,10 +81,14 @@ export function MiningSitesMap({ compact = false, className = "" }: { compact?: 
       <div className="min-w-0 space-y-3">
         {selected && <div ref={detailRef} className="relative scroll-mt-28 rounded-2xl border border-brand-line bg-surface p-4" aria-label="Selected site details">
           <button aria-label="Close site details" onClick={clearSelection} className="gali-icon-button absolute right-3 top-3"><X className="h-4 w-4" /></button>
-          <p className="gali-eyebrow">Selected site</p><VisualAsset name="site-operation" className="gali-selected-site-art" /><p className="text-[10px] text-muted">Illustrative operating-site view</p><h3 className="mt-2 pr-10 text-base font-semibold text-ink">{selected.properties.name}</h3>
+          <p className="gali-eyebrow">Selected site</p><VisualAsset name="site-operation" className="gali-selected-site-art" /><p className="text-[10px] text-muted">Illustrative operating-site view</p>
+          <div className="mt-2 flex items-center justify-between pr-8">
+            <h3 className="text-base font-semibold text-ink">{selected.properties.name}</h3>
+            {siteSymbols(selected)[0] && <IssuerLogo symbol={siteSymbols(selected)[0]} size="sm" />}
+          </div>
           <p className="mt-2 text-[12px] text-muted">{selected.properties.company_name ?? selected.properties.company_slug ?? "Operator unavailable"} · {selected.properties.province ?? "Province unavailable"}</p>
           <dl className="mt-4 space-y-2 border-t border-line pt-3 text-[12px]"><div><dt className="text-muted">Coordinates · latitude, longitude</dt><dd className="mt-1 font-numeric text-ink-soft">{selected.geometry.coordinates[1].toFixed(6)}, {selected.geometry.coordinates[0].toFixed(6)}</dd></div><div className="flex items-center justify-between"><dt className="text-muted">Production</dt><dd className="font-numeric text-ink-soft">{selected.properties.production_volume_mt != null ? `${selected.properties.production_volume_mt.toFixed(2)} Mt/year` : "Unavailable"}</dd></div></dl>
-          <div className="mt-4 flex flex-wrap gap-2">{siteSymbols(selected).map((symbol) => <Link key={symbol} href={`/issuer/${symbol}`} className="gali-button gali-button-secondary text-[12px]">Profile {symbol} →</Link>)}<button onClick={copyCoordinates} className="gali-button gali-button-secondary text-[12px]"><Copy className="h-3 w-3" />Copy coordinates</button></div>
+          <div className="mt-4 flex flex-wrap gap-2">{siteSymbols(selected).map((symbol) => <Link key={symbol} href={`/issuer/${symbol}`} className="gali-button gali-button-secondary inline-flex items-center gap-1.5 text-[12px]"><IssuerLogo symbol={symbol} size="xs" />Profile {symbol} →</Link>)}<ActionButton action={copyCoordinates} loadingText="Copying coordinates…" variant="outline" className="text-[12px]"><Copy className="h-3 w-3" />Copy coordinates</ActionButton></div>
           {!siteSymbols(selected).length && <p className="mt-3 text-[12px] text-muted">No issuer links in the dataset.</p>}
           {copyMessage && <p role="status" className="mt-3 text-[12px] text-brand">{copyMessage}</p>}
         </div>}

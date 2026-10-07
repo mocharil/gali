@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { DatasetContext, type DatasetStatus } from "@/components/DatasetContext";
+import { ActivityProvider } from "@/components/ActivityProvider";
 
 export function Providers({ children, dataset }: { children: React.ReactNode; dataset: DatasetStatus }) {
   const [client] = useState(
@@ -17,5 +18,5 @@ export function Providers({ children, dataset }: { children: React.ReactNode; da
         },
       })
   );
-  return <DatasetContext.Provider value={dataset}><QueryClientProvider client={client}>{children}</QueryClientProvider></DatasetContext.Provider>;
+  return <DatasetContext.Provider value={dataset}><QueryClientProvider client={client}><ActivityProvider>{children}</ActivityProvider></QueryClientProvider></DatasetContext.Provider>;
 }

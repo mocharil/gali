@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useHydrated } from "../useHydrated";
 import { ai } from "./client";
 import type { AiAnswer, AiRequest } from "./types";
+import { useActivityFlag } from "@/components/ActivityProvider";
 
 export function useAiStatus(enabled = true) {
   const hydrated = useHydrated();
@@ -15,6 +16,7 @@ export function useAiRequest() {
   const [answer, setAnswer] = useState<AiAnswer | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  useActivityFlag(busy, "Preparing AI analysis…", "analysis");
   const controller = useRef<AbortController | null>(null);
   const generation = useRef(0);
   const cancel = useCallback(() => { generation.current++; controller.current?.abort(); controller.current = null; setBusy(false); setError(null); }, []);

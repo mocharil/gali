@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ElementType } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { ArrowRight, TrendingDown, Gauge, ShieldAlert, MapPin, SlidersHorizontal, FileSpreadsheet, Activity, Search, Download, Scale, Sparkles, ExternalLink, ArrowUpDown } from "lucide-react";
 import { useIssuerUniverse } from "@/lib/useIssuerUniverse";
 import { MineExplainer } from "@/components/MineExplainer";
@@ -11,8 +11,11 @@ import { ResearchBrief } from "@/components/ResearchBrief";
 import { ScoreCoverage } from "@/components/ScoreCoverage";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { DetailSection } from "@/components/DetailSection";
+import { IssuerLogo } from "@/components/IssuerLogo";
 import { compareScores, isScoreRankable, scoreRanks } from "@/lib/scores";
 import { DataState } from "@/components/DataState";
+import { PageLoading } from "@/components/LoadingState";
+import { ActionButton } from "@/components/ActionButton";
 import { downloadCSV } from "@/lib/export";
 import { qualityLabel } from "@/lib/presentation";
 import { Badge } from "@/components/ui/badge";
@@ -143,7 +146,8 @@ export default function DashboardPage() {
     return 0;
   });
 
-  if (error) return <div className="mx-auto max-w-7xl p-6"><DataState error={error} onRetry={() => void refetch()} /></div>;
+  if (error) return <div className="mx-auto max-w-7xl p-6"><DataState error={error} onRetry={() => refetch()} /></div>;
+  if (isLoading) return <PageLoading label="Loading your dashboard…" />;
   if (!isLoading && !issuers?.length) return <div className="mx-auto max-w-7xl p-6"><DataState empty /></div>;
 
   return (
@@ -162,7 +166,7 @@ export default function DashboardPage() {
           {isLoading ? "…" : avgRli == null ? "–" : <><NumberTicker value={avgRli} decimalPlaces={1} /><span className="ml-2 text-sm font-medium text-muted">years</span></>}
         </OverviewMetric>
         <OverviewMetric visual="license-window" icon={ShieldAlert} label="License area expiring within 3 years" accent="text-brand" hint="Highest expiring license-area share in the dataset">
-          {isLoading ? "…" : worstCliff ? <><span className="mr-2 text-lg">{worstCliff.symbol}</span><NumberTicker value={worstCliff.license_cliff_3y ?? 0} decimalPlaces={0} suffix="%" /></> : "–"}
+          {isLoading ? "…" : worstCliff ? <><span className="inline-flex items-center gap-1.5 mr-2 text-lg"><IssuerLogo symbol={worstCliff.symbol} size="xs" />{worstCliff.symbol}</span><NumberTicker value={worstCliff.license_cliff_3y ?? 0} decimalPlaces={0} suffix="%" /></> : "–"}
         </OverviewMetric>
         </div>
       </section>
@@ -194,7 +198,16 @@ export default function DashboardPage() {
                 {group.map((issuer) => <li key={issuer.symbol} data-testid={`score-row-${issuer.symbol}`}>
                   <Link href={`/issuer/${issuer.symbol}`} className="gali-card group block h-full p-4 transition-colors hover:border-brand-line sm:p-5">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0"><div className="flex items-center gap-2"><span className="font-numeric text-base font-bold text-ink">{issuer.symbol}</span>{qualified && <span className="rounded-md bg-brand-soft px-1.5 py-0.5 text-[11px] font-semibold text-brand">#{universeRanks.get(issuer.symbol)}</span>}</div><p className="mt-1 truncate text-[12px] text-muted" title={issuer.name}>{issuer.name}</p></div>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <IssuerLogo symbol={issuer.symbol} size="md" className="shrink-0 transition-transform group-hover:scale-105" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-numeric text-base font-bold text-ink">{issuer.symbol}</span>
+                            {qualified && <span className="rounded-md bg-brand-soft px-1.5 py-0.5 text-[11px] font-semibold text-brand">#{universeRanks.get(issuer.symbol)}</span>}
+                          </div>
+                          <p className="mt-0.5 truncate text-[12px] text-muted" title={issuer.name}>{issuer.name}</p>
+                        </div>
+                      </div>
                       <div className="shrink-0 text-right"><p className="font-numeric text-2xl font-semibold text-ink">{issuer.ground_truth_score?.toFixed(1) ?? "–"}</p><p className="text-[11px] text-muted">score / 100</p></div>
                     </div>
                     <div className="mt-3"><ScoreCoverage coverage={issuer.confidence_pct} eligible={qualified} /></div>
@@ -228,15 +241,15 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              onClick={exportUniverseCSV}
+            <ActionButton
+              action={exportUniverseCSV} loadingText="Preparing CSV…" paintFirst
               variant="outline"
               size="sm"
               className="h-8 gap-1.5 border-line-strong bg-surface text-sm font-semibold text-ink-soft hover:border-brand-line hover:text-ink"
             >
               <Download className="h-3.5 w-3.5 text-brand" />
               <span>Export CSV</span>
-            </Button>
+            </ActionButton>
             <Button
               asChild
               variant="outline"
@@ -366,9 +379,11 @@ export default function DashboardPage() {
                           href={`/issuer/${item.symbol}`}
                           className="flex items-center gap-2 group/link"
                         >
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface border border-line font-numeric text-sm font-bold text-ink group-hover/link:border-brand-line group-hover/link:text-brand transition-colors">
-                            {item.symbol.slice(0, 2)}
-                          </div>
+                          <IssuerLogo
+                            symbol={item.symbol}
+                            size="sm"
+                            className="shrink-0 group-hover/link:border-brand-line transition-colors"
+                          />
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span className="font-numeric font-bold text-ink group-hover/link:text-brand">

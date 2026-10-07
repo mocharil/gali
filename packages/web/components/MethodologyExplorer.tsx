@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { ArrowRight } from "lucide-react";
 import { useIssuerUniverse } from "@/lib/useIssuerUniverse";
 import { VisualAsset, type VisualAssetName } from "@/components/VisualAsset";
+import { IssuerPicker } from "@/components/IssuerPicker";
 
 const METRICS: { key: string; label: string; asset: VisualAssetName; logic: string; meaning: string; assumption: string }[] = [
   { key: "reserve-life", label: "Reserve life", asset: "mine-cutaway", logic: "Reserves ÷ annual production", meaning: "How long the remaining reserves would last at the current production rate.", assumption: "Reserve estimates and production rates can change. Inputs must refer to the same attributable entities." },
@@ -15,8 +16,9 @@ const METRICS: { key: string; label: string; asset: VisualAssetName; logic: stri
 
 export function MethodologyExplorer() {
   const [selected, setSelected] = useState("reserve-life");
+  const [symbol, setSymbol] = useState("BYAN");
   const query = useIssuerUniverse();
-  const issuer = query.data?.find((item) => item.symbol === "BYAN") ?? query.data?.[0];
+  const issuer = query.data?.find((item) => item.symbol === symbol) ?? query.data?.[0];
   const metric = METRICS.find((item) => item.key === selected)!;
   const value = !issuer ? null : selected === "reserve-life" ? issuer.rli_years == null ? null : issuer.rli_years.toFixed(1) + " years"
     : selected === "reserve-value" ? issuer.reserve_backed_value_usd == null ? null : "$" + (issuer.reserve_backed_value_usd / 1e9).toFixed(2) + "B"
@@ -28,7 +30,7 @@ export function MethodologyExplorer() {
     <div className="gali-visual-intro" aria-live="polite">
       <VisualAsset name={metric.asset} className="gali-intro-art" />
       <div className="min-w-0"><h2 className="text-2xl font-bold">{metric.label}</h2><p className="mt-2 text-base font-semibold text-ink-soft">{metric.logic}</p><p className="mt-3 text-sm leading-relaxed text-muted">{metric.meaning}</p>
-        {issuer && <div className="mt-4 border-t border-line pt-4"><p className="text-[12px] text-muted">{issuer.symbol} · active dataset example</p><p className="mt-1 font-numeric text-3xl font-bold text-info">{value ?? "Unavailable"}</p></div>}
+        {issuer && <div className="mt-4 border-t border-line pt-4"><IssuerPicker label="Example issuer" value={issuer.symbol} onChange={setSymbol} options={(query.data ?? []).map((item) => ({ symbol: item.symbol, name: item.name, score: item.ground_truth_score }))} className="max-w-sm" /><p className="mt-4 text-[12px] text-muted">{metric.label} for {issuer.symbol} · active dataset</p><p className="mt-1 font-numeric text-3xl font-bold text-info">{value ?? "Unavailable"}</p></div>}
         <p className="mt-4 rounded-xl border border-info-line bg-info-soft p-3 text-[12px] leading-relaxed text-info">{metric.assumption}</p>
         {issuer && <Link href={"/issuer/" + issuer.symbol} className="mt-4 inline-flex items-center gap-2 text-[12px] font-semibold text-info">Review issuer evidence<ArrowRight className="h-3.5 w-3.5" /></Link>}
       </div>

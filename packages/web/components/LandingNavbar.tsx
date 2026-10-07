@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import Image from "next/image";
 import { Menu, X, Sparkles, ArrowRight } from "lucide-react";
 

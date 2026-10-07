@@ -1,0 +1,944 @@
+{
+  "app_version": "0.5.2",
+  "validation_date_utc": "2026-10-06",
+  "mode": "Local production server using the explicit simulation dataset",
+  "browser": "Chromium",
+  "live_gemini_exercised": false,
+  "ai_testing": "HTTP fixtures with the server provider disabled; 39 separate AI contract/output checks passed.",
+  "tested_layouts": [
+    "1440x900",
+    "1280x800",
+    "768x1024",
+    "390x844",
+    "390px reduced motion"
+  ],
+  "counts": {
+    "regression_passed": 55,
+    "loading_passed": 19,
+    "unique_browser_cases_passed": 74,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "runs": [
+    {
+      "scope": "Full browser regression",
+      "stats": {
+        "startTime": "2026-10-06T02:51:12.251Z",
+        "duration": 244576.579,
+        "expected": 73,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "note": "55 existing cases and 18 loading cases passed. One new retry assertion expected upstream detail instead of the existing normalized UI error; corrected only the assertion."
+    },
+    {
+      "scope": "All loading cases after correcting the retry assertion",
+      "stats": {
+        "startTime": "2026-10-06T02:56:18.284Z",
+        "duration": 23295.731,
+        "expected": 19,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "note": "19 passed; no application-source changes between these browser runs."
+    }
+  ],
+  "screenshots_reviewed": [
+    "docs/screenshots/loading-navigation-desktop.png",
+    "docs/screenshots/loading-data-desktop.png",
+    "docs/screenshots/loading-data-mobile.png"
+  ],
+  "cases": [
+    {
+      "file": "english.spec.ts",
+      "title": "All research pages, profile tabs, evidence and search use English",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 13447
+        }
+      ]
+    },
+    {
+      "file": "english.spec.ts",
+      "title": "English assistant prompts and downloaded research remain in English",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 5771
+        }
+      ]
+    },
+    {
+      "file": "english.spec.ts",
+      "title": "Map labels load consistently across repeat navigation and viewport changes",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 7666
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Landing \u2192 dashboard \u2192 issuer \u2192 evidence; assistant and search use API facts",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2173
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Scenario zero baseline, percent scale, CSV, presets and refresh persistence",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 5624
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Compare correct pillars, distinct pair, shared URL and partial data",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 833
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Cost curve tooltip, map location \u2192 issuer, coverage and divergence",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2112
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Failure and empty states: API 503, scenario error, empty dataset, missing issuer",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 5789
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Responsive navigation and all routes at 1440x900",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 14630
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Responsive navigation and all routes at 1280x800",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 12746
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Responsive navigation and all routes at 768x1024",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 11079
+        }
+      ]
+    },
+    {
+      "file": "gali.spec.ts",
+      "title": "Responsive navigation and all routes at 390x844",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 11008
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: comparison at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4139
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: active_itmg at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 6053
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: gross_loss at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4740
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: partial_data at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4506
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: provisional_score at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4141
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: dashboard_stress at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4931
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: out_of_scope at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4082
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: long_response at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4534
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: comparison at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1927
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: active_itmg at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1914
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: gross_loss at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2084
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: partial_data at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2143
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: provisional_score at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1712
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: dashboard_stress at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1970
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: out_of_scope at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1803
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI output: long_response at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2084
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "AI scenario source link preserves ITMG and the active parameters",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4690
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "At narrow mobile width, long answers wrap and follow-ups reveal the latest summary",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1559
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "Unverified, truncated and unavailable provider outputs show readable errors with no answer",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2922
+        }
+      ]
+    },
+    {
+      "file": "gemini-output.spec.ts",
+      "title": "Limited answers retain their status, categories, exact facts and references in downloads",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1522
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "AI endpoints: missing credentials, origin check, bounded input, and no fabricated success",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 36
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Without credentials: data analysis works and Gemini setup is explicit",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 3938
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Configured Gemini: connection test, source-linked answers, follow-ups and Markdown export",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4254
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Gemini errors remain errors and a manual retry can succeed",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1081
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Stop and close cancel pending answers without late UI updates",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 4106
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Dashboard AI brief is requested explicitly and includes a balanced evidence view",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2625
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Scenario AI uses the selected issuer and active parameters; switching clears prior answers",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2129
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Gemini answer and evidence are responsive at 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 5008
+        }
+      ]
+    },
+    {
+      "file": "gemini.spec.ts",
+      "title": "Gemini answer and evidence are responsive at 390px",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1721
+        }
+      ]
+    },
+    {
+      "file": "research.spec.ts",
+      "title": "Complete-score ranking is separated from provisional scores",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 822
+        }
+      ]
+    },
+    {
+      "file": "research.spec.ts",
+      "title": "Landing leaders use complete scores after repeated desktop and mobile navigation",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 10564
+        }
+      ]
+    },
+    {
+      "file": "research.spec.ts",
+      "title": "Scenario drivers, sensitivity, selected issuer and saved brief stay consistent",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2331
+        }
+      ]
+    },
+    {
+      "file": "research.spec.ts",
+      "title": "Gross losses remain visible despite the zero RBV floor",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1435
+        }
+      ]
+    },
+    {
+      "file": "research.spec.ts",
+      "title": "Issuer profile exposes model scope, weight sensitivity and working methodology anchors",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1883
+        }
+      ]
+    },
+    {
+      "file": "simulation.spec.ts",
+      "title": "Bundled dataset: source, all endpoints, validation, depth and offline map",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 5994
+        }
+      ]
+    },
+    {
+      "file": "simulation.spec.ts",
+      "title": "Advanced scenario assumptions change outputs and persist across refresh",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1464
+        }
+      ]
+    },
+    {
+      "file": "ui-polish.spec.ts",
+      "title": "Mobile profile tabs, metric help and dashboard screening remain usable",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1415
+        }
+      ]
+    },
+    {
+      "file": "ui-polish.spec.ts",
+      "title": "Map grouping, combined filters, selection and reset reflect the published sites",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1310
+        }
+      ]
+    },
+    {
+      "file": "visual-ui.spec.ts",
+      "title": "Mine hotspots explain each lens and open the actual license scenario",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 3455
+        }
+      ]
+    },
+    {
+      "file": "visual-ui.spec.ts",
+      "title": "Illustrated unit economics and valuation keep issuer values and missing data",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 743
+        }
+      ]
+    },
+    {
+      "file": "visual-ui.spec.ts",
+      "title": "The geographic map uses exact dataset coordinates and supports zoom and pan",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1555
+        }
+      ]
+    },
+    {
+      "file": "visual-ui.spec.ts",
+      "title": "A device without WebGL retains geographic boundaries, filters and map controls",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 635
+        }
+      ]
+    },
+    {
+      "file": "visual-ui.spec.ts",
+      "title": "Street detail is optional and a tile failure returns to bundled geography",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 2628
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Slow data: /coverage provides feedback until the response arrives",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1934
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Slow data: /cost-curve provides feedback until the response arrives",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 458
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Slow data: /issuer/BUMI provides feedback until the response arrives",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 596
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Sidebar navigation responds before a delayed route arrives",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1600
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Search navigation retains feedback after the palette closes",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 947
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Mobile landing navigation retains feedback after its menu unmounts",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 661
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Assistant evidence links retain feedback after the assistant closes",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 3033
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "A newer menu selection cancels the prior navigation indicator",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 529
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Current-page, modified clicks, and browser back do not leave a navigation spinner behind",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1385
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Comparison keeps its loader while either selected issuer is still loading",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 506
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Scenario changes calculate visibly and disable stale exports",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1530
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Retry reports pending work and clears the indicator after recovery",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1853
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Copy displays a busy button until the clipboard operation finishes",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1418
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "File export paints preparation feedback and returns to its enabled state",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 888
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "A failed file action clears loading and allows a retry",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 909
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Print paints preparation feedback before opening the browser dialog",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 533
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Gemini cancellation ends global and local loading together",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1113
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Street tiles provide loading feedback and failures return to bundled geography",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 1815
+        }
+      ]
+    },
+    {
+      "file": "loading.spec.ts",
+      "title": "Mobile loading remains within the viewport and respects reduced motion",
+      "project": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "duration_ms": 620
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

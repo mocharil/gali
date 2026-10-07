@@ -1,5 +1,5 @@
 import { ArrowRight, CircleHelp, Calculator } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import type { IssuerDetail } from "@/lib/types";
 
 const object = (value: unknown): Record<string, unknown> => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};

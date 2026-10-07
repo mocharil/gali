@@ -2,7 +2,7 @@
 
 import { useId, useState, type ReactNode } from "react";
 import { Clock, Coins, FileClock, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { VisualAsset } from "@/components/VisualAsset";
 
 type Lens = "reserves" | "costs" | "licenses";

@@ -28,7 +28,7 @@ try {
   const { parseAiRequest } = loadModule("ai/server/request");
   const { buildGroundingContext } = loadModule("ai/server/context");
   const { loadServerData } = loadModule("ai/server/data");
-  const { validateNarrative } = loadModule("ai/server/narrative");
+  const { validateNarrative, repairCitations } = loadModule("ai/server/narrative");
   const { analyzeWithGemini } = loadModule("ai/server/service");
   const { providerError, readGeminiResponse } = loadModule("ai/server/provider");
   const { AiBudget } = loadModule("ai/server/budget");
@@ -153,6 +153,20 @@ try {
     ]) { const value = narrative(); mutate(value); assert.throws(() => validateNarrative(JSON.stringify(value), context, true), rejected("AI_UNVERIFIED_ANSWER")); }
     assert.throws(() => validateNarrative("{", context), rejected("AI_UNVERIFIED_ANSWER"));
   });
+  await test("Only a valid but unlisted placeholder ID is declared; everything else is still rejected", async () => {
+    const forgetful = narrative(); forgetful.summary.text = "BUMI's reserve life is {{BUMI.rli_years}} and its cost is {{BUMI.cash_cost_per_ton_usd}}."; forgetful.summary.evidence_ids = ["BUMI.rli_years"];
+    assert.throws(() => validateNarrative(JSON.stringify(forgetful), context, true), rejected("AI_UNVERIFIED_ANSWER"));
+    const repaired = validateNarrative(repairCitations(JSON.stringify(forgetful), context), context, true);
+    assert.deepEqual(repaired.summary.evidence_ids, ["BUMI.rli_years", "BUMI.cash_cost_per_ton_usd"]);
+    const invented = narrative(); invented.summary.text = "The figure is {{invented.source}}."; invented.summary.evidence_ids = ["BUMI.rli_years"];
+    assert.throws(() => validateNarrative(repairCitations(JSON.stringify(invented), context), context, true), rejected("AI_UNVERIFIED_ANSWER"));
+    const crowded = narrative(); const ten = context.evidence.map((fact) => fact.id).filter((id) => id !== "BUMI.rli_years").slice(0, 10);
+    crowded.summary.text = "BUMI's reserve life is {{BUMI.rli_years}}."; crowded.summary.evidence_ids = ten; assert.equal(ten.length, 10);
+    assert.throws(() => validateNarrative(repairCitations(JSON.stringify(crowded), context), context, true), rejected("AI_UNVERIFIED_ANSWER"));
+    const raw = narrative(); raw.summary.text = "Reserve life is 99 years and {{BUMI.rli_years}}."; raw.summary.evidence_ids = ["method.rbv"];
+    assert.throws(() => validateNarrative(repairCitations(JSON.stringify(raw), context), context, true), rejected("AI_UNVERIFIED_ANSWER"));
+    assert.equal(repairCitations("{", context), "{");
+  });
   await test("Safety blocks and truncated provider output never become an answer", async () => {
     assert.throws(() => readGeminiResponse({ candidates: [{ finishReason: "MAX_TOKENS" }], text: "partial" }), rejected("AI_INCOMPLETE"));
     assert.throws(() => readGeminiResponse({ candidates: [{ finishReason: "SAFETY" }], text: "" }), rejected("AI_BLOCKED"));
@@ -212,9 +226,18 @@ try {
     const request = { ...selectedRequest, question: "Unique invalid generation" }; let attempts = 0;
     const invalidDependencies = { ...dependencies, generate: async () => { attempts++; return { text: "{}", inputTokens: 1, outputTokens: 1 }; } };
     await assert.rejects(analyzeWithGemini(request, signal(), invalidDependencies), rejected("AI_UNVERIFIED_ANSWER"));
-    await assert.rejects(analyzeWithGemini(request, signal(), invalidDependencies), rejected("AI_UNVERIFIED_ANSWER")); assert.equal(attempts, 2);
+    await assert.rejects(analyzeWithGemini(request, signal(), invalidDependencies), rejected("AI_UNVERIFIED_ANSWER")); assert.equal(attempts, 4); // two calls x (first attempt + one verification retry); nothing cached
     const controller = new AbortController();
     await assert.rejects(analyzeWithGemini({ ...request, question: "Aborted generation" }, controller.signal, { ...dependencies, generate: async (...args) => { const result = await dependencies.generate(...args); controller.abort(); return result; } }), rejected("AI_ABORTED"));
+  });
+  await test("A failed verification gets one retry; provider errors are never retried", async () => {
+    let calls = 0;
+    const flaky = { ...dependencies, generate: async (...args) => { calls++; return calls === 1 ? { text: "{}", inputTokens: 1, outputTokens: 1 } : dependencies.generate(...args); } };
+    const recovered = await analyzeWithGemini({ ...selectedRequest, question: "Retry after a failed verification" }, signal(), flaky);
+    assert.equal(calls, 2); assert.equal(recovered.cached, false);
+    let outage = 0;
+    const down = { ...dependencies, generate: async () => { outage++; throw new AiError("The AI request timed out.", "AI_TIMEOUT", 504); } };
+    await assert.rejects(analyzeWithGemini({ ...selectedRequest, question: "Provider outage is not retried" }, signal(), down), rejected("AI_TIMEOUT")); assert.equal(outage, 1);
   });
   await test("Export includes evidence, snapshot, provenance and model limits", async () => {
     const text = aiBriefMarkdown(answer); assert.ok(text.includes("Dataset source: synthetic")); assert.ok(text.includes(context.snapshot.run_id)); assert.ok(text.includes("## Evidence")); assert.ok(text.includes("do not prove every interpretation")); assert.equal(text.includes("{{"), false);

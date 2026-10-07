@@ -2,7 +2,7 @@
 
 import { VisualAsset } from "@/components/VisualAsset";
 import { useQueries } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { ArrowUpRight, Download, Radar, TrendingDown, Globe2, ShieldAlert } from "lucide-react";
 import { api } from "@/lib/api";
 import type { IssuerSummary, ScenarioShockRequest, IssuerScenarioImpact } from "@/lib/types";
@@ -11,6 +11,8 @@ import { qualityLabel } from "@/lib/presentation";
 import { DataState } from "@/components/DataState";
 import { DetailSection } from "@/components/DetailSection";
 import { GeminiResearchPanel } from "@/components/GeminiResearchPanel";
+import { ActionButton } from "./ActionButton";
+import { LoadingState } from "./LoadingState";
 
 const BASELINE: ScenarioShockRequest = { price_shock_pct: 0, destination_shocks: {}, discount_rate: .12, variable_cost_share: .65, license_cliff_expiry_shock: false };
 const TESTS: { label: string; request: ScenarioShockRequest; href: string }[] = [
@@ -49,9 +51,9 @@ export function ResearchBrief({ issuers }: { issuers: IssuerSummary[] }) {
   return <section data-testid="research-brief" className="gali-intelligence overflow-hidden rounded-[20px] border p-4 sm:p-6">
     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div><div className="flex items-center gap-2 text-[12px] font-semibold tracking-wide text-info"><Radar className="h-4 w-4" />Reserve value resilience</div><h2 className="mt-2 text-xl font-bold text-ink">Three pressures to watch</h2></div>
-      <button onClick={exportMatrix} disabled={!ready} className="gali-button gali-button-secondary disabled:opacity-40"><Download className="h-3.5 w-3.5" />Export analysis</button>
+      <ActionButton action={exportMatrix} loadingText="Preparing analysis…" paintFirst variant="outline" disabled={!ready}><Download className="h-3.5 w-3.5" />Export analysis</ActionButton>
     </div>
-    {error ? <DataState error={error.error} onRetry={() => results.forEach((result) => void result.refetch())} /> : !ready ? <div role="status" className="rounded-xl border border-line p-6 text-sm text-muted">Calculating the resilience matrix…</div> : <>
+    {error ? <DataState error={error.error} onRetry={() => Promise.all(results.map((result) => result.refetch()))} /> : !ready ? <LoadingState label="Calculating the resilience matrix…" skeleton /> : <>
       <div className="grid gap-3 md:grid-cols-3">
         {[
           { icon: TrendingDown, label: "Price pressure", value: price, worst: priceWorst, assumption: "Price −20%", text: "Volume and costs stay constant. Thin margins amplify the impact.", index: 0, color: "text-negative" },

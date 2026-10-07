@@ -2,12 +2,14 @@
 
 import { VisualIntro } from "@/components/VisualIntro";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { ShieldCheck, CheckCircle2, Database, Coins, ArrowRight } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { IssuerLogo } from "@/components/IssuerLogo";
 import { DataState } from "@/components/DataState";
+import { PageLoading } from "@/components/LoadingState";
 import { Skeleton } from "@/components/Skeleton";
 import { useDataset } from "@/components/DatasetContext";
 
@@ -29,7 +31,8 @@ export default function CoveragePage() {
     queryFn: () => api.getCoverage(),
   });
 
-  if (error) return <div className="mx-auto max-w-6xl p-6"><DataState error={error} onRetry={() => void refetch()} /></div>;
+  if (error) return <div className="mx-auto max-w-6xl p-6"><DataState error={error} onRetry={() => refetch()} /></div>;
+  if (isLoading) return <PageLoading label="Loading data coverage…" />;
 
   return (
     <div className="gali-page space-y-8">
@@ -143,7 +146,12 @@ export default function CoveragePage() {
             <tbody className="divide-y divide-line">
               {data?.in_universe_issuers.map((i) => (
                 <tr key={String(i.symbol)} className="hover:bg-surface-hover transition-colors">
-                  <td className="px-4 py-3 font-numeric font-bold text-brand">{String(i.symbol)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <IssuerLogo symbol={String(i.symbol)} size="xs" />
+                      <span className="font-numeric font-bold text-ink">{String(i.symbol)}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 font-medium text-ink-soft">{String(i.name)}</td>
                   <td className="px-4 py-3">
                     <ConfidenceBadge dataQuality={String(i.quality) as "LENGKAP" | "PARSIAL"} />

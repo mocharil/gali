@@ -4,7 +4,7 @@ import { AiError, type AiAnswer, type AiRequest } from "../types";
 import { loadGeminiConfig, type GeminiConfig } from "./config";
 import { buildGroundingContext, type GroundingContext } from "./context";
 import { generateWithGemini, type Generator } from "./provider";
-import { narrativeSchema, SYSTEM_INSTRUCTION, validateNarrative } from "./narrative";
+import { narrativeSchema, repairCitations, SYSTEM_INSTRUCTION, validateNarrative } from "./narrative";
 import { aiBudget } from "./budget";
 import { withAiAbort } from "./abort";
 
@@ -32,9 +32,16 @@ export async function analyzeWithGemini(request: AiRequest, signal: AbortSignal,
     deterministic_orderings: context.orderings, constraints: context.warnings,
   });
   const generate = dependencies.generate ?? generateWithGemini;
-  const result = await (dependencies.budget ?? aiBudget).run(() => withAiAbort(() => generate(config, SYSTEM_INSTRUCTION, prompt, narrativeSchema(context), signal), signal));
-  if (signal.aborted) throw new AiError("The analysis was stopped.", "AI_ABORTED", 499);
-  const narrative = validateNarrative(result.text, context, request.mode === "brief");
+  // One extra attempt, only when an answer fails verification (a model slip, not an outage). Timeouts,
+  // quota and access errors are never retried, and every attempt passes through the request budget.
+  let result: Awaited<ReturnType<Generator>>;
+  let narrative: ReturnType<typeof validateNarrative>;
+  for (let attempt = 1; ; attempt++) {
+    result = await (dependencies.budget ?? aiBudget).run(() => withAiAbort(() => generate(config, SYSTEM_INSTRUCTION, prompt, narrativeSchema(), signal), signal));
+    if (signal.aborted) throw new AiError("The analysis was stopped.", "AI_ABORTED", 499);
+    try { narrative = validateNarrative(repairCitations(result.text, context), context, request.mode === "brief"); break; }
+    catch (error) { if (attempt >= 2 || !(error instanceof AiError) || error.code !== "AI_UNVERIFIED_ANSWER") throw error; }
+  }
   const cited = new Set([narrative.summary, ...narrative.findings].flatMap((claim) => claim.evidence_ids));
   const answer: AiAnswer = {
     ...narrative, request_id: randomUUID(), provider: "gemini_vertex", model: config.model, generated_at: new Date().toISOString(), cached: false,
@@ -49,5 +56,5 @@ export async function analyzeWithGemini(request: AiRequest, signal: AbortSignal,
 export async function checkGeminiConnection(signal: AbortSignal): Promise<void> {
   const config = await loadGeminiConfig();
   const response = await aiBudget.run(() => withAiAbort(() => generateWithGemini(config, "Reply with exactly OK. No explanations.", "Connection check.", undefined, signal), signal));
-  if (response.text.trim() !== "OK") throw new AiError("Gemini responded, but the connection check was incomplete. Try an analysis to verify model access.", "AI_INCOMPLETE", 502);
+  if (response.text.trim() !== "OK") throw new AiError("The AI service responded, but the connection check was incomplete. Try an analysis to verify model access.", "AI_INCOMPLETE", 502);
 }

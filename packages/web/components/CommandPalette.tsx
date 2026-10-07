@@ -4,9 +4,10 @@ import React, { useState, useRef } from "react";
 import { useIssuerUniverse } from "@/lib/useIssuerUniverse";
 import { useDialog } from "@/lib/useDialog";
 import { DataState } from "./DataState";
-import { useRouter } from "next/navigation";
+import { useActivity } from "./ActivityProvider";
 import { Search, Pickaxe, ArrowRight, Sparkles, X, Keyboard } from "lucide-react";
 import { NAVIGATION_PAGES } from "@/lib/navigation";
+import { IssuerLogo } from "./IssuerLogo";
 
 const PAGES = [{ href: "/", label: "Home", description: "Introduction to GALI and the research workflow", icon: Sparkles }, ...NAVIGATION_PAGES].map((page) => ({ ...page, desc: page.description }));
 
@@ -18,7 +19,7 @@ export function CommandPalette({
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
-  const router = useRouter();
+  const { navigate } = useActivity();
 
   const panelRef = useRef<HTMLDivElement>(null);
   useDialog(isOpen, onClose, panelRef);
@@ -97,21 +98,24 @@ export function CommandPalette({
                 <button
                   key={i.symbol}
                   onClick={() => {
-                    router.push(`/issuer/${i.symbol}`);
+                    navigate(`/issuer/${i.symbol}`);
                     onClose();
                   }}
                   className="flex items-center justify-between rounded-xl border border-line bg-surface p-2.5 text-left transition-colors hover:border-brand-line hover:bg-surface-hover group"
                 >
-                  <div className="min-w-0 pr-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-numeric font-bold text-brand group-hover:text-brand">
-                        {i.symbol}
-                      </span>
-                      <span className="text-[12px] font-numeric text-muted">
-                        Score: {i.ground_truth_score != null ? i.ground_truth_score.toFixed(1) : "—"}
-                      </span>
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <IssuerLogo symbol={i.symbol} size="sm" className="shrink-0" />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-numeric font-bold text-ink group-hover:text-brand">
+                          {i.symbol}
+                        </span>
+                        <span className="text-[12px] font-numeric text-muted">
+                          Score: {i.ground_truth_score != null ? i.ground_truth_score.toFixed(1) : "—"}
+                        </span>
+                      </div>
+                      <div className="text-[12px] text-muted truncate">{i.name}</div>
                     </div>
-                    <div className="text-[12px] text-muted truncate">{i.name}</div>
                   </div>
                   <ArrowRight className="h-3.5 w-3.5 text-subtle group-hover:text-brand group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
@@ -132,7 +136,7 @@ export function CommandPalette({
                   <button
                     key={p.href}
                     onClick={() => {
-                      router.push(p.href);
+                      navigate(p.href);
                       onClose();
                     }}
                     className="flex w-full items-center justify-between rounded-xl border border-line bg-surface p-2.5 text-left transition-colors hover:border-info-line hover:bg-surface-hover group"

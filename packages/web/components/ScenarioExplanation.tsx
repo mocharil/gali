@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { BarChart3, ArrowUpRight, Download, ShieldAlert, Grid3X3 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import type { IssuerScenarioImpact, ScenarioShockRequest } from "@/lib/types";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { DRIVER_LABELS, scenarioBrief } from "@/lib/research";
 import { useDataset } from "./DatasetContext";
-import { Button } from "./ui/button";
+import { ActionButton } from "./ActionButton";
 import { GeminiResearchPanel } from "./GeminiResearchPanel";
 
 const usd = (value: number | null | undefined) => value == null ? "—" : `${value < 0 ? "−" : ""}$${(Math.abs(value) / (Math.abs(value) >= 1e9 ? 1e9 : 1e6)).toFixed(2)}${Math.abs(value) >= 1e9 ? "B" : "M"}`;
@@ -49,7 +49,7 @@ export function ScenarioExplanation({ impacts, params }: { impacts: IssuerScenar
   return <section className="gali-card overflow-hidden" data-testid="scenario-explanation">
     <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line p-5 sm:p-6">
       <div><p className="text-[11px] font-semibold uppercase tracking-[.16em] text-info">From changes to drivers</p><h2 className="mt-2 text-xl font-semibold text-ink">Explore each issuer&apos;s resilience.</h2><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">Trace the drivers, check margin limits, and save the research findings with their assumptions.</p></div>
-      <div className="flex flex-wrap items-end gap-2"><div><label htmlFor="explain-issuer" className="mb-1.5 block text-[12px] text-muted">Selected issuer</label><select id="explain-issuer" value={selected.symbol} onChange={(event) => choose(event.target.value)} className="gali-input min-h-10 min-w-32 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink">{impacts.map((row) => <option value={row.symbol} key={row.symbol}>{row.symbol}{row.is_partial ? " · Partial" : ""}</option>)}</select></div><Button variant="outline" onClick={exportBrief}><Download className="h-4 w-4" />Save research brief</Button></div>
+      <div className="flex flex-wrap items-end gap-2"><div><label htmlFor="explain-issuer" className="mb-1.5 block text-[12px] text-muted">Selected issuer</label><select id="explain-issuer" value={selected.symbol} onChange={(event) => choose(event.target.value)} className="gali-input min-h-10 min-w-32 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink">{impacts.map((row) => <option value={row.symbol} key={row.symbol}>{row.symbol}{row.is_partial ? " · Partial" : ""}</option>)}</select></div><ActionButton variant="outline" action={exportBrief} loadingText="Preparing brief…" paintFirst><Download className="h-4 w-4" />Save research brief</ActionButton></div>
     </div>
     {selected.is_partial ? <div className="p-6"><p className="font-medium text-brand">Analysis {selected.symbol} cannot be calculated yet.</p><p className="mt-2 text-sm text-muted">Reserve or gross profit inputs are incomplete. No waterfall or sensitivity values are inferred.</p><Link href={`/issuer/${selected.symbol}`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-info">Explore the available data<ArrowUpRight className="h-4 w-4" /></Link></div> : <>
       <div className="grid gap-4 border-b border-line p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">

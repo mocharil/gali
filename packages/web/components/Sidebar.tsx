@@ -1,13 +1,15 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, Github, X, PanelLeftOpen, ChevronDown } from "lucide-react";
 import { NAVIGATION_GROUPS } from "@/lib/navigation";
 import { useIssuerUniverse } from "@/lib/useIssuerUniverse";
+import { useHydrated } from "@/lib/useHydrated";
 import { useDialog } from "@/lib/useDialog";
+import { IssuerLogo } from "@/components/IssuerLogo";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -22,6 +24,8 @@ const MENU_GROUPS = NAVIGATION_GROUPS;
 
 export function Sidebar({ isOpen = false, isCollapsed = false, onClose, onToggleCollapse, onOpenSearch, apiOnline }: SidebarProps) {
   const pathname = usePathname();
+  // Server HTML and the first client render must agree, so the issuer list always starts closed and opens after hydration.
+  const hydrated = useHydrated();
   const { data: issuers } = useIssuerUniverse();
   const panelRef = useRef<HTMLElement>(null);
   const folded = isCollapsed && !isOpen;
@@ -45,11 +49,11 @@ export function Sidebar({ isOpen = false, isCollapsed = false, onClose, onToggle
       <nav aria-label="GALI research" className={`min-h-0 flex-1 space-y-4 overflow-y-auto pb-6 ${folded ? "px-3" : "px-4"}`}>
         {MENU_GROUPS.map((group) => <div key={group.title}>
           {!folded && <p className="px-3 py-1 text-[12px] font-medium text-subtle">{group.title}</p>}
-          <div className="space-y-1">{group.items.map((item) => <Link key={item.href} href={item.href} onClick={onClose} aria-current={pathname === item.href ? "page" : undefined} aria-label={item.label} title={folded ? item.label : undefined} className={`gali-nav-item ${folded ? "justify-center px-0" : ""}`}><item.icon />{!folded && <span className="leading-snug">{item.label}</span>}</Link>)}</div>
+          <div className="space-y-1">{group.items.map((item) => <Link key={item.href} href={item.href} showPending={!folded} onClick={onClose} aria-current={pathname === item.href ? "page" : undefined} aria-label={item.label} title={folded ? item.label : undefined} className={`gali-nav-item ${folded ? "justify-center px-0" : ""}`}><item.icon />{!folded && <span className="leading-snug">{item.label}</span>}</Link>)}</div>
         </div>)}
-        {!folded && <details key={pathname} open={pathname.startsWith("/issuer/")} className="group/issuers border-t border-line pt-3">
+        {!folded && <details key={pathname} open={hydrated && pathname.startsWith("/issuer/")} className="group/issuers border-t border-line pt-3">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-[12px] font-medium text-muted hover:bg-surface-muted [&::-webkit-details-marker]:hidden"><span>Issuer list · {issuers?.length ?? 0}</span><ChevronDown className="h-3.5 w-3.5 transition-transform group-open/issuers:rotate-180" /></summary>
-          <div className="mt-2 grid grid-cols-3 gap-2">{(issuers ?? []).map((issuer) => <Link key={issuer.symbol} href={`/issuer/${issuer.symbol}`} onClick={onClose} aria-current={pathname === `/issuer/${issuer.symbol}` ? "page" : undefined} className={`flex min-h-12 flex-col items-center justify-center rounded-xl border py-2 leading-tight transition-colors ${pathname === `/issuer/${issuer.symbol}` ? "border-brand-line bg-brand-soft" : "border-line bg-surface hover:bg-surface-muted"}`}><span className="text-[12px] font-semibold text-ink">{issuer.symbol}</span><span className="font-numeric text-[12px] text-muted">{issuer.ground_truth_score?.toFixed(1) ?? "—"}</span></Link>)}</div>
+          <div className="mt-2 grid grid-cols-3 gap-2">{(issuers ?? []).map((issuer) => <Link key={issuer.symbol} href={`/issuer/${issuer.symbol}`} showPending onClick={onClose} aria-current={pathname === `/issuer/${issuer.symbol}` ? "page" : undefined} className={`flex min-h-14 flex-col items-center justify-center rounded-xl border p-2 leading-tight transition-colors ${pathname === `/issuer/${issuer.symbol}` ? "border-brand-line bg-brand-soft" : "border-line bg-surface hover:bg-surface-muted"}`}><IssuerLogo symbol={issuer.symbol} size="xs" className="mb-1" /><span className="text-[12px] font-semibold text-ink">{issuer.symbol}</span><span className="font-numeric text-[11px] text-muted">{issuer.ground_truth_score?.toFixed(1) ?? "—"}</span></Link>)}</div>
         </details>}
       </nav>
       <div className={`shrink-0 border-t border-line ${folded ? "flex flex-col items-center gap-3 p-3" : "p-4"}`}>

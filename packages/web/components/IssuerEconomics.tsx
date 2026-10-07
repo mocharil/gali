@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { BarChart3, Globe2, ShieldAlert } from "lucide-react";
 import type { IssuerDetail } from "@/lib/types";
 

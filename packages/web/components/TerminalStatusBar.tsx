@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 
 export function TerminalStatusBar({ apiOnline }: { apiOnline?: boolean | null }) {
   return <footer className="shrink-0 border-t border-line bg-surface px-4 py-5 text-[12px] text-muted sm:px-6 lg:px-8">

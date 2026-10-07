@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { Layers } from "lucide-react";
 
 export interface DatasetStatus { mode: "simulation" | "sectors"; as_of: string | null; version: string | null; source_type: "synthetic" | "sectors" }

@@ -5,11 +5,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Loader2, PlugZap, Sparkles } from "lucide-react";
 import { ai } from "@/lib/ai/client";
 import { useAiStatus } from "@/lib/ai/useAi";
+import { useActivityFlag } from "./ActivityProvider";
+import { ActionButton } from "./ActionButton";
 
 export function AiConnection({ enabled = true, compact = false }: { enabled?: boolean; compact?: boolean }) {
   const status = useAiStatus(enabled);
   const cache = useQueryClient();
   const [checking, setChecking] = useState(false);
+  useActivityFlag(checking, "Checking AI connection…", "analysis");
   const [message, setMessage] = useState<string | null>(null);
   const pending = useRef<AbortController | null>(null);
   useEffect(() => () => pending.current?.abort(), []);
@@ -26,16 +29,16 @@ export function AiConnection({ enabled = true, compact = false }: { enabled?: bo
   return <div className={compact ? "space-y-2" : "rounded-2xl border border-line bg-surface-muted p-4"} data-testid="gemini-connection">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${verified ? "bg-positive-soft text-positive" : "bg-info-soft text-info"}`}>
-        {verified ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}Gemini · {status.isPending ? "Checking configuration" : verified ? "Access verified" : configured ? "Ready to connect" : "Setup required"}
+        {verified ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}AI · {status.isPending ? "Checking configuration" : verified ? "Access verified" : configured ? "Ready to connect" : "Setup required"}
       </span>
       {configured && <button type="button" className="inline-flex min-h-9 items-center gap-1.5 text-[12px] font-semibold text-info disabled:opacity-50" disabled={checking} onClick={() => void check()}>
         {checking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PlugZap className="h-3.5 w-3.5" />}{checking ? "Testing access…" : "Test connection"}
       </button>}
-      {status.isError && <button type="button" onClick={() => void status.refetch()} className="min-h-9 text-[12px] text-info">Retry status</button>}
+      {status.isError && <ActionButton action={() => status.refetch()} loadingText="Checking status…" variant="ghost" className="min-h-9 text-[12px] text-info">Retry status</ActionButton>}
     </div>
-    {!compact && <p className="mt-2 text-[12px] leading-relaxed text-muted">{status.data?.message ?? (status.isError ? "Gemini status could not be loaded. Try again." : "Checking server configuration…")}</p>}
+    {!compact && <p className="mt-2 text-[12px] leading-relaxed text-muted">{status.data?.message ?? (status.isError ? "AI status could not be loaded. Try again." : "Checking server configuration…")}</p>}
     {message && <p role="alert" className="text-[12px] leading-relaxed text-negative">{message}</p>}
-    {!configured && !status.isPending && <details className="mt-2 text-[12px] text-muted"><summary className="min-h-8 cursor-pointer font-medium text-info">Gemini setup</summary><p className="mt-1 leading-relaxed">Configure the service account JSON on the GALI server, then restart the app. Setup instructions are included in docs/GEMINI_SETUP.md. Credentials stay on the server.</p></details>}
-    {!compact && configured && <p className="mt-1 text-[11px] text-subtle">The connection test makes one short Gemini request.</p>}
+    {!configured && !status.isPending && <details className="mt-2 text-[12px] text-muted"><summary className="min-h-8 cursor-pointer font-medium text-info">AI setup</summary><p className="mt-1 leading-relaxed">Configure the service account JSON on the GALI server, then restart the app. Setup instructions are in the project documentation. Credentials stay on the server.</p></details>}
+    {!compact && configured && <p className="mt-1 text-[11px] text-subtle">The connection test makes one short AI request.</p>}
   </div>;
 }

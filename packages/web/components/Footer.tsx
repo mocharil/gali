@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { ShieldAlert, Database, ShieldCheck } from "lucide-react";
 
 export function Footer() {

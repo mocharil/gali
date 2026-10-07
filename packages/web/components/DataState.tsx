@@ -1,10 +1,11 @@
 "use client";
 
 import { AlertCircle, Database, RefreshCw } from "lucide-react";
+import { ActionButton } from "./ActionButton";
 
 export function DataState({ error, onRetry, empty = false, title, description }: {
   error?: unknown;
-  onRetry?: () => void;
+  onRetry?: () => unknown | Promise<unknown>;
   empty?: boolean;
   title?: string;
   description?: string;
@@ -18,9 +19,9 @@ export function DataState({ error, onRetry, empty = false, title, description }:
           <p className="text-sm leading-relaxed text-ink-soft">
             {description ?? (empty ? "Adjust the filters, or load a Sectors dataset and publish the calculated metrics first." : error instanceof Error ? error.message : "Check the API connection and try again.")}
           </p>
-          {onRetry && <button type="button" onClick={onRetry} className="inline-flex items-center gap-2 rounded-lg border border-line-strong px-3 py-2 text-sm font-medium text-ink-soft hover:bg-surface-hover">
+          {onRetry && <ActionButton action={onRetry} loadingText="Retrying data…" variant="outline" className="inline-flex items-center gap-2 rounded-lg border border-line-strong px-3 py-2 text-sm font-medium text-ink-soft hover:bg-surface-hover">
             <RefreshCw className="h-4 w-4" /> Try again
-          </button>}
+          </ActionButton>}
         </div>
       </div>
     </div>

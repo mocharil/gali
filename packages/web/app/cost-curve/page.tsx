@@ -2,16 +2,18 @@
 
 import { CostUnitEconomics } from "@/components/CostUnitEconomics";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { Layers } from "lucide-react";
 import { ResponsiveContainer, ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
 import { api } from "@/lib/api";
 import type { CostCurvePoint } from "@/lib/types";
 import { DataState } from "@/components/DataState";
+import { PageLoading } from "@/components/LoadingState";
 import { Skeleton } from "@/components/Skeleton";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { IssuerLogo } from "@/components/IssuerLogo";
 
 export default function CostCurvePage() {
   const query = useQuery({ queryKey: ["cost-curve", "Coal"], queryFn: () => api.getCostCurve("Coal") });
@@ -25,6 +27,8 @@ export default function CostCurvePage() {
   ]);
   if (query.isError) return <div className="p-6"><DataState error={query.error} onRetry={() => query.refetch()} /></div>;
 
+  if (query.isLoading) return <PageLoading label="Loading the cost curve…" />;
+
   return <div className="gali-page space-y-6">
     <div className="border-b border-line pb-6">
       <Badge variant="success" className="mb-3 gap-2"><Layers className="h-3.5 w-3.5" />M4 · Cost curve</Badge>
@@ -34,7 +38,14 @@ export default function CostCurvePage() {
     {query.isLoading ? <Skeleton className="h-96 rounded-xl" /> : points.length === 0 ? <DataState empty /> : <>
       <CostUnitEconomics points={points} />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="p-5"><p className="text-sm text-muted">Lowest cash cost</p><p className="mt-2 text-2xl font-numeric text-positive">{points[0].symbol}</p><p className="mt-2 text-sm text-muted">${points[0].cash_cost_per_ton_usd.toFixed(2)} / ton</p></Card>
+        <Card className="p-5">
+          <p className="text-sm text-muted">Lowest cash cost</p>
+          <div className="mt-2 flex items-center gap-2">
+            <IssuerLogo symbol={points[0].symbol} size="sm" />
+            <p className="text-2xl font-numeric text-positive">{points[0].symbol}</p>
+          </div>
+          <p className="mt-2 text-sm text-muted">${points[0].cash_cost_per_ton_usd.toFixed(2)} / ton</p>
+        </Card>
         <Card className="p-5"><p className="text-sm text-muted">Price reference · Coal series</p><p className="mt-2 text-2xl font-numeric text-brand">{benchmark == null ? "—" : `$${benchmark.toFixed(2)}/t`}</p><p className="mt-2 text-sm text-muted">The benchmark is not adjusted for each product&apos;s quality.</p></Card>
         <Card className="p-5"><p className="text-sm text-muted">Attributed volume analyzed</p><p className="mt-2 text-2xl font-numeric text-info">{capacity.toFixed(1)} Mt/year</p><p className="mt-2 text-sm text-muted">{points.length} issuers with available cost inputs.</p></Card>
       </div>
@@ -60,7 +71,7 @@ export default function CostCurvePage() {
       </Card>
       <Card className="p-5 space-y-4"><CardTitle>Cost curve inputs</CardTitle>
         <Table><TableHeader><TableRow><TableHead>Issuer</TableHead><TableHead>Cash cost / ton</TableHead><TableHead>Volume / year</TableHead><TableHead>Realized price / ton</TableHead><TableHead>Margin / ton</TableHead></TableRow></TableHeader>
-          <TableBody>{points.map((point) => <TableRow key={point.symbol}><TableCell><Link href={`/issuer/${point.symbol}`} className="font-numeric text-brand hover:underline">{point.symbol}</Link></TableCell><TableCell className="font-numeric">${point.cash_cost_per_ton_usd.toFixed(2)}</TableCell><TableCell className="font-numeric">{point.annual_volume_mt.toFixed(1)} Mt</TableCell><TableCell className="font-numeric">{point.realized_price_per_ton_usd != null ? `$${point.realized_price_per_ton_usd.toFixed(2)}` : "—"}</TableCell><TableCell className="font-numeric">{point.unit_margin_usd != null ? `$${point.unit_margin_usd.toFixed(2)}` : "—"}</TableCell></TableRow>)}</TableBody>
+          <TableBody>{points.map((point) => <TableRow key={point.symbol}><TableCell><Link href={`/issuer/${point.symbol}`} className="inline-flex items-center gap-2 font-numeric font-bold text-ink hover:text-brand"><IssuerLogo symbol={point.symbol} size="xs" /><span>{point.symbol}</span></Link></TableCell><TableCell className="font-numeric">${point.cash_cost_per_ton_usd.toFixed(2)}</TableCell><TableCell className="font-numeric">{point.annual_volume_mt.toFixed(1)} Mt</TableCell><TableCell className="font-numeric">{point.realized_price_per_ton_usd != null ? `$${point.realized_price_per_ton_usd.toFixed(2)}` : "—"}</TableCell><TableCell className="font-numeric">{point.unit_margin_usd != null ? `$${point.unit_margin_usd.toFixed(2)}` : "—"}</TableCell></TableRow>)}</TableBody>
         </Table>
         {(query.data?.partial_issuers_excluded?.length ?? 0) > 0 && <p className="text-sm text-brand">Insufficient inputs: {query.data?.partial_issuers_excluded?.join(", ")}. <Link href="/coverage" className="underline">See the reasons →</Link></p>}
       </Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { useIssuerUniverse } from "@/lib/useIssuerUniverse";
 import { ArrowRight, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { DataState } from "@/components/DataState";
@@ -8,6 +8,7 @@ import { ScoreCoverage } from "@/components/ScoreCoverage";
 import { compareScores, isScoreRankable } from "@/lib/scores";
 import { MineExplainer } from "@/components/MineExplainer";
 import { VisualAsset, type VisualAssetName } from "@/components/VisualAsset";
+import { IssuerLogo } from "@/components/IssuerLogo";
 
 const FEATURES: { asset: VisualAssetName; title: string; text: string; href: string; action: string }[] = [
   { asset: "site-operation", title: "From ticker to mining site", text: "Explore geographic locations and operating entities linked to issuers.", href: "/map", action: "Explore the map" },
@@ -34,14 +35,35 @@ export default function LandingPage() {
       </div>
       <MineExplainer priority className="lg:col-span-7" />
     </section>
+    <section aria-label="Tracked issuers" className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-muted">Tracked Issuers:</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {["AADI", "ADMR", "ADRO", "BUMI", "BYAN", "DSSA", "GEMS", "ITMG", "PTBA"].map((sym) => (
+            <Link key={sym} href={`/issuer/${sym}`} className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-1.5 shadow-xs hover:border-brand-line hover:bg-surface-hover transition-all group">
+              <IssuerLogo symbol={sym} size="xs" />
+              <span className="text-xs font-numeric font-bold text-ink group-hover:text-brand">{sym}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
     <section aria-label="Fundamental snapshot" className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold text-ink">A closer look at the issuer universe</h2><Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-info">Explore all issuers<ArrowRight className="h-3.5 w-3.5" /></Link></div>
       {isLoading && <p role="status" className="text-sm text-muted">Loading issuer data...</p>}
-      {error && <DataState error={error} onRetry={() => void refetch()} />}
+      {error && <DataState error={error} onRetry={() => refetch()} />}
       {!isLoading && !error && !leaders.length && <DataState empty />}
       {!error && <div className="grid gap-4 md:grid-cols-3">{leaders.map((issuer) => <Link key={issuer.symbol} href={"/issuer/" + issuer.symbol} className="gali-card gali-illustrated-metric p-5 transition-colors hover:border-brand-line">
         <VisualAsset name="reserve-clock" />
-        <div className="min-w-0 flex-1"><p className="font-numeric text-lg font-bold text-ink">{issuer.symbol}</p><p className="mt-1 font-numeric text-[26px] font-bold leading-tight text-brand">{issuer.rli_years == null ? "Unavailable" : issuer.rli_years.toFixed(1) + " years"}</p><p className="mt-1 text-[12px] text-muted">Reserve life at the current production rate</p><div className="mt-3 flex flex-wrap items-center gap-2"><span className="text-[12px] text-ink-soft">Score {issuer.ground_truth_score?.toFixed(1) ?? "N/A"}</span><ScoreCoverage coverage={issuer.confidence_pct} eligible={isScoreRankable(issuer)} /></div></div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <IssuerLogo symbol={issuer.symbol} size="xs" />
+            <p className="font-numeric text-lg font-bold text-ink">{issuer.symbol}</p>
+          </div>
+          <p className="mt-1 font-numeric text-[26px] font-bold leading-tight text-brand">{issuer.rli_years == null ? "Unavailable" : issuer.rli_years.toFixed(1) + " years"}</p>
+          <p className="mt-1 text-[12px] text-muted">Reserve life at current rate</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2"><span className="text-[12px] text-ink-soft">Score {issuer.ground_truth_score?.toFixed(1) ?? "N/A"}</span><ScoreCoverage coverage={issuer.confidence_pct} eligible={isScoreRankable(issuer)} /></div>
+        </div>
       </Link>)}</div>}
       {!!issuers?.length && !error && <p className="text-[12px] text-muted">{issuers.length} issuers · {completeCount} with complete core metrics · {issuers.length - completeCount} partial. Scores describe the available dataset.</p>}
     </section>

@@ -206,3 +206,14 @@
 [popover]::backdrop { background: rgba(20,35,55,.10); }
 summary:focus-visible { outline: 2px solid var(--info); outline-offset: -4px; border-radius: 16px; }
 @media print { details > div { display: block !important; } details > summary { list-style: none; } }
+
+@keyframes gali-loading-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(400%); }
+}
+.gali-loading-progress { animation: gali-loading-progress 1.25s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .gali-loading-progress { animation: none; width: 100%; opacity: .65; }
+}
+
+.gali-nav-item:has([data-testid="link-pending"]) { background: var(--color-info-soft); color: var(--color-info); }

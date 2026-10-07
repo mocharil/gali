@@ -5,7 +5,7 @@ import { AiError } from "../types";
 export function withAiAbort<T>(work: () => Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const error = () => signal.reason instanceof Error && signal.reason.name === "TimeoutError"
-      ? new AiError("The Gemini request timed out. Try again when the connection is stable.", "AI_TIMEOUT", 504)
+      ? new AiError("The AI request timed out. Try again when the connection is stable.", "AI_TIMEOUT", 504)
       : new AiError("The analysis was stopped.", "AI_ABORTED", 499);
     const abort = () => { signal.removeEventListener("abort", abort); reject(error()); };
     if (signal.aborted) { abort(); return; }

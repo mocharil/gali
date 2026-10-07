@@ -21,21 +21,21 @@ function clientFor(config: GeminiConfig): GoogleGenAI {
 export function providerError(error: unknown): AiError {
   if (error instanceof AiError) return error;
   const status = error && typeof error === "object" && "status" in error ? Number(error.status) : null;
-  if (status === 401 || status === 403) return new AiError("Gemini access was denied. Check the service account's Vertex AI permissions, API activation, and project billing.", "AI_ACCESS_DENIED", 503);
-  if (status === 404) return new AiError("The Gemini model is unavailable in this project or location. Check the server model setting.", "AI_MODEL_UNAVAILABLE", 503);
-  if (status === 429) return new AiError("Gemini is at its request limit. Wait a moment and try again.", "AI_QUOTA", 429, 60);
-  if (status === 400) return new AiError("Gemini rejected the request configuration. Check model support for structured output and the selected location.", "AI_PROVIDER_REQUEST", 502);
-  if (error instanceof Error && /timeout|abort/i.test(error.name)) return new AiError("The Gemini request timed out or was stopped. Try again when the connection is stable.", "AI_TIMEOUT", 504);
-  return new AiError("Gemini could not be reached. Check the server connection and service account credentials, then try again.", "AI_PROVIDER_UNAVAILABLE", 503);
+  if (status === 401 || status === 403) return new AiError("AI access was denied. Check the service account's Vertex AI permissions, API activation, and project billing.", "AI_ACCESS_DENIED", 503);
+  if (status === 404) return new AiError("The AI model is unavailable in this project or location. Check the server model setting.", "AI_MODEL_UNAVAILABLE", 503);
+  if (status === 429) return new AiError("The AI service is at its request limit. Wait a moment and try again.", "AI_QUOTA", 429, 60);
+  if (status === 400) return new AiError("The AI service rejected the request configuration. Check model support for structured output and the selected location.", "AI_PROVIDER_REQUEST", 502);
+  if (error instanceof Error && /timeout|abort/i.test(error.name)) return new AiError("The AI request timed out or was stopped. Try again when the connection is stable.", "AI_TIMEOUT", 504);
+  return new AiError("The AI service could not be reached. Check the server connection and service account credentials, then try again.", "AI_PROVIDER_UNAVAILABLE", 503);
 }
 
 export function readGeminiResponse(response: GenerateContentResponse): Generation {
   const candidate = response.candidates?.[0];
   if (response.promptFeedback?.blockReason || candidate?.finishReason === "SAFETY" || candidate?.finishReason === "BLOCKLIST") {
-    throw new AiError("Gemini could not answer this request. Rephrase it as a question about GALI data and analysis.", "AI_BLOCKED", 422);
+    throw new AiError("The AI service could not answer this request. Rephrase it as a question about GALI data and analysis.", "AI_BLOCKED", 422);
   }
   if (candidate?.finishReason !== "STOP" || !response.text) {
-    throw new AiError("Gemini did not return a complete answer. Shorten the question or narrow it to a few issuers and try again.", "AI_INCOMPLETE", 502);
+    throw new AiError("The AI service did not return a complete answer. Shorten the question or narrow it to a few issuers and try again.", "AI_INCOMPLETE", 502);
   }
   return { text: response.text, inputTokens: response.usageMetadata?.promptTokenCount ?? null, outputTokens: response.usageMetadata?.candidatesTokenCount ?? null };
 }

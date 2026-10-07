@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { NAVIGATION_PAGES } from "@/lib/navigation";
+import { IssuerLogo } from "./IssuerLogo";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -38,8 +39,10 @@ export function Header({
 
   // Derive title from pathname, handling /issuer/[symbol]
   let context = ROUTE_CONTEXTS[pathname];
-  if (!context && pathname.startsWith("/issuer/")) {
-    const symbol = pathname.split("/")[2]?.toUpperCase() || "ISSUER";
+  const isIssuerRoute = pathname.startsWith("/issuer/");
+  const issuerSymbol = isIssuerRoute ? pathname.split("/")[2]?.toUpperCase() : null;
+  if (!context && isIssuerRoute) {
+    const symbol = issuerSymbol || "ISSUER";
     context = {
       title: `${symbol} · Fundamental`,
       category: "Coal issuer",
@@ -81,15 +84,18 @@ export function Header({
             <PanelLeft className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
 
-          <div className="min-w-0">
-            <div className="hidden sm:flex items-center gap-1.5 text-[12px] font-medium text-muted">
-              <span className="text-brand">{context.category}</span>
-              <ChevronRight className="h-3 w-3 text-subtle" />
-              <span className="truncate text-ink-soft">{context.title}</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            {issuerSymbol && <IssuerLogo symbol={issuerSymbol} size="sm" className="shrink-0" />}
+            <div className="min-w-0">
+              <div className="hidden sm:flex items-center gap-1.5 text-[12px] font-medium text-muted">
+                <span className="text-brand">{context.category}</span>
+                <ChevronRight className="h-3 w-3 text-subtle" />
+                <span className="truncate text-ink-soft">{context.title}</span>
+              </div>
+              <p className="text-sm font-semibold tracking-tight text-ink sm:text-lg truncate">
+                {context.title}
+              </p>
             </div>
-            <p className="text-sm font-semibold tracking-tight text-ink sm:text-lg truncate">
-              {context.title}
-            </p>
           </div>
         </div>
 

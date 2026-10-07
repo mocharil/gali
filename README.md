@@ -45,6 +45,10 @@ Kelengkapan di atas mengacu pada metrik utama, bukan seluruh pilar skor. Dataset
 
 Versi 0.3 mengadaptasi panduan desain Organa: Plus Jakarta Sans lokal, permukaan putih, tipografi navy, aksen amber/cyan, sidebar 256 px, kartu 20 px, dan kontrol yang konsisten. Pedoman implementasi tersedia di [GALI Design System](docs/GALI_DESIGN_SYSTEM.md).
 
+## Loading feedback: version 0.5.2
+
+Menu navigation now shows a destination label and amber progress bar immediately, including when a mobile menu or assistant closes. Loading panels, skeletons, and busy buttons cover page data, issuer comparisons, scenario calculations, retries, copies, exports, print preparation, Gemini requests, and map loading. Pending actions clean up after success, failure, or cancellation, and reduced-motion preferences are respected. See [LOADING_STATES.md](docs/LOADING_STATES.md) for behavior and verification; run `npm run test:loading` for the targeted browser suite.
+
 ## AI response review: version 0.5.1
 
 Eight response scenarios now cover comparisons, active stress and gross losses, partial data, provisional scores, dashboard resilience, unsupported live-market questions, and long-answer layouts. Method references have clear labels, scenario evidence links preserve their issuer and assumptions, mobile answers wrap cleanly, and saved briefs retain response status and finding categories. See [AI_OUTPUT_REVIEW.md](docs/AI_OUTPUT_REVIEW.md) for verified checks and live questions to evaluate with your service account.
@@ -176,6 +180,7 @@ Mode Data analysis dan ringkasan perbandingan menggunakan aturan deterministik p
 
 | Dokumen | Deskripsi |
 |---|---|
+| [`docs/LOADING_STATES.md`](docs/LOADING_STATES.md) | Navigation and action feedback, loading panels, cancellation, and browser verification |
 | [`docs/LOCAL_DATASET.md`](docs/LOCAL_DATASET.md) | Dashboard tanpa token, dataset sintetis, stress test, dan launcher Windows |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Desain teknis arsitektur monorepo, schema Postgres, keamanan, dan load test |
 | [`docs/METRICS.md`](docs/METRICS.md) | Rumus matematis dan metodologi perhitungan M1–M9 |

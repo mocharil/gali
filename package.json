@@ -1,6 +1,6 @@
 {
   "name": "gali",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "engines": {
     "node": ">=20.9.0"
@@ -15,6 +15,7 @@
     "test:local": "npm --prefix packages/web run test:local",
     "test:analysis": "npm --prefix packages/web run test:simulation && npm --prefix packages/web run test:research",
     "test:ai": "npm --prefix packages/web run test:ai",
-    "test:ai:output": "npm --prefix packages/web run test:ai:output"
+    "test:ai:output": "npm --prefix packages/web run test:ai:output",
+    "test:loading": "npm --prefix packages/web run test:loading"
   }
 }

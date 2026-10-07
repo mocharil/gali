@@ -2,7 +2,7 @@
 
 import { ValuationLens } from "@/components/ValuationLens";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import {
   Activity,
   ShieldCheck,
@@ -14,7 +14,9 @@ import {
 
 import { api } from "@/lib/api";
 import { quadrantLabel } from "@/lib/market";
+import { IssuerLogo } from "@/components/IssuerLogo";
 import { DataState } from "@/components/DataState";
+import { PageLoading } from "@/components/LoadingState";
 import { Skeleton } from "@/components/Skeleton";
 import {
   Card,
@@ -40,7 +42,8 @@ export default function DivergencePage() {
   const issuers = data?.issuers ?? [];
   const sorted = [...issuers].sort((a, b) => (b.ground_truth_score ?? -1) - (a.ground_truth_score ?? -1));
 
-  if (error) return <div className="mx-auto max-w-7xl p-6"><DataState error={error} onRetry={() => void refetch()} /></div>;
+  if (error) return <div className="mx-auto max-w-7xl p-6"><DataState error={error} onRetry={() => refetch()} /></div>;
+  if (isLoading) return <PageLoading label="Loading the valuation map…" />;
   if (!isLoading && !issuers.length) return <div className="mx-auto max-w-7xl p-6"><DataState empty /></div>;
 
   return (
@@ -155,9 +158,14 @@ export default function DivergencePage() {
                   <TableRow key={item.symbol} className="font-numeric">
                     <TableCell className="text-muted font-bold">{idx + 1}</TableCell>
                     <TableCell>
-                      <div className="font-bold text-ink">{item.symbol}</div>
-                      <div className="text-[12px] text-muted font-sans truncate max-w-[160px]">
-                        {item.name}
+                      <div className="flex items-center gap-3">
+                        <IssuerLogo symbol={item.symbol} size="sm" className="shrink-0" />
+                        <div>
+                          <div className="font-bold text-ink">{item.symbol}</div>
+                          <div className="text-[12px] text-muted font-sans truncate max-w-[160px]">
+                            {item.name}
+                          </div>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-bold text-brand text-sm">

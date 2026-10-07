@@ -11,7 +11,7 @@ async function ask(page: Page, key: keyof typeof scenarios, width: number) {
   await page.goto("/dashboard"); await page.keyboard.press("Control+j");
   const dialog = page.getByRole("dialog", { name: "GALI Data Assistant" });
   await dialog.getByLabel("Analysis question").fill(item.question);
-  await dialog.getByRole("button", { name: width < 640 ? "Ask" : "Ask Gemini", exact: true }).click();
+  await dialog.getByRole("button", { name: width < 640 ? "Ask" : "Ask AI", exact: true }).click();
   const answer = dialog.getByTestId("ai-answer").last(); await expect(answer).toBeVisible();
   return { item, dialog, answer };
 }
@@ -83,12 +83,12 @@ test("At narrow mobile width, long answers wrap and follow-ups reveal the latest
 
 test("Unverified, truncated and unavailable provider outputs show readable errors with no answer", async ({ page }) => {
   await setup(page);
-  let failure = { detail: "Gemini returned an answer that could not be verified against GALI evidence. Narrow the question and try again.", code: "AI_UNVERIFIED_ANSWER" };
+  let failure = { detail: "The AI service returned an answer that could not be verified against GALI evidence. Narrow the question and try again.", code: "AI_UNVERIFIED_ANSWER" };
   await page.route("**/api/ai/analyze", (route) => route.fulfill({ status: 502, json: failure }));
   await page.goto("/dashboard"); await page.keyboard.press("Control+j"); const dialog = page.getByRole("dialog", { name: "GALI Data Assistant" });
   await dialog.getByLabel("Analysis question").fill("Explain BUMI");
-  for (const detail of [failure.detail, "Gemini stopped before completing the analysis. Narrow the question and try again.", "Gemini is temporarily unavailable. Try again shortly."]) {
-    failure = { detail, code: "AI_OUTPUT_ERROR" }; await dialog.getByRole("button", { name: "Ask Gemini", exact: true }).click();
+  for (const detail of [failure.detail, "Gemini stopped before completing the analysis. Narrow the question and try again.", "The AI service is temporarily unavailable. Try again shortly."]) {
+    failure = { detail, code: "AI_OUTPUT_ERROR" }; await dialog.getByRole("button", { name: "Ask AI", exact: true }).click();
     await expect(dialog.getByRole("alert")).toContainText(detail); await expect(dialog.getByTestId("ai-answer")).toHaveCount(0); await expect(dialog.getByRole("button", { name: "Try again", exact: true })).toBeEnabled();
   }
 });

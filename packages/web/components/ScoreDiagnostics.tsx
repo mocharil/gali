@@ -1,5 +1,5 @@
 import { Layers3, Scale, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import type { IssuerDetail } from "@/lib/types";
 import { SCORE_PILLARS, pillarValue, isScoreRankable } from "@/lib/scores";
 import { ScoreCoverage } from "./ScoreCoverage";

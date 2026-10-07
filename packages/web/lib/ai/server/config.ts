@@ -18,12 +18,12 @@ function invalid(message: string): never { throw new AiError(message, "AI_CONFIG
 
 export async function loadGeminiConfig(env: Environment = process.env, cwd = process.cwd()): Promise<GeminiConfig> {
   if (env.GALI_AI_ENABLED === "0" || env.GALI_AI_ENABLED === "false") {
-    throw new AiError("Gemini is disabled on this server. Data analysis remains available.", "AI_NOT_CONFIGURED", 503);
+    throw new AiError("AI analysis is disabled on this server. Data analysis remains available.", "AI_NOT_CONFIGURED", 503);
   }
   const location = env.GOOGLE_CLOUD_LOCATION?.trim() || "global";
   const model = env.GALI_GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
   if (!/^(global|[a-z][a-z0-9-]{1,40})$/.test(location) || !/^gemini-[a-z0-9.-]{1,100}$/.test(model)) {
-    invalid("The Gemini model or location setting is invalid. Check the server configuration.");
+    invalid("The AI model or location setting is invalid. Check the server configuration.");
   }
   const filename = env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
   const inline = env.GALI_AI_SERVICE_ACCOUNT_JSON?.trim();
@@ -52,7 +52,7 @@ export async function loadGeminiConfig(env: Environment = process.env, cwd = pro
     // Only Google's expected key fields enter the SDK. Custom token URLs are not used.
     credentials = { client_email: account.client_email, private_key: account.private_key, project_id: account.project_id };
   } else if (env.GALI_AI_USE_ADC !== "1" && env.GALI_AI_USE_ADC !== "true") {
-    throw new AiError("Gemini is not configured. Add service account credentials on the server to enable AI analysis.", "AI_NOT_CONFIGURED", 503);
+    throw new AiError("AI analysis is not configured. Add service account credentials on the server to enable AI analysis.", "AI_NOT_CONFIGURED", 503);
   }
   const project = env.GOOGLE_CLOUD_PROJECT?.trim() || credentials?.project_id;
   if (!project || !/^[a-z][a-z0-9-]{4,61}[a-z0-9]$/.test(project)) {
@@ -71,9 +71,9 @@ export async function geminiStatus(): Promise<AiStatus> {
     const verification = processState.__galiGeminiVerification;
     const at = verification?.fingerprint === config.fingerprint ? verification.at : null;
     return { ...base, state: at ? "verified" : "configured", last_verified_at: at,
-      message: at ? "Gemini access was verified on this server. Each analysis reads the active dataset." : "Credentials are configured. Test the connection or run an analysis to verify access." };
+      message: at ? "AI access was verified on this server. Each analysis reads the active dataset." : "Credentials are configured. Test the connection or run an analysis to verify access." };
   } catch (error) {
     if (error instanceof AiError) return { ...base, state: error.code === "AI_NOT_CONFIGURED" ? "not_configured" : "configuration_error", message: error.message };
-    return { ...base, state: "configuration_error", message: "Gemini configuration could not be checked." };
+    return { ...base, state: "configuration_error", message: "AI configuration could not be checked." };
   }
 }

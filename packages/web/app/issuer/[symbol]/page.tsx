@@ -5,8 +5,11 @@ import { useId } from "react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useActivity } from "@/components/ActivityProvider";
+import { PageLoading } from "@/components/LoadingState";
+import { ActionButton } from "@/components/ActionButton";
+import { AppLink as Link } from "@/components/AppLink";
 import {
   ArrowLeft,
   Clock,
@@ -39,7 +42,7 @@ import { SCORE_PILLARS, pillarValue, isScoreRankable } from "@/lib/scores";
 import { api } from "@/lib/api";
 import type { IssuerDetail } from "@/lib/types";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
-import { Skeleton } from "@/components/Skeleton";
+import { IssuerLogo } from "@/components/IssuerLogo";
 import { IssuerEconomics } from "@/components/IssuerEconomics";
 import { ScoreDiagnostics } from "@/components/ScoreDiagnostics";
 import { ValuationContext } from "@/components/ValuationContext";
@@ -92,7 +95,7 @@ function generateExecutiveBrief(data: IssuerDetail) {
 export default function IssuerDetailPage() {
   const reducedMotion = useReducedMotion();
   const { symbol } = useParams<{ symbol: string }>();
-  const router = useRouter();
+  const { navigate, destination } = useActivity();
   const sym = (symbol || "").toUpperCase();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -100,29 +103,7 @@ export default function IssuerDetailPage() {
     queryFn: () => api.getIssuerDetail(sym),
   });
 
-  if (isLoading) {
-    return (
-      <div className="gali-page space-y-6" aria-busy="true" aria-label={`Loading data ${sym}`}>
-        <Skeleton className="h-4 w-28" />
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <Skeleton className="h-10 w-48" />
-            <Skeleton className="mt-2 h-4 w-64" />
-          </div>
-          <Skeleton className="h-10 w-44" />
-        </div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-36 rounded-2xl" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Skeleton className="h-56 rounded-2xl lg:col-span-2" />
-          <Skeleton className="h-56 rounded-2xl" />
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoading label={`Loading ${sym} profile…`} />;
 
   if (isError || !data) return <div className="mx-auto max-w-6xl px-4 py-8"><DataState error={error} onRetry={() => refetch()} /><Link href="/dashboard" className="mt-4 inline-block text-sm text-brand">← Back to dashboard</Link></div>;
 
@@ -149,14 +130,16 @@ export default function IssuerDetailPage() {
           {ALL_ISSUERS.map((i) => (
             <button
               key={i.symbol}
-              onClick={() => router.push(`/issuer/${i.symbol}`)}
-              className={`rounded-lg px-2.5 py-1 text-sm font-numeric font-bold transition-all ${
+              onClick={() => navigate(`/issuer/${i.symbol}`)}
+              aria-busy={destination === `/issuer/${i.symbol}` || undefined}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-numeric font-bold transition-all ${
                 i.symbol === sym
                   ? "bg-gold text-ink shadow-sm"
                   : "bg-surface text-muted border border-line hover:border-line-strong hover:text-ink"
               }`}
             >
-              {i.symbol}
+              <IssuerLogo symbol={i.symbol} size="xs" />
+              <span>{i.symbol}</span>
             </button>
           ))}
         </div>
@@ -167,25 +150,28 @@ export default function IssuerDetailPage() {
         {/* ambient glow orbs */}
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div className="space-y-3">
-            {/* Symbol + badges */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-numeric text-4xl font-bold text-ink tracking-tight">
-                {data.symbol}
-              </h1>
-              <ScoreCoverage coverage={typeof data.confidence?.effective_weight === "number" ? data.confidence.effective_weight * 100 : null} eligible={data.confidence?.ranking_eligible !== false && isScoreRankable({ data_quality: data.data_quality, ground_truth_score: data.ground_truth_score, confidence_pct: typeof data.confidence?.effective_weight === "number" ? data.confidence.effective_weight * 100 : 0 })} />
-            </div>
-            <p className="text-base font-semibold text-ink-soft">{data.name}</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface-hover px-3 py-1 text-[12px] font-medium text-ink-soft">
-                <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-                Coal · Indonesia Stock Exchange
-              </span>
-              {data.ground_truth_score != null && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-soft px-3 py-1 text-[12px] font-bold text-brand">
-                  Fundamental score: {data.ground_truth_score.toFixed(1)} / 100
+          <div className="flex items-start gap-4">
+            <IssuerLogo symbol={data.symbol} size="xl" className="shrink-0 shadow-sm" />
+            <div className="space-y-3">
+              {/* Symbol + badges */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="font-numeric text-4xl font-bold text-ink tracking-tight">
+                  {data.symbol}
+                </h1>
+                <ScoreCoverage coverage={typeof data.confidence?.effective_weight === "number" ? data.confidence.effective_weight * 100 : null} eligible={data.confidence?.ranking_eligible !== false && isScoreRankable({ data_quality: data.data_quality, ground_truth_score: data.ground_truth_score, confidence_pct: typeof data.confidence?.effective_weight === "number" ? data.confidence.effective_weight * 100 : 0 })} />
+              </div>
+              <p className="text-base font-semibold text-ink-soft">{data.name}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface-hover px-3 py-1 text-[12px] font-medium text-ink-soft">
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+                  Coal · Indonesia Stock Exchange
                 </span>
-              )}
+                {data.ground_truth_score != null && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-soft px-3 py-1 text-[12px] font-bold text-brand">
+                    Fundamental score: {data.ground_truth_score.toFixed(1)} / 100
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -196,12 +182,12 @@ export default function IssuerDetailPage() {
             >
               <Scale className="h-3.5 w-3.5" /> Compare
             </Link>
-            <button
-              onClick={() => window.print()}
+            <ActionButton
+              action={() => window.print()} loadingText="Preparing print…" paintFirst variant="outline"
               className="inline-flex items-center gap-1.5 rounded-xl bg-surface-hover border border-line-strong px-3.5 py-2 text-sm font-bold text-ink-soft hover:border-line-strong hover:bg-surface-hover hover:text-ink transition-all shadow-panel"
             >
               <Printer className="h-3.5 w-3.5" /> Print page
-            </button>
+            </ActionButton>
             <Link
               href={`/scenario?issuer=${data.symbol}`}
               className="inline-flex items-center gap-1.5 rounded-xl bg-surface-hover border border-line-strong px-3.5 py-2 text-sm font-bold text-info hover:border-info-line hover:bg-surface-hover hover:text-info transition-all shadow-panel"

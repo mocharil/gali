@@ -192,7 +192,7 @@ The dashboard resilience matrix uses three separate scenarios: commodity price â
 - License cliff values require qualified matches and available areas/expiry dates. Missing inputs remain null; zero is not a guarantee of renewal.
 - Ownership seeds and the existing ADROâ€“AADI mapping require review against source dates. Summing issuer RBVs can count the same underlying entity through multiple listed ownership interests.
 - The current graph and geospatial read endpoints use normalized current entities. Full historical graph/site snapshots and exact per-field raw lineage remain future work.
-- Data analysis mode and comparative summaries use explicit rules on API facts. Since version 0.5.0, Gemini analysis and AI research briefs optionally call Gemini on Vertex AI, while numeric metrics remain deterministic. See [GEMINI_SETUP.md](GEMINI_SETUP.md).
+- Data analysis mode and comparative summaries use explicit rules on API facts. Since version 0.5.0, AI analysis and AI research briefs can optionally explain the results in plain language, while numeric metrics remain deterministic.
 
 
 > [!IMPORTANT]

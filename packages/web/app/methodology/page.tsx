@@ -1,12 +1,10 @@
 import { MethodologyExplorer } from "@/components/MethodologyExplorer";
 import fs from "node:fs";
 import path from "node:path";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { ShieldAlert } from "lucide-react";
+import { MethodologyDocument } from "@/components/MethodologyDocument";
+import { parseMethodology } from "@/lib/methodologyDoc";
 
 export const metadata = {
   title: "Methodology & Disclaimer",
@@ -28,7 +26,7 @@ function readMetricsDoc(): string {
 }
 
 export default function MethodologyPage() {
-  const content = readMetricsDoc();
+  const doc = parseMethodology(readMetricsDoc());
 
   return (
     <div className="gali-page max-w-6xl">
@@ -44,9 +42,7 @@ export default function MethodologyPage() {
         </p>
       </div>
 
-      <article className="prose prose-sm sm:prose-base max-w-none prose-headings:text-ink prose-a:text-brand prose-code:text-info prose-strong:text-ink-soft prose-table:text-sm">
-        <ReactMarkdown components={{ h1: ({ children }) => <h2>{children}</h2>, h3: ({ children }) => <h3 id={String(children).startsWith("M2") ? "rbv" : String(children).startsWith("M8") ? "score" : undefined}>{children}</h3> }} remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{content}</ReactMarkdown>
-      </article>
+      <MethodologyDocument doc={doc} />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { SlidersHorizontal, Download, Share2, RotateCcw } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { api } from "@/lib/api";
@@ -16,7 +16,11 @@ import { ScenarioExplanation } from "@/components/ScenarioExplanation";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ActionButton";
+import { LoadingState } from "@/components/LoadingState";
+import { useActivityFlag } from "@/components/ActivityProvider";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { IssuerLogo } from "@/components/IssuerLogo";
 
 const COUNTRIES = ["China", "India", "Indonesia", "Japan", "Korea", "Philippines", "Malaysia"];
 const BASELINE: ScenarioShockRequest = {
@@ -83,6 +87,7 @@ export default function ScenarioStudioPage() {
     retry: 1,
   });
   const busy = !upToDate || result.isFetching;
+  useActivityFlag(busy, "Calculating the latest scenario…");
   const impacts = !busy && !result.isError ? result.data?.impacts ?? [] : [];
   const sorted = [...impacts].sort((a, b) => (a.post_shock_rank ?? 99) - (b.post_shock_rank ?? 99));
   const chartData = sorted.filter((item) => !item.is_partial && item.baseline_rbv_usd != null && item.post_shock_rbv_usd != null).map((item) => ({
@@ -114,8 +119,8 @@ export default function ScenarioStudioPage() {
         <p className="mt-2 text-sm text-muted">Change commodity prices, sales destination demand, and license renewal assumptions. Compare published RBV with the scenario model&apos;s results.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" onClick={copyLink}><Share2 className="h-4 w-4" />Copy scenario</Button>
-        <Button variant="outline" size="sm" onClick={exportCSV} disabled={busy || !impacts.length}><Download className="h-4 w-4" />Export CSV</Button>
+        <ActionButton variant="outline" size="sm" action={copyLink} loadingText="Copying link…"><Share2 className="h-4 w-4" />Copy scenario</ActionButton>
+        <ActionButton variant="outline" size="sm" action={exportCSV} loadingText="Preparing CSV…" paintFirst disabled={busy || !impacts.length}><Download className="h-4 w-4" />Export CSV</ActionButton>
       </div>
     </div>
     {shareMessage && <p role="status" className="text-sm text-brand">{shareMessage}</p>}
@@ -169,7 +174,7 @@ export default function ScenarioStudioPage() {
           </div>
         </div>
         {!busy && impacts.length > 0 && <div data-testid="scenario-summary" className="grid grid-cols-2 gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-3"><div><p className="text-[12px] uppercase text-muted">Scenario RBV</p><p className="mt-1 font-numeric text-lg font-bold text-brand">{usd(totalScenario)}</p></div><div><p className="text-[12px] uppercase text-muted">Aggregate model change</p><p className={`mt-1 font-numeric text-lg font-bold ${totalDelta < 0 ? "text-negative" : "text-positive"}`}>{signedPct(totalBaseline > 0 ? totalDelta / totalBaseline * 100 : null)}</p></div><div><p className="text-[12px] uppercase text-muted">Calculable</p><p className="mt-1 font-numeric text-lg font-bold text-ink-soft">{quantifiable}/{impacts.length} issuers</p></div><p className="col-span-2 text-[12px] text-muted sm:col-span-3">Sum of issuer models, rather than an industry total. Shared entities may be counted for multiple issuers.</p></div>}
-        {busy ? <div className="h-80 flex items-center justify-center text-sm text-brand" role="status">Calculating the latest scenario…</div>
+        {busy ? <LoadingState label="Calculating the latest scenario…" description="Applying the latest price, demand, cost, and license assumptions." skeleton />
           : result.isError ? <DataState error={result.error} onRetry={() => result.refetch()} />
           : chartData.length === 0 ? <DataState title="RBV cannot be calculated yet" description="Reserve or gross profit inputs are insufficient. Review Data coverage and issuer profiles." />
           : <div className="h-80 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData} margin={{ top: 15, right: 5, left: 0, bottom: 15 }}>
@@ -186,7 +191,7 @@ export default function ScenarioStudioPage() {
       <CardTitle>RBV change by issuer</CardTitle>
       <Table><TableHeader><TableRow><TableHead>Issuer</TableHead><TableHead>Baseline RBV</TableHead><TableHead>Scenario RBV</TableHead><TableHead>Delta %</TableHead><TableHead>Scenario gross profit</TableHead><TableHead>RBV size rank</TableHead><TableHead>Model basis</TableHead></TableRow></TableHeader>
         <TableBody>{sorted.map((item) => <TableRow key={item.symbol} data-testid={`impact-${item.symbol}`} className="font-numeric">
-          <TableCell><Link href={`/issuer/${item.symbol}`} className="text-brand hover:underline">{item.symbol}</Link></TableCell>
+          <TableCell><Link href={`/issuer/${item.symbol}`} className="inline-flex items-center gap-2 font-bold text-ink hover:text-brand"><IssuerLogo symbol={item.symbol} size="xs" /><span>{item.symbol}</span></Link></TableCell>
           <TableCell>{usd(item.baseline_rbv_usd)}</TableCell><TableCell>{usd(item.post_shock_rbv_usd)}</TableCell>
           <TableCell className={item.delta_rbv_pct != null && item.delta_rbv_pct < 0 ? "text-negative" : "text-ink-soft"}>{signedPct(item.delta_rbv_pct)}</TableCell>
           <TableCell className={(item.post_shock_gp_usd ?? 0) < 0 ? "text-negative" : "text-ink-soft"}>{usd(item.post_shock_gp_usd)}{(item.gross_loss_usd ?? 0) > 0 && <span className="mt-1 block font-sans text-[11px]">Gross loss</span>}</TableCell>

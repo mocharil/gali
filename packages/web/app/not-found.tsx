@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/components/AppLink";
 import { Compass, Home } from "lucide-react";
 
 export default function NotFound() {

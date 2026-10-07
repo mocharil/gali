@@ -8,6 +8,8 @@ import geography from "@/lib/geography/southeast-asia.json";
 import type { GeoJSONFeature } from "@/lib/types";
 import { siteColor, siteRegion } from "@/lib/sites";
 import { OfflineSitesMap } from "@/components/OfflineSitesMap";
+import { Loader2 } from "lucide-react";
+import { useActivityFlag } from "./ActivityProvider";
 
 const NATIONAL_BOUNDS: maplibregl.LngLatBoundsLike = [[94, -11], [142, 8]];
 const STYLE: StyleSpecification = {
@@ -40,6 +42,8 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
   const [region, setRegion] = useState<string | null>(null);
   const [basemap, setBasemap] = useState<"geographic" | "streets">("geographic");
   const [mapNotice, setMapNotice] = useState("");
+  const [streetLoading, setStreetLoading] = useState(false);
+  useActivityFlag(!fallback && (!ready || streetLoading), streetLoading ? "Loading street detail…" : "Preparing the geographic map…");
   const groups = useMemo(() => {
     const grouped = new Map<string, GeoJSONFeature[]>();
     for (const site of sites) {
@@ -53,10 +57,11 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
   }, [sites]);
 
   useEffect(() => {
-    if (!container.current) return;
+    if (!container.current || fallback) return;
     let map: maplibregl.Map | undefined;
     let resize: ResizeObserver | undefined;
     const labels: maplibregl.Marker[] = [];
+    const deadline = setTimeout(() => { if (!map?.loaded()) setFallback(true); }, 10_000);
     try {
       map = new maplibregl.Map({ container: container.current, style: STYLE,
         center: [118, -2], zoom: 3.6, minZoom: 2.4, maxZoom: 13,
@@ -66,6 +71,7 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
       map.addControl(new maplibregl.ScaleControl({ maxWidth: 90, unit: "metric" }), "bottom-left");
       map.on("load", () => {
+        clearTimeout(deadline);
         setReady(true);
         for (const feature of geography.features) {
           if (!["IDN", "MYS", "PHL", "PNG", "AUS"].includes(feature.properties.code)) continue;
@@ -80,8 +86,8 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
       resize = new ResizeObserver(() => map?.resize());
       resize.observe(container.current);
     } catch { setFallback(true); }
-    return () => { resize?.disconnect(); labels.forEach((label) => label.remove()); map?.remove(); mapRef.current = null; };
-  }, []);
+    return () => { clearTimeout(deadline); resize?.disconnect(); labels.forEach((label) => label.remove()); map?.remove(); mapRef.current = null; };
+  }, [fallback]);
 
   useEffect(() => { if (selected) setRegion(siteRegion(selected)); }, [selected]);
   useEffect(() => {
@@ -92,6 +98,7 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
     const map = mapRef.current;
     if (!map || !ready) return;
     if (basemap === "geographic") {
+      setStreetLoading(false);
       if (map.getLayer("street-detail")) map.removeLayer("street-detail");
       if (map.getSource("street-map")) map.removeSource("street-map");
       return;
@@ -99,14 +106,26 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
     const onError = (event: maplibregl.ErrorEvent) => {
       if (!("sourceId" in event) || event.sourceId !== "street-map") return;
       setMapNotice("Street tiles are unavailable. Showing bundled geography.");
+      setStreetLoading(false);
       setBasemap("geographic");
     };
+    const onData = (event: maplibregl.MapSourceDataEvent) => {
+      if (event.sourceId === "street-map" && event.isSourceLoaded) setStreetLoading(false);
+    };
+    const deadline = setTimeout(() => {
+      setMapNotice("Street tiles took too long to load. Showing bundled geography.");
+      setStreetLoading(false); setBasemap("geographic");
+    }, 15_000);
+    const complete = (event: maplibregl.MapSourceDataEvent) => {
+      if (event.sourceId === "street-map" && event.isSourceLoaded) { clearTimeout(deadline); onData(event); }
+    };
     map.on("error", onError);
+    map.on("sourcedata", complete);
     map.addSource("street-map", { type: "raster", tileSize: 256,
       tiles: [process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
       attribution: process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION || '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors' });
     map.addLayer({ id: "street-detail", type: "raster", source: "street-map" }, "coordinate-anchors");
-    return () => { map.off("error", onError); };
+    return () => { clearTimeout(deadline); map.off("error", onError); map.off("sourcedata", complete); };
   }, [basemap, ready]);
 
   useEffect(() => {
@@ -177,10 +196,10 @@ export function GeographicSitesMap({ sites, selected, onSelect }: {
         <div className="rounded-xl border border-line bg-surface px-3 py-2 shadow-panel"><p className="text-[12px] font-semibold text-ink">{region ?? "Indonesia"}</p><p className="mt-0.5 text-[11px] text-muted">{basemap === "streets" ? "OpenStreetMap · Online detail" : "Geographic basemap"} · {region ? "Markers follow site coordinates" : "Numbers show site counts"}</p></div>
         <div className="flex flex-wrap gap-2 pointer-events-auto">
           <button type="button" disabled={!groups.length} onClick={() => setRegion(region ? null : groups.find((group) => group.name === "Kalimantan")?.name ?? groups[0]?.name ?? null)} className="gali-button gali-button-secondary text-[12px] disabled:opacity-40">{region ? "All Indonesia" : "Focus on " + (groups.find((group) => group.name === "Kalimantan")?.name ?? groups[0]?.name ?? "region")}</button>
-          <button type="button" disabled={!ready} aria-pressed={basemap === "streets"} onClick={() => { setMapNotice(""); setBasemap(basemap === "streets" ? "geographic" : "streets"); }} className="gali-button gali-button-secondary text-[12px] disabled:opacity-40">{basemap === "streets" ? "Bundled geography" : "Street detail"}</button>
+          <button type="button" disabled={!ready} aria-pressed={basemap === "streets"} aria-busy={streetLoading || undefined} onClick={() => { setMapNotice(""); setStreetLoading(basemap !== "streets"); setBasemap(basemap === "streets" ? "geographic" : "streets"); }} className="gali-button gali-button-secondary text-[12px] disabled:opacity-40">{streetLoading && <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />}{basemap === "streets" ? "Bundled geography" : "Street detail"}</button>
         </div>
       </div>
-      {!ready && <p role="status" className="absolute bottom-8 left-4 rounded-lg bg-surface px-3 py-2 text-[12px] text-muted">Loading geographic map…</p>}
+      {(!ready || streetLoading) && <p role="status" className="absolute bottom-8 left-4 flex items-center gap-2 rounded-xl border border-info-line bg-surface px-3 py-2 text-[12px] text-info"><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />{streetLoading ? "Loading street detail…" : "Loading geographic map…"}</p>}
       {mapNotice && <p role="status" className="absolute bottom-10 left-3 right-3 w-fit rounded-lg border border-line bg-surface px-3 py-2 text-[11px] text-muted">{mapNotice}</p>}
     </div>
   </div>;
