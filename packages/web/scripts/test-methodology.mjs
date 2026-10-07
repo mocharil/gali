@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -11,7 +12,12 @@ try {
   const source = await readFile(path.join(root, "lib/methodologyDoc.ts"), "utf8");
   await writeFile(path.join(directory, "doc.cjs"), ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText);
   const { parseMethodology, normalizeMath } = createRequire(import.meta.url)(path.join(directory, "doc.cjs"));
-  const doc = parseMethodology(await readFile(path.join(root, "../../docs/METRICS.md"), "utf8"));
+  // The page renders the bundled copy in content/, because Vercel builds this package without the repo-level docs/.
+  const bundled = await readFile(path.join(root, "content/METRICS.md"), "utf8");
+  const docsPath = path.join(root, "../../docs/METRICS.md");
+  const lf = (text) => text.split(String.fromCharCode(13)).join("");
+  if (existsSync(docsPath)) assert.equal(lf(bundled), lf(await readFile(docsPath, "utf8")), "content/METRICS.md is out of date; run `npm run sync:docs`");
+  const doc = parseMethodology(bundled);
 
   const metrics = doc.sections.flatMap((section) => section.metrics ?? []);
   assert.deepEqual(metrics.map((metric) => metric.code), ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9"]);

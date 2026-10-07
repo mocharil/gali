@@ -1,32 +1,16 @@
 import { MethodologyExplorer } from "@/components/MethodologyExplorer";
-import fs from "node:fs";
-import path from "node:path";
 import "katex/dist/katex.min.css";
 import { ShieldAlert } from "lucide-react";
 import { MethodologyDocument } from "@/components/MethodologyDocument";
 import { parseMethodology } from "@/lib/methodologyDoc";
+import metricsDoc from "@/content/METRICS.md";
 
 export const metadata = {
   title: "Methodology & Disclaimer",
 };
 
-function readMetricsDoc(): string {
-  // docs/METRICS.md lives at the monorepo root, written by gali_core/metrics
-  // (task 4.14). This page renders it directly rather than re-typing formulas
-  // in JSX -- one source of truth for the methodology, same principle as the
-  // rest of this codebase.
-  const candidates = [
-    path.join(process.cwd(), "..", "..", "docs", "METRICS.md"),
-    path.join(process.cwd(), "docs", "METRICS.md"),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return fs.readFileSync(p, "utf-8");
-  }
-  return "# Methodology\n\n_docs/METRICS.md was not found in this build._";
-}
-
 export default function MethodologyPage() {
-  const doc = parseMethodology(readMetricsDoc());
+  const doc = parseMethodology(metricsDoc);
 
   return (
     <div className="gali-page max-w-6xl">

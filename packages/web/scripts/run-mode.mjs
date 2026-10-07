@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
 const [mode, command = "dev"] = process.argv.slice(2);
 if (!["simulation", "sectors"].includes(mode) || !["dev", "build", "start"].includes(command)) { console.error("Usage: node scripts/run-mode.mjs simulation|sectors dev|build|start"); process.exit(1); }
+await import("./sync-docs.mjs");
 const args = [require.resolve("next/dist/bin/next"), command];
 if (command !== "build") args.push("-p", process.env.PORT ?? "3000", "-H", process.env.GALI_HOST ?? "127.0.0.1");
 const child = spawn(process.execPath, args, { cwd: path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), stdio: "inherit", env: { ...process.env, GALI_DATA_MODE: mode } });
